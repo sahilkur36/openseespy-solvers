@@ -1,0 +1,87 @@
+site_name: openseespy-solvers
+site_description: SciPy-style PythonSparse solvers for OpenSeesPy
+site_url: https://openseespy-solvers.github.io/openseespy-solvers/
+repo_url: https://github.com/gaaraujo/openseespy-solvers
+repo_name: gaaraujo/openseespy-solvers
+
+hooks:
+  - docs/hooks.py
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - search.suggest
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+            show_symbol_type_heading: true
+            members_order: source
+            separate_signature: true
+            merge_init_into_class: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: ["."]
+  - toc:
+      permalink: true
+  - tables
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Tutorial: getting-started.md
+  - User guide:
+      - PythonSparse interface: user-guide/pythonsparse-interface.md
+      - Solver objects: user-guide/solver-objects.md
+      - to_opensees: user-guide/to-opensees.md
+      - Preconditioners: user-guide/preconditioners.md
+  - Reference:
+      - scipy: reference/scipy.md
+      - cupy: reference/cupy.md
+  - API:
+      - openseespy_solvers.scipy: api/scipy.md
+      - openseespy_solvers.scipy.precond: api/precond.md
+      - openseespy_solvers.cupy.precond: api/precond_cupy.md
+      - openseespy_solvers.cupy: api/cupy.md
+      - Exceptions: api/exceptions.md
+  - Examples: examples.md
+  - Release notes: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/gaaraujo/openseespy-solvers
