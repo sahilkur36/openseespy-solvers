@@ -40,6 +40,14 @@ ops.analyze(1)
 After a linear solve, `solver.A`, `solver.b`, and `solver.x` refer to the cached
 matrix and vectors from the last call. See [LinearSolver attributes](user-guide/solver-objects.md).
 
+## GitHub
+
+Source, bug reports, and feature requests:
+[github.com/gaaraujo/openseespy-solvers](https://github.com/gaaraujo/openseespy-solvers).
+Open an [issue](https://github.com/gaaraujo/openseespy-solvers/issues) for problems or
+questions; contributions (pull requests, documentation fixes, examples) are welcome there
+as well.
+
 ## See Also
 
 - [Installation](installation.md)

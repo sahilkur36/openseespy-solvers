@@ -62,6 +62,13 @@ and [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scip
 See the [tutorial](https://openseespy-solvers.readthedocs.io/en/latest/getting-started/) and
 [API reference](https://openseespy-solvers.readthedocs.io/en/latest/api/scipy/) for details.
 
+## GitHub
+
+Repository: [github.com/gaaraujo/openseespy-solvers](https://github.com/gaaraujo/openseespy-solvers).
+Report bugs and ask questions via
+[issues](https://github.com/gaaraujo/openseespy-solvers/issues); send contributions
+(pull requests) there as well.
+
 ## License
 
 BSD 3-Clause — see [LICENSE](LICENSE).
