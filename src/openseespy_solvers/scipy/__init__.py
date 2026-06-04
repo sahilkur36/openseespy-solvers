@@ -33,6 +33,11 @@ import numpy as np
 import scipy.sparse.linalg as spla
 
 from openseespy_solvers._base import EigenSolver, LinearSolver
+from openseespy_solvers._sparse import (
+    OPENSEES_EIGSH_WHICH,
+    eigsh_arpack_kwargs,
+    opensees_eigsh_sigma,
+)
 from openseespy_solvers._docstrings import (
     _EIGEN_NOTES,
     _EIGEN_RETURNS,
@@ -287,19 +292,19 @@ class _Eigsh(ScipyMixin, EigenSolver):
         }
 
     def _solve_eigen(self, K, M, *, num_modes, find_smallest):  # noqa: ANN001
-        kwargs: dict[str, Any] = {"k": num_modes, "M": M, "which": self._which, "mode": self._mode}
-        if find_smallest:
-            kwargs["sigma"] = 0.0 if self._sigma is None else self._sigma
-        elif self._sigma is not None:
-            kwargs["sigma"] = self._sigma
-        if self._v0 is not None:
-            kwargs["v0"] = self._v0
-        if self._ncv is not None:
-            kwargs["ncv"] = self._ncv
-        if self._maxiter is not None:
-            kwargs["maxiter"] = self._maxiter
-        if self._tol > 0.0:
-            kwargs["tol"] = self._tol
+        kwargs = eigsh_arpack_kwargs(
+            num_modes=num_modes,
+            which=OPENSEES_EIGSH_WHICH,
+            tol=self._tol,
+            v0=self._v0,
+            ncv=self._ncv,
+            maxiter=self._maxiter,
+            mode=self._mode,
+        )
+        kwargs["M"] = M
+        sigma = opensees_eigsh_sigma(find_smallest, self._sigma)
+        if sigma is not None:
+            kwargs["sigma"] = sigma
         return spla.eigsh(K, **kwargs)
 
 
@@ -579,17 +584,16 @@ def eigsh(
 ) -> _Eigsh:
     r"""Configure a sparse eigenvalue solver for OpenSees ``PythonSparse``.
 
-    Uses :func:`scipy.sparse.linalg.eigsh` internally to solve the generalized
-    eigenproblem ``K x = \lambda M x``.
+    Matches OpenSees ``eigsh``: shift-invert with ``sigma=0`` when
+    ``find_smallest=True``; plain ARPACK when ``find_smallest=False`` unless
+    ``sigma`` is set. ARPACK always uses ``which='LM'`` (OpenSees reference).
 
     Parameters
     ----------
     sigma : float, optional
-        Shift for shift-invert mode. When OpenSees requests the smallest
-        eigenvalues (``find_smallest=True``) and ``sigma`` is ``None``, a shift
-        of ``0.0`` is used.
-    which : {'LM', 'SM', 'LR', 'SR', 'LI', 'SI', 'LA', 'SA', 'BE'}, optional
-        Which eigenvalues to compute. Default is ``'LM'``.
+        Shift for shift-invert. Default ``0.0`` when ``find_smallest=True``.
+    which : {'LM', 'SM', ...}, optional
+        Accepted for API compatibility; solves always use ``'LM'`` like OpenSees.
     v0 : ndarray, optional
         Starting vector for ARPACK.
     ncv : int, optional

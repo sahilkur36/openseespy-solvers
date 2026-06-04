@@ -65,6 +65,42 @@ def _host_array(array: Any) -> np.ndarray:
     return np.asarray(array, dtype=np.float64)
 
 
+# OpenSees PythonSparse reference (benchmark_python_sparse_eigen.py) always uses LM.
+OPENSEES_EIGSH_WHICH = "LM"
+
+
+def opensees_eigsh_sigma(find_smallest: bool, sigma: float | None) -> float | None:
+    """Shift for ``eigsh`` matching OpenSees: ``0.0`` when smallest, else optional user ``sigma``."""
+    if find_smallest:
+        return 0.0 if sigma is None else sigma
+    return sigma
+
+
+def eigsh_arpack_kwargs(
+    *,
+    num_modes: int,
+    which: str,
+    tol: float,
+    v0: Any | None,
+    ncv: int | None,
+    maxiter: int | None,
+    mode: str | None = None,
+) -> dict[str, Any]:
+    """Keyword arguments forwarded to SciPy/CuPy ``eigsh`` (ARPACK), except ``A``/``M``."""
+    kwargs: dict[str, Any] = {"k": num_modes, "which": which}
+    if mode is not None:
+        kwargs["mode"] = mode
+    if v0 is not None:
+        kwargs["v0"] = v0
+    if ncv is not None:
+        kwargs["ncv"] = ncv
+    if maxiter is not None:
+        kwargs["maxiter"] = maxiter
+    if tol > 0.0:
+        kwargs["tol"] = tol
+    return kwargs
+
+
 def csr_linear_kwargs_from_matrix(
     matrix: Any,
     rhs: Any,

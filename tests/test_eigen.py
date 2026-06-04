@@ -11,6 +11,31 @@ from openseespy_solvers.scipy import eigsh, lobpcg
 from conftest import csr_eigen_kwargs
 
 
+def test_eigsh_largest_diagonal() -> None:
+    n = 6
+    K = sp.diags(np.arange(2.0, 2.0 + n, 1.0))
+    M = sp.eye(n)
+    num_modes = 3
+    kwargs = csr_eigen_kwargs(K, M, num_modes=num_modes, find_smallest=False)
+    ev = np.frombuffer(kwargs["eigenvalues"], dtype=np.float64, count=num_modes)
+    eigsh(tol=1e-10).solve(**kwargs)
+    np.testing.assert_allclose(ev, [7.0, 6.0, 5.0], rtol=1e-6)
+
+
+def test_cupy_eigsh_largest_general() -> None:
+    pytest.importorskip("cupy")
+    from openseespy_solvers.cupy import eigsh as cupy_eigsh
+
+    n = 6
+    K = sp.diags(np.arange(2.0, 2.0 + n, 1.0))
+    M = sp.eye(n)
+    num_modes = 3
+    kwargs = csr_eigen_kwargs(K, M, num_modes=num_modes, find_smallest=False)
+    ev = np.frombuffer(kwargs["eigenvalues"], dtype=np.float64, count=num_modes)
+    cupy_eigsh(tol=1e-10).solve(**kwargs)
+    np.testing.assert_allclose(ev, [7.0, 6.0, 5.0], rtol=1e-5)
+
+
 def test_eigsh_diagonal() -> None:
     n = 6
     K = sp.diags(np.arange(2.0, 2.0 + n, 1.0))

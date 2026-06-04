@@ -23,8 +23,19 @@ LARGE_STATIC_MESH_FACTORS = [4.0, 5.0, 6.0, 8.0]
 DEFAULT_EIGEN_MESH_FACTORS = [1.0, 2.0, 3.0, 4.0]
 LARGE_EIGEN_MESH_FACTORS = [4.0, 6.0, 8.0, 10.0]
 
+# Native OpenSees solvers compared in ``brick_bar.py`` (static benchmark).
+NATIVE_STATIC_SOLVERS = ["BandGeneral", "SuperLU", "UmfPack"]
+
 # Benchmark scripts: skip a solver on finer meshes after it uses this fraction of --time-limit.
 BUDGET_SKIP_FRACTION = 0.85
+
+
+def equation_count_for_mesh() -> int:
+    """Return ``ops.systemSize()`` after ``build_model`` (requires a linear system)."""
+    import openseespy.opensees as ops
+
+    ops.system("BandGeneral")
+    return ops.systemSize()
 
 
 def budget_record_status(
@@ -89,7 +100,7 @@ def eigen_skips_trusted_reference(label: str) -> bool:
 
 
 def pythonsparse_static_solvers() -> list[tuple[str, object]]:
-    """CPU SciPy direct solvers plus GPU factories when CuPy/nvMath are installed."""
+    """Recommended PythonSparse static solvers (see docs/recommended-solvers.md)."""
     from openseespy_solvers.scipy import spsolve as scipy_spsolve
 
     solvers: list[tuple[str, object]] = []
@@ -108,20 +119,6 @@ def pythonsparse_static_solvers() -> list[tuple[str, object]]:
         return solvers
 
     try:
-        from openseespy_solvers.cupy import cg as cupy_cg, precond as cupy_precond
-
-        iter_kwargs = {"rtol": 1e-7, "atol": 1e-12}
-        solvers.append(("PythonSparse (cupy.cg)", cupy_cg(**iter_kwargs)))
-        solvers.append(
-            (
-                "PythonSparse (cupy.cg.jacobi)",
-                cupy_cg(M=cupy_precond.jacobi, **iter_kwargs),
-            )
-        )
-    except ImportError:
-        pass
-
-    try:
         from openseespy_solvers.nvmath import direct_solver
 
         nvmath_solver = direct_solver()
@@ -133,7 +130,7 @@ def pythonsparse_static_solvers() -> list[tuple[str, object]]:
 
 
 def pythonsparse_eigen_solvers() -> list[tuple[str, object]]:
-    """CPU ``eigsh`` plus GPU ``eigsh`` (general + lumped) and ``lobpcg`` when CuPy is installed."""
+    """Recommended PythonSparse eigen solvers (see docs/recommended-solvers.md)."""
     from openseespy_solvers.scipy import eigsh
 
     solvers: list[tuple[str, object]] = []
@@ -146,32 +143,8 @@ def pythonsparse_eigen_solvers() -> list[tuple[str, object]]:
     try:
         from openseespy_solvers.cupy import eigsh as cupy_eigsh
 
-        # stdBrick consistent mass: compare shift-invert (general) vs row-sum lumped CuPy eigsh.
-        solvers.append(
-            ("PythonSparse (cupy.eigsh)", cupy_eigsh(tol=0.0))
-        )
-        solvers.append(
-            ("PythonSparse (cupy.eigsh.lumped)", cupy_eigsh(tol=0.0, mass_mode="lumped"))
-        )
-    except ImportError:
-        pass
-
-    try:
-        from openseespy_solvers.cupy import lobpcg, precond as cupy_precond
-
-        lobpcg_kwargs = {"tol": 0.2, "maxiter": 300, "rng": 0}
-        try:
-            from openseespy_solvers.nvmath._base import _import_nvmath
-
-            _import_nvmath()
-            solvers.append(
-                (
-                    "PythonSparse (cupy.lobpcg.nvmath)",
-                    lobpcg(M=cupy_precond.nvmath, **lobpcg_kwargs),
-                )
-            )
-        except ImportError:
-            pass
+        cupy_solver = cupy_eigsh(tol=0.0)
+        solvers.append((pythonsparse_label(cupy_solver), cupy_solver))
     except ImportError:
         pass
 

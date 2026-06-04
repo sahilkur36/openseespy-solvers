@@ -397,6 +397,8 @@ class EigenSolver(BaseOpenSeesSolver, ABC):
             eigvecs_host = np.asarray(self._to_host(eigvecs), dtype=OPENSEES_BUFFER_DTYPE)
 
             order = np.argsort(eigvals_host)
+            if not find_smallest:
+                order = order[::-1]
             eigvals_host = eigvals_host[order]
             eigvecs_host = eigvecs_host[:, order]
 

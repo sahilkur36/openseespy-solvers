@@ -12,10 +12,11 @@ Notes
 Generalized :func:`cupyx.scipy.sparse.linalg.eigsh` is not available.
 :func:`eigsh` supports:
 
-- ``mass_mode='general'`` (default): shift-invert with full ``M`` via SciPy ARPACK
-  plus a pluggable GPU inner :class:`~openseespy_solvers._base.LinearSolver`.
-- ``mass_mode='diagonal'`` / ``'lumped'``: shift-invert on GPU with diagonal (exact or
-  row-sum lumped) mass; cached ``m`` and ``K - sigma diag(m)``.
+- ``mass_mode='general'`` (default): matches OpenSees ``eigsh`` (shift-invert with
+  ``sigma=0`` for smallest modes; plain ARPACK for largest). GPU inner solves when
+  shift-invert is used.
+- ``mass_mode='diagonal'`` / ``'lumped'``: shift-invert on GPU (smallest modes, or
+  when ``sigma`` is set); use ``general`` for largest modes without a shift.
 
 Use :func:`lobpcg` when these modes are not appropriate.
 
@@ -41,7 +42,12 @@ import scipy.sparse as sp_host
 import scipy.sparse.linalg as spla_cpu
 
 from openseespy_solvers._base import EigenSolver, LinearSolver
-from openseespy_solvers._sparse import csr_linear_kwargs_from_matrix
+from openseespy_solvers._sparse import (
+    OPENSEES_EIGSH_WHICH,
+    csr_linear_kwargs_from_matrix,
+    eigsh_arpack_kwargs,
+    opensees_eigsh_sigma,
+)
 from openseespy_solvers.exceptions import SolverConvergenceError
 from openseespy_solvers._docstrings import (
     _EIGEN_NOTES,
@@ -307,6 +313,7 @@ class _Eigsh(CupyMixin, EigenSolver):
         which: str = "LM",
         mass_mode: str = "general",
         linear_solver: LinearSolver | None = None,
+        mode: str = "normal",
         v0: Any = None,
         ncv: int | None = None,
         maxiter: int | None = None,
@@ -319,6 +326,7 @@ class _Eigsh(CupyMixin, EigenSolver):
         self._sigma = sigma
         self._which = which
         self._mass_mode = mass_mode
+        self._mode = mode
         self._inner_solver = linear_solver or _default_inner_linear_solver()
         self._v0 = v0
         self._ncv = ncv
@@ -334,6 +342,7 @@ class _Eigsh(CupyMixin, EigenSolver):
             "which": which,
             "mass_mode": mass_mode,
             "linear_solver": linear_solver,
+            "mode": mode,
             "v0": v0,
             "ncv": ncv,
             "maxiter": maxiter,
@@ -358,15 +367,6 @@ class _Eigsh(CupyMixin, EigenSolver):
             self._inner_needs_refactor = True
         super().solve(**kwargs)
 
-    def _shift_sigma_value(self, find_smallest: bool) -> float:
-        if find_smallest:
-            return 0.0 if self._sigma is None else self._sigma
-        if self._sigma is None:
-            raise ValueError(
-                "CuPy eigsh shift-invert requires sigma or request smallest modes"
-            )
-        return self._sigma
-
     def _shifted_stiffness_diagonal_mass(self, K, m, sigma: float):  # noqa: ANN001
         if (
             self._eigen_matrix_status == "UNCHANGED"
@@ -383,15 +383,18 @@ class _Eigsh(CupyMixin, EigenSolver):
         return self._shifted
 
     def _cupy_eigsh_kwargs(self, num_modes: int) -> dict[str, Any]:
-        kwargs: dict[str, Any] = {"k": num_modes, "which": self._which}
+        kwargs = eigsh_arpack_kwargs(
+            num_modes=num_modes,
+            which=OPENSEES_EIGSH_WHICH,
+            tol=self._tol,
+            v0=self._v0,
+            ncv=self._ncv,
+            maxiter=self._maxiter,
+        )
         if self._v0 is not None:
-            kwargs["v0"] = self._to_device(np.asarray(self._v0, dtype=self._compute_dtype))
-        if self._ncv is not None:
-            kwargs["ncv"] = self._ncv
-        if self._maxiter is not None:
-            kwargs["maxiter"] = self._maxiter
-        if self._tol > 0.0:
-            kwargs["tol"] = self._tol
+            kwargs["v0"] = self._to_device(
+                np.asarray(self._v0, dtype=self._compute_dtype)
+            )
         return kwargs
 
     def _mass_diagonal(self, M):  # noqa: ANN001
@@ -431,7 +434,13 @@ class _Eigsh(CupyMixin, EigenSolver):
         """Shift-invert with diagonal mass; OP = (K - sigma diag(m))^{-1} diag(m)."""
         cp = self._cp
         cspla = self._cspla
-        sigma = self._shift_sigma_value(find_smallest)
+        sigma = opensees_eigsh_sigma(find_smallest, self._sigma)
+        if sigma is None:
+            raise ValueError(
+                "cupy.eigsh with mass_mode='diagonal' or 'lumped' uses shift-invert; "
+                "use mass_mode='general' for largest modes (find_smallest=False), "
+                "or pass sigma=."
+            )
         m = self._mass_diagonal(M)
         shifted = self._shifted_stiffness_diagonal_mass(K, m, sigma)
         n = K.shape[0]
@@ -484,8 +493,26 @@ class _Eigsh(CupyMixin, EigenSolver):
             shape=matrix.shape,
         )
 
+    def _solve_eigen_standard(self, K, M, *, num_modes):  # noqa: ANN001
+        """Plain SciPy ARPACK (OpenSees path when find_smallest=False and no sigma)."""
+        kwargs = eigsh_arpack_kwargs(
+            num_modes=num_modes,
+            which=OPENSEES_EIGSH_WHICH,
+            tol=self._tol,
+            v0=self._v0,
+            ncv=self._ncv,
+            maxiter=self._maxiter,
+            mode=self._mode,
+        )
+        kwargs["M"] = self._host_csr(M)
+        if self._v0 is not None:
+            kwargs["v0"] = np.asarray(self._v0, dtype=np.float64).ravel()
+        return spla_cpu.eigsh(self._host_csr(K), **kwargs)
+
     def _solve_eigen_general(self, K, M, *, num_modes, find_smallest):  # noqa: ANN001
-        sigma = self._shift_sigma_value(find_smallest)
+        sigma = opensees_eigsh_sigma(find_smallest, self._sigma)
+        if sigma is None:
+            return self._solve_eigen_standard(K, M, num_modes=num_modes)
 
         if self._shifted is None or self._eigen_matrix_status != "UNCHANGED":
             self._shifted = K - sigma * M
@@ -499,20 +526,19 @@ class _Eigsh(CupyMixin, EigenSolver):
             return self._to_host(self._inner_linear_solve(self._shifted, v_gpu))
 
         op_inv = spla_cpu.LinearOperator((n, n), matvec=opinv_matvec, dtype=np.float64)
-        kwargs: dict[str, Any] = {
-            "k": num_modes,
-            "which": self._which,
-            "sigma": sigma,
-            "OPinv": op_inv,
-        }
+        kwargs = eigsh_arpack_kwargs(
+            num_modes=num_modes,
+            which=OPENSEES_EIGSH_WHICH,
+            tol=self._tol,
+            v0=self._v0,
+            ncv=self._ncv,
+            maxiter=self._maxiter,
+            mode=self._mode,
+        )
+        kwargs["sigma"] = sigma
+        kwargs["OPinv"] = op_inv
         if self._v0 is not None:
             kwargs["v0"] = np.asarray(self._v0, dtype=np.float64).ravel()
-        if self._ncv is not None:
-            kwargs["ncv"] = self._ncv
-        if self._maxiter is not None:
-            kwargs["maxiter"] = self._maxiter
-        if self._tol > 0.0:
-            kwargs["tol"] = self._tol
         # ARPACK runs on the CPU; inner (K - sigma M)^{-1} solves use the GPU solver.
         eigvals, eigvecs = spla_cpu.eigsh(
             self._host_csr(K), M=self._host_csr(M), **kwargs
@@ -521,6 +547,11 @@ class _Eigsh(CupyMixin, EigenSolver):
 
     def _solve_eigen(self, K, M, *, num_modes, find_smallest):  # noqa: ANN001
         mode = self._mass_mode.lower()
+        if mode in {"diagonal", "lumped"} and self._mode != "normal":
+            raise ValueError(
+                "cupy.eigsh mode= is only used with mass_mode='general'; "
+                f"got mode={self._mode!r} with mass_mode={self._mass_mode!r}."
+            )
         if mode in {"diagonal", "lumped"}:
             return self._solve_eigen_shift_invert_diagonal_mass(
                 K, M, num_modes=num_modes, find_smallest=find_smallest
@@ -694,6 +725,7 @@ def eigsh(
     which: str = "LM",
     mass_mode: str = "general",
     linear_solver: LinearSolver | None = None,
+    mode: str = "normal",
     v0: Any = None,
     ncv: int | None = None,
     maxiter: int | None = None,
@@ -704,31 +736,26 @@ def eigsh(
 ) -> _Eigsh:
     r"""Configure a generalized eigen solver for OpenSees ``PythonSparse`` (GPU).
 
-    Solves ``K x = \lambda M x`` using one of three modes:
+    Matches OpenSees ``eigsh``: ``sigma=0`` and shift-invert when
+    ``find_smallest=True``; no shift when ``find_smallest=False`` unless you set
+    ``sigma``. ARPACK always uses ``which='LM'``.
 
-    - ``mass_mode='general'`` (default):
-      shift-invert with :func:`scipy.sparse.linalg.eigsh` and full ``M``; GPU
-      inner solves on ``(K - sigma M)^{-1}``.
-    - ``mass_mode='diagonal'`` / ``'lumped'``:
-      shift-invert on GPU with diagonal (exact or row-sum lumped) mass; caches
-      ``m`` and ``K - sigma diag(m)`` when the matrix is unchanged.
+    - ``mass_mode='general'`` (default): SciPy ARPACK; GPU inner solves only when
+      shift-invert is active.
+    - ``mass_mode='diagonal'`` / ``'lumped'``: GPU shift-invert (smallest modes).
 
     Parameters
     ----------
     sigma : float, optional
-        Shift for shift-invert mode. When OpenSees requests the smallest
-        eigenvalues (``find_smallest=True``) and ``sigma`` is ``None``, a shift
-        of ``0.0`` is used.
+        Shift for shift-invert. Default ``0.0`` when ``find_smallest=True``.
     which : {'LM', 'SM', 'LR', 'SR', 'LI', 'SI', 'LA', 'SA', 'BE'}, optional
-        Which operator eigenvalues to compute. Default is ``'LM'``.
+        Operator eigenvalues for ARPACK. Default ``'LM'`` (shift-invert).
     mass_mode : {'diagonal', 'lumped', 'general'}, optional
         Eigen mode strategy. Default is ``'general'``.
     linear_solver : LinearSolver, optional
-        Inner solver for shift-invert linear systems ``(K - \sigma M) w = v``
-        (full ``M`` in ``general``; ``diag(m)`` in ``diagonal`` / ``lumped``).
-        Defaults to
-        :func:`openseespy_solvers.nvmath.direct_solver` on GPU when nvMath is
-        installed, otherwise :func:`spsolve`.
+        Inner solver for shift-invert (``general`` and diagonal/lumped paths).
+    mode : {'normal', 'buckling', 'cayley'}, optional
+        SciPy ARPACK mode (``mass_mode='general'`` only). Default ``'normal'``.
     v0 : cupy.ndarray, optional
         Starting vector for ARPACK.
     ncv : int, optional
@@ -746,9 +773,9 @@ def eigsh(
 
     Notes
     -----
-    All modes use shift-invert. CuPy does not expose generalized
-    :func:`~cupyx.scipy.sparse.linalg.eigsh`, so ``diagonal`` / ``lumped`` run
-    CuPy Lanczos on ``OP = (K - sigma diag(m))^{-1} diag(m)`` while ``general``
+    CuPy does not expose generalized :func:`~cupyx.scipy.sparse.linalg.eigsh`, so
+    ``diagonal`` / ``lumped`` run CuPy Lanczos on
+    ``OP = (K - sigma diag(m))^{-1} diag(m)`` while ``general``
     uses SciPy ARPACK with the same shift-invert idea and a full mass matrix.
     """
     return _Eigsh(
@@ -756,6 +783,7 @@ def eigsh(
         which=which,
         mass_mode=mass_mode,
         linear_solver=linear_solver,
+        mode=mode,
         v0=v0,
         ncv=ncv,
         maxiter=maxiter,

@@ -28,10 +28,7 @@ import _brick_common as brick
 NUM_STEPS = 10
 DEFAULT_TIME_LIMIT = 120.0
 BUDGET_SKIP_FRACTION = brick.BUDGET_SKIP_FRACTION
-
-# Native OpenSees solvers to compare against. You can also add "ProfileSPD",
-# "SparseGeneral", etc.
-NATIVE_SOLVERS = ["BandGeneral", "SuperLU", "UmfPack"]
+NATIVE_SOLVERS = brick.NATIVE_STATIC_SOLVERS
 
 # --- model (kip, in, sec) ---
 BAR_LENGTH = 10.0
@@ -138,7 +135,7 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
         for label, solver in pythonsparse_solvers:
             if label in skip_remaining:
                 build_model(nx, ny, nz)
-                equations = ops.systemSize()
+                equations = brick.equation_count_for_mesh()
                 row = (factor, equations, label, -2, 0.0)
                 results.append(row)
                 if table is not None:
@@ -169,7 +166,7 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
         for name in NATIVE_SOLVERS:
             if name in skip_remaining:
                 build_model(nx, ny, nz)
-                equations = ops.systemSize()
+                equations = brick.equation_count_for_mesh()
                 row = (factor, equations, name, -2, 0.0)
                 results.append(row)
                 if table is not None:

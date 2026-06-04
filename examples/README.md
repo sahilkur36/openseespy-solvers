@@ -39,13 +39,11 @@ selection.
 Each script builds a small 3-D brick bar, runs one analysis, and prints **Passed!** /
 **Failed!**. All use `solver.to_openseespy()` with `ops.system("PythonSparse", ...)`.
 
-Eigen scripts (`scipy_eigsh`, `scipy_lobpcg`, `cupy_lobpcg`, and `brick_bar_eigen`) use
-**two-tier verification**: compare PythonSparse to OpenSees **`genBandArpack`** first; if
-results disagree, fall back to **`fullGenLapack`** (dense tiebreaker), except
-**`cupy.eigsh.lumped`** (row-sum lumped mass — approximate; a short first/last-mode
-comparison is printed, no tiebreaker). The benchmark only runs `fullGenLapack` when the fast
-reference mismatches a solver that is not lumped — use the default mesh
-sweep for CI; add `--large-test` only when you want heavier runs.
+Eigen scripts and `brick_bar_eigen` use **two-tier verification**: compare PythonSparse to
+OpenSees **`genBandArpack`** first; if results disagree, fall back to **`fullGenLapack`**
+(dense tiebreaker). The benchmark sweep uses only recommended eigen solvers; experimental
+paths (e.g. `lobpcg`, lumped `eigsh`) are in `solvers/` smoke tests only. Use the default
+mesh sweep for CI; add `--large-test` only when you want heavier runs.
 
 ### SciPy (`openseespy_solvers.scipy`)
 
@@ -93,11 +91,12 @@ Change the mesh sweep in one line (bigger number = finer mesh):
 MESH_FACTORS = [1.5, 2.0, 2.5, 3.0]
 ```
 
-When CuPy (and optionally nvMath) are installed and a CUDA device is present,
-the benchmarks automatically add PythonSparse rows when optional backends are
-present — e.g. `PythonSparse (scipy.umfpack)` when scikit-umfpack is installed,
-`PythonSparse (cupy.cg)`, `PythonSparse (nvmath.direct_solver)`, and
-`PythonSparse (cupy.lobpcg)` for eigen when CuPy sees a GPU.
+Benchmarks compare [recommended solvers](../docs/recommended-solvers.md) to native
+OpenSees backends. **Static** (`brick_bar.py`): `scipy.spsolve`, optional
+`scipy.umfpack`, optional `nvmath.direct_solver` (GPU), vs `BandGeneral`,
+`SuperLU`, `UmfPack`. **Eigen** (`brick_bar_eigen.py`): `scipy.eigsh`, optional
+`cupy.eigsh`, vs `genBandArpack` (`fullGenLapack` tiebreaker on mismatch). Other
+factories remain in `solvers/` as smoke tests only.
 
 String-based solver loop (no lambdas):
 
@@ -105,7 +104,7 @@ String-based solver loop (no lambdas):
 from openseespy_solvers.scipy import spsolve
 
 solver = spsolve()
-NATIVE_SOLVERS = ["BandGeneral", "SuperLU", "UmfPack"]
+NATIVE_SOLVERS = brick.NATIVE_STATIC_SOLVERS  # BandGeneral, SuperLU, UmfPack
 
 for factor in MESH_FACTORS:
     nx, ny, nz = mesh_counts(factor)

@@ -25,8 +25,8 @@ Optional GPU backends (CuPy, nvMath) and UMFPACK: see the
 
 | Script | Analysis | Solvers compared |
 |--------|----------|------------------|
-| [`brick_bar.py`](../examples/brick_bar.py) | static | PythonSparse (auto) vs `BandGeneral`, `SuperLU`, `UmfPack` |
-| [`brick_bar_eigen.py`](../examples/brick_bar_eigen.py) | eigen | `PythonSparse` vs `genBandArpack` (`fullGenLapack` tiebreaker on mismatch) |
+| [`brick_bar.py`](../examples/brick_bar.py) | static | [Recommended](../recommended-solvers.md) PythonSparse vs `BandGeneral`, `SuperLU`, `UmfPack` |
+| [`brick_bar_eigen.py`](../examples/brick_bar_eigen.py) | eigen | Recommended `scipy.eigsh` / `cupy.eigsh` vs `genBandArpack` (`fullGenLapack` tiebreaker) |
 
 ## Solver catalog (one factory per script)
 

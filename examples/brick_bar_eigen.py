@@ -3,7 +3,7 @@
 Sweeps a few mesh sizes and times an eigenvalue analysis with each solver, in
 the style of the OpenSees SolverBenchmark examples. Verification uses a two-tier
 reference: ``genBandArpack`` first; ``fullGenLapack`` only when they disagree
-(except ``cupy.eigsh.lumped``, which uses a different mass matrix).
+(experimental lumped-mass solvers are not in the benchmark sweep).
 
 Run with ``--large-test`` for a finer mesh sweep (more equations, slower).
 """
@@ -105,7 +105,7 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
 
         if FAST_REFERENCE in skip_remaining:
             build_model(nx, ny, nz)
-            equations = ops.systemSize()
+            equations = brick.equation_count_for_mesh()
             far_node = far_corner_node()
             ref_ev = None
             ref_mode = None
@@ -291,7 +291,7 @@ def main():
     print(f"Eigen analysis — {sweep_label}; mesh factors: {mesh_factors}")
     print(
         f"Primary reference: {FAST_REFERENCE}; tiebreaker: {TRUSTED_REFERENCE} "
-        "(on mismatch only, except cupy.eigsh.lumped)."
+        "(on mismatch only)."
     )
     print(
         f"Per-run time budget: {args.time_limit:.1f}s (not a hard timeout; "
