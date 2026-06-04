@@ -1,38 +1,91 @@
 # Examples
 
-Runnable scripts are in the [`examples/`](https://github.com/gaaraujo/openseespy-solvers/tree/main/examples)
-directory. Install OpenSeesPy to run them:
+Scripts live in [`examples/`](../examples/). There are two kinds:
+
+1. **Benchmarks** — [`brick_bar.py`](../examples/brick_bar.py) and
+   [`brick_bar_eigen.py`](../examples/brick_bar_eigen.py) sweep mesh sizes and compare
+   PythonSparse against native OpenSees solvers.
+2. **Solver catalog** — [`examples/solvers/`](../examples/solvers/) has **one runnable
+   script per solver factory** (small mesh, Passed!/Failed! smoke test).
 
 ```bash
-pip install openseespy-solvers[opensees]
+pip install openseespy-solvers
+cd examples
+python brick_bar.py
+python brick_bar.py --large-test   # finer mesh sweep (slower)
+python solvers/scipy_spsolve.py
 ```
 
-## linear_static_spsolve.py
+Optional GPU backends (CuPy, nvMath) and UMFPACK: see the
+[installation guide](../installation.md). For which factories to try first, see
+[Recommended solvers](recommended-solvers.md) (`scipy_spsolve`, `scipy_umfpack`,
+`scipy_eigsh`, `nvmath_direct_solver`, `cupy_eigsh`).
 
-Static analysis of a 2-D truss using [`scipy.spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve).
+## Benchmark scripts
 
-## linear_static_cg.py
+| Script | Analysis | Solvers compared |
+|--------|----------|------------------|
+| [`brick_bar.py`](../examples/brick_bar.py) | static | PythonSparse (auto) vs `BandGeneral`, `SuperLU`, `UmfPack` |
+| [`brick_bar_eigen.py`](../examples/brick_bar_eigen.py) | eigen | `PythonSparse` vs `genBandArpack` (`fullGenLapack` tiebreaker on mismatch) |
 
-Same model with [`scipy.cg`](api/scipy.md#openseespy_solvers.scipy.cg) and
-[`precond.jacobi`](api/precond.md#openseespy_solvers.scipy.precond.jacobi).
+## Solver catalog (one factory per script)
 
-## linear_static_cg_gpu.py
+| Backend | Scripts |
+|---------|---------|
+| SciPy | `scipy_spsolve`, `scipy_umfpack`, `scipy_cg`, `scipy_cg_jacobi`, `scipy_gmres`, `scipy_gmres_ilu`, `scipy_eigsh`, `scipy_lobpcg` |
+| CuPy | `cupy_spsolve`, `cupy_cg`, `cupy_cg_jacobi`, `cupy_gmres`, `cupy_gmres_ilu`, `cupy_eigsh`, `cupy_lobpcg` |
+| nvMath | `nvmath_direct_solver` |
 
-GPU counterpart using [`cupy.cg`](api/cupy.md#openseespy_solvers.cupy.cg). Requires
-the `[gpu]` extra.
+Preconditioners (`scipy.precond` / `cupy.precond`: `jacobi`, `ilu`) are demonstrated via
+`M=` on `cg` or `gmres` in the `*_jacobi` and `*_ilu` scripts.
 
-## modal_eigsh.py
+Every catalog script follows the same OpenSeesPy style: top-to-bottom flow,
+`ops.system("PythonSparse", solver.to_openseespy())`, and a **Passed!** / **Failed!**
+footer.
 
-2-D frame eigenvalue analysis with [`scipy.eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh).
+## One-line mesh knob (benchmarks)
 
-## Testing without OpenSeesPy
-
-The test suite constructs synthetic OpenSees-style keyword arguments:
-
-```bash
-pip install -e ".[dev]"
-pytest
+```python
+MESH_FACTORS = [1.5, 2.0, 2.5, 3.0]
 ```
 
-Helpers are defined in `tests/conftest.py` (`csr_linear_kwargs`,
-`csr_eigen_kwargs`, `form_ap_kwargs`).
+## Two-tier eigen verification
+
+Eigen examples compare `PythonSparse` to OpenSees **`genBandArpack`** first (fast banded
+reference). If eigenvalues or the mode shape disagree, they fall back to **`fullGenLapack`**
+(dense LAPACK tiebreaker). Catalog scripts use the same logic via
+[`run_eigen_verified()`](../examples/solvers/_brick_common.py).
+
+## String-based solver loop (benchmarks)
+
+```python
+from openseespy_solvers.scipy import spsolve
+
+solver = spsolve()
+NATIVE_SOLVERS = ["BandGeneral", "SuperLU", "UmfPack"]
+
+for factor in MESH_FACTORS:
+    nx, ny, nz = mesh_counts(factor)
+    for name in solvers:
+        build_model(nx, ny, nz)
+        apply_load()
+        if name == "PythonSparse":
+            ops.system("PythonSparse", solver.to_openseespy())
+        else:
+            ops.system(name)
+        ops.numberer("RCM")
+        ops.constraints("Plain")
+        ops.integrator("LoadControl", 1.0 / NUM_STEPS)
+        ops.test("NormUnbalance", 1.0e-7, 50)
+        ops.algorithm("ModifiedNewton", "-FactorOnce")
+        ops.analysis("Static")
+        status = ops.analyze(NUM_STEPS)
+```
+
+## See also
+
+- [examples/README.md](../examples/README.md) — install extras and full script list
+- OpenSees [`benchmark_python_sparse.py`](https://github.com/OpenSees/OpenSees/blob/master/EXAMPLES/SolverBenchmark/benchmark_python_sparse.py)
+- OpenSees [`benchmark_python_sparse_eigen.py`](https://github.com/OpenSees/OpenSees/blob/master/EXAMPLES/SolverBenchmark/benchmark_python_sparse_eigen.py)
+- [Tutorial](getting-started.md)
+- [PythonSparse interface](user-guide/pythonsparse-interface.md)

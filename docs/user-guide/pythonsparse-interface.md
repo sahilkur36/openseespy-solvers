@@ -59,6 +59,6 @@ OpenSees indicates how the system matrix changed since the previous solve:
 
 ## See Also
 
-[solver objects](solver-objects.md), [to_opensees()](to-opensees.md)
+[solver objects](solver-objects.md), [to_openseespy()](to-openseespy.md)
 
 [OpenSees PythonSparse documentation](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system/PythonSparse.html)

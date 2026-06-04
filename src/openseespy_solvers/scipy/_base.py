@@ -11,6 +11,33 @@ import scipy.sparse.linalg as spla
 from openseespy_solvers.exceptions import UnsupportedStorageSchemeError
 
 
+def _import_umfpack() -> Any:
+    """Import :mod:`scikits.umfpack` lazily.
+
+    ``scikit-umfpack`` is an optional dependency, so importing the SciPy
+    namespace must never require it. The import is deferred until a UMFPACK
+    solver is actually instantiated.
+
+    Returns
+    -------
+    module
+        The imported :mod:`scikits.umfpack` module.
+
+    Raises
+    ------
+    ImportError
+        If ``scikit-umfpack`` is not installed.
+    """
+    try:
+        import scikits.umfpack as umfpack
+    except ImportError as exc:  # pragma: no cover - exercised only without umfpack
+        raise ImportError(
+            "The 'umfpack' solver requires scikit-umfpack. "
+            "Install with: pip install openseespy-solvers[umfpack]"
+        ) from exc
+    return umfpack
+
+
 class ScipyMixin:
     """Implements the backend hooks using SciPy / NumPy (CPU)."""
 

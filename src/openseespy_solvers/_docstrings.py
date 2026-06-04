@@ -2,7 +2,7 @@
 
 _OPENSEES_LINEAR = """
 scheme : {'CSR', 'CSC'}, optional
-    Sparse storage scheme for :meth:`~openseespy_solvers._base.BaseOpenSeesSolver.to_opensees`.
+    Sparse storage scheme for :meth:`~openseespy_solvers._base.BaseOpenSeesSolver.to_openseespy`.
     Default is ``'CSR'``.
 writable : str or list of str, optional
     Writable buffers declared to OpenSees. Default is ``'none'``.
@@ -18,7 +18,7 @@ dtype : dtype or str, optional
 
 _OPENSEES_EIGEN = """
 scheme : {'CSR', 'CSC'}, optional
-    Sparse storage scheme for :meth:`~openseespy_solvers._base.BaseOpenSeesSolver.to_opensees`.
+    Sparse storage scheme for :meth:`~openseespy_solvers._base.BaseOpenSeesSolver.to_openseespy`.
     Default is ``'CSR'``.
 debug : bool, optional
     If ``True``, exceptions raised during
@@ -32,7 +32,7 @@ _LINEAR_RETURNS = """
 Returns
 -------
 solver : LinearSolver
-    Configured linear solver. Pass ``solver.to_opensees()`` to
+    Configured linear solver. Pass ``solver.to_openseespy()`` to
     ``ops.system('PythonSparse', ...)``.
 """
 
@@ -40,7 +40,7 @@ _EIGEN_RETURNS = """
 Returns
 -------
 solver : EigenSolver
-    Configured eigen solver. Pass ``solver.to_opensees()`` to
+    Configured eigen solver. Pass ``solver.to_openseespy()`` to
     ``ops.eigen('PythonSparse', num_modes, ...)``.
 """
 

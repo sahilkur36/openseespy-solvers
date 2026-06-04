@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import copy
-
 import numpy as np
 import pytest
 import scipy.sparse as sp
@@ -79,13 +77,6 @@ def test_gmres_nonsymmetric() -> None:
     np.testing.assert_allclose(x_buf, x_expected, rtol=1e-8)
 
 
-def test_copy_stats_independence() -> None:
-    solver = cg()
-    clone = copy.copy(solver)
-    solver.stats.num_solves = 3
-    assert clone.stats.num_solves == 0
-
-
 def test_cupy_cg() -> None:
     pytest.importorskip("cupy")
     import importlib
@@ -98,6 +89,35 @@ def test_cupy_cg() -> None:
     solver = cupy_cg(rtol=1e-8)
     assert solver.solve(**kwargs) == 0
     np.testing.assert_allclose(x_buf, b / np.diag(A), rtol=1e-5)
+
+
+def test_cupy_spsolve_matrix_status_caching() -> None:
+    pytest.importorskip("cupy")
+    import scipy.sparse as sp
+
+    from openseespy_solvers.cupy import spsolve as cupy_spsolve
+
+    A = sp.diags([4.0, 5.0, 6.0])
+    b = np.ones(3)
+    x_buf = np.zeros(3, dtype=np.float64)
+    solver = cupy_spsolve()
+
+    kwargs = csr_linear_kwargs(A, b, x=x_buf, matrix_status="STRUCTURE_CHANGED")
+    assert solver.solve(**kwargs) == 0
+    first_A = solver.A
+    first_solve = solver._solve_func
+
+    kwargs2 = csr_linear_kwargs(A, b, x=x_buf, matrix_status="UNCHANGED")
+    assert solver.solve(**kwargs2) == 0
+    assert solver.A is first_A
+    assert solver._solve_func is first_solve
+
+    A2 = sp.diags([8.0, 10.0, 12.0])
+    kwargs3 = csr_linear_kwargs(A2, b, x=x_buf, matrix_status="COEFFICIENTS_CHANGED")
+    assert solver.solve(**kwargs3) == 0
+    assert solver.A is first_A
+    assert solver._solve_func is not first_solve
+    np.testing.assert_allclose(x_buf, b / np.array([8.0, 10.0, 12.0]), rtol=1e-5)
 
 
 def test_cupy_cg_jacobi_preconditioner() -> None:

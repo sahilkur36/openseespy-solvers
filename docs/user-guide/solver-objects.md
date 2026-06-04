@@ -2,12 +2,12 @@
 
 Backend factories return solver objects that implement the OpenSees
 `PythonSparse` protocol. Application code configures the solver, passes
-`solver.to_opensees()` to OpenSeesPy, and inspects cached data after analysis.
+`solver.to_openseespy()` to OpenSeesPy, and inspects cached data after analysis.
 
 ## Common methods
 
-`to_opensees(scheme=None, writable=None)`
-: Return the OpenSees configuration dict. See [to_opensees](to-opensees.md).
+`to_openseespy(scheme=None, writable=None)`
+: Return the OpenSees configuration dict. See [to_openseespy](to-openseespy.md).
 
 `solve(**kwargs)`
 : Called by OpenSees; not normally invoked from application code.

@@ -2,7 +2,7 @@
 
 These bases own the parts that are *identical for every backend*: wrapping the
 OpenSees memoryviews, the ``matrix_status`` caching pattern, writing the solution
-in place, statistics, ``formAp``, ``to_opensees`` and ``copy`` support.
+in place, statistics, ``formAp``, ``to_openseespy`` and ``copy`` support.
 
 Backend-specific numerics are provided by small hooks that each namespace
 (``openseespy_solvers.scipy``, ``.cupy``, ...) implements:
@@ -93,7 +93,7 @@ class BaseOpenSeesSolver(ABC):
 
     # -- OpenSees config -------------------------------------------------
 
-    def to_opensees(
+    def to_openseespy(
         self,
         *,
         scheme: str | None = None,
@@ -120,7 +120,7 @@ class BaseOpenSeesSolver(ABC):
         --------
         >>> from openseespy_solvers.scipy import cg
         >>> solver = cg()
-        >>> cfg = solver.to_opensees()
+        >>> cfg = solver.to_openseespy()
         >>> sorted(cfg.keys())
         ['scheme', 'solver', 'writable']
         """

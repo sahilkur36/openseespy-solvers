@@ -74,3 +74,55 @@ def form_ap_kwargs(
     base["p"] = memoryview(np.asarray(p, dtype=np.float64))
     base["Ap"] = memoryview(ap)
     return base
+
+
+# --- minimal 3-D brick bar (kip, in, sec) for OpenSeesPy solver tests ---
+_BAR_LENGTH = 10.0
+_BAR_HEIGHT = 2.0
+_BAR_THICKNESS = 1.0
+_ELASTIC_MODULUS = 29_000.0
+_POISSON_RATIO = 0.3
+_STEEL_DENSITY = 0.284e-3 / 386.4
+_YIELD_STRESS = 50.0
+
+
+def build_brick_bar(ops, nx, ny, nz):
+    """Build a small cantilever brick bar and return its far-corner node tag."""
+    ops.wipe()
+    ops.model("basic", "-ndm", 3, "-ndf", 3)
+    ops.nDMaterial(
+        "ElasticIsotropic", 1, _ELASTIC_MODULUS, _POISSON_RATIO, _STEEL_DENSITY
+    )
+    ops.block3D(
+        nx, ny, nz, 1, 1, "stdBrick", 1,
+        1, 0.0, -_BAR_THICKNESS / 2.0, -_BAR_HEIGHT / 2.0,
+        2, _BAR_LENGTH, -_BAR_THICKNESS / 2.0, -_BAR_HEIGHT / 2.0,
+        3, _BAR_LENGTH, _BAR_THICKNESS / 2.0, -_BAR_HEIGHT / 2.0,
+        4, 0.0, _BAR_THICKNESS / 2.0, -_BAR_HEIGHT / 2.0,
+        5, 0.0, -_BAR_THICKNESS / 2.0, _BAR_HEIGHT / 2.0,
+        6, _BAR_LENGTH, -_BAR_THICKNESS / 2.0, _BAR_HEIGHT / 2.0,
+        7, _BAR_LENGTH, _BAR_THICKNESS / 2.0, _BAR_HEIGHT / 2.0,
+        8, 0.0, _BAR_THICKNESS / 2.0, _BAR_HEIGHT / 2.0,
+    )
+    ops.fixX(0.0, 1, 1, 1)
+    far_corner = (_BAR_LENGTH, _BAR_THICKNESS / 2.0, _BAR_HEIGHT / 2.0)
+    for node in ops.getNodeTags():
+        coord = [ops.nodeCoord(node, i) for i in (1, 2, 3)]
+        if np.allclose(coord, far_corner, atol=1e-9):
+            return node
+    return None
+
+
+def apply_face_load(ops):
+    """Apply a downward load over the free-end face of the brick bar."""
+    total = 1.25 * _YIELD_STRESS * (_BAR_THICKNESS * _BAR_HEIGHT**2) / (6 * _BAR_LENGTH)
+    ops.timeSeries("Trig", 1, 0.0, 6.0, 4.0, "-factor", 1.0)
+    ops.pattern("Plain", 1, 1)
+    far_nodes = [
+        n
+        for n in ops.getNodeTags()
+        if np.isclose(ops.nodeCoord(n, 1), _BAR_LENGTH, atol=1e-9)
+    ]
+    load = total / len(far_nodes)
+    for node in far_nodes:
+        ops.load(node, 0.0, 0.0, -load)

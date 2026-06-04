@@ -4,6 +4,7 @@
     options:
       members:
         - spsolve
+        - umfpack
         - cg
         - gmres
         - eigsh

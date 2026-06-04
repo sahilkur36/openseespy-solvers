@@ -29,9 +29,13 @@ dependencies = [
 
 [project.optional-dependencies]
 opensees = ["openseespy"]
+# One extra per optional backend (matches openseespy_solvers.cupy, …).
 # Install the CuPy wheel matching your CUDA toolkit, e.g. cupy-cuda12x (see docs).
-gpu = ["cupy>=13.0"]
-amg = ["pyamg>=5.0"]
+# nvMath: GPU-only — install nvmath-python[cu12] or [cu13] manually (see docs).
+cupy = ["cupy>=13.0"]
+# 64-bit UMFPACK direct solver (CPU) for openseespy_solvers.scipy.umfpack.
+# On Windows, prefer: conda install -c conda-forge scikit-umfpack (PyPI is sdist-only).
+umfpack = ["scikit-umfpack>=0.3.3"]
 dev = [
     "pytest>=8",
     "ruff>=0.4",
@@ -65,11 +69,14 @@ select = ["E", "F", "I", "N", "UP", "B"]
 "src/openseespy_solvers/_base.py" = ["N802", "N803", "N806"]
 "src/openseespy_solvers/scipy/_base.py" = ["N802", "N803", "N806"]
 "src/openseespy_solvers/cupy/_base.py" = ["N802", "N803", "N806"]
+"src/openseespy_solvers/nvmath/_base.py" = ["N802", "N803", "N806"]
+"src/openseespy_solvers/nvmath/__init__.py" = ["F401", "N802", "N803", "N806"]
 "src/openseespy_solvers/scipy/precond.py" = ["N803"]
 "src/openseespy_solvers/scipy/__init__.py" = ["F401", "N802", "N803", "N806"]
 "src/openseespy_solvers/cupy/__init__.py" = ["F401", "N802", "N803", "N806"]
 "src/openseespy_solvers/__init__.py" = ["F401"]
 "tests/**" = ["N803", "N806", "I001"]
+"examples/**" = ["I001", "E402"]
 "src/openseespy_solvers/cupy/precond.py" = ["N803"]
 
 [tool.pytest.ini_options]

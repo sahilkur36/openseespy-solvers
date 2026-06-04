@@ -6,4 +6,5 @@
         - spsolve
         - cg
         - gmres
+        - eigsh
         - lobpcg

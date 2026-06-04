@@ -1,4 +1,4 @@
-# to_opensees
+# to_openseespy
 
 Return the configuration dictionary for OpenSeesPy `PythonSparse` commands.
 
@@ -6,12 +6,12 @@ Return the configuration dictionary for OpenSeesPy `PythonSparse` commands.
 
 ```python
 solver = cg(rtol=1e-8)
-cfg = solver.to_opensees()
+cfg = solver.to_openseespy()
 ops.system("PythonSparse", cfg)
 ```
 
 ```python
-lam = ops.eigen("PythonSparse", num_modes, eigsolver.to_opensees())
+lam = ops.eigen("PythonSparse", num_modes, eigsolver.to_openseespy())
 ```
 
 ## Return value
@@ -44,6 +44,6 @@ equations.
 
 ## See Also
 
-[`BaseOpenSeesSolver.to_opensees`](../api/scipy.md) (documented on solver factories)
+[`BaseOpenSeesSolver.to_openseespy`](../api/scipy.md) (documented on solver factories)
 
 [solver objects](solver-objects.md)

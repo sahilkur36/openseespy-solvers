@@ -56,3 +56,38 @@ def parse_eigen_values(kwargs: dict[str, Any]) -> np.ndarray:
     if "m_values" not in kwargs:
         raise InvalidOpenSeesDataError("Missing buffer: m_values")
     return np.frombuffer(kwargs["m_values"], dtype=np.float64, count=nnz)
+
+
+def _host_array(array: Any) -> np.ndarray:
+    get = getattr(array, "get", None)
+    if get is not None:
+        return get()
+    return np.asarray(array, dtype=np.float64)
+
+
+def csr_linear_kwargs_from_matrix(
+    matrix: Any,
+    rhs: Any,
+    *,
+    matrix_status: str,
+    x: np.ndarray | None = None,
+) -> dict:
+    """Build OpenSees-style linear ``solve`` kwargs from a CSR matrix and RHS."""
+    indptr = _host_array(matrix.indptr).astype(np.int32, copy=False)
+    indices = _host_array(matrix.indices).astype(np.int32, copy=False)
+    values = _host_array(matrix.data).astype(np.float64, copy=False)
+    b = _host_array(rhs).astype(np.float64, copy=False)
+    n = matrix.shape[0]
+    if x is None:
+        x = np.zeros(n, dtype=np.float64)
+    return {
+        "index_ptr": memoryview(indptr),
+        "indices": memoryview(indices),
+        "values": memoryview(values),
+        "rhs": memoryview(b),
+        "x": memoryview(x),
+        "num_eqn": n,
+        "nnz": values.size,
+        "matrix_status": matrix_status,
+        "storage_scheme": "CSR",
+    }

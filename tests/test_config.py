@@ -1,4 +1,4 @@
-"""Tests for ``to_opensees()`` configuration."""
+"""Tests for ``to_openseespy()`` configuration."""
 
 from __future__ import annotations
 
@@ -7,17 +7,17 @@ import copy
 from openseespy_solvers.scipy import cg, spsolve
 
 
-def test_to_opensees_linear_defaults() -> None:
+def test_to_openseespy_linear_defaults() -> None:
     solver = spsolve()
-    cfg = solver.to_opensees()
+    cfg = solver.to_openseespy()
     assert cfg["solver"] is solver
     assert cfg["scheme"] == "CSR"
     assert cfg["writable"] == "none"
 
 
-def test_to_opensees_overrides() -> None:
+def test_to_openseespy_overrides() -> None:
     solver = cg()
-    cfg = solver.to_opensees(scheme="CSC", writable="values")
+    cfg = solver.to_openseespy(scheme="CSC", writable="values")
     assert cfg["scheme"] == "CSC"
     assert cfg["writable"] == "values"
 

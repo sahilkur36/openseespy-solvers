@@ -8,12 +8,30 @@ commands.
 
 ## Installation
 
-Requires **Python ≥ 3.12**, **NumPy ≥ 1.26**, and **SciPy ≥ 1.12**.
+Requires **Python ≥ 3.12**, **NumPy ≥ 1.26**, **SciPy ≥ 1.12**, and **OpenSeesPy**
+(already in your environment, or `pip install openseespy-solvers[opensees]`).
 
 ```bash
 pip install openseespy-solvers
-pip install openseespy-solvers[gpu]   # CuPy ≥ 13 (CUDA-specific wheel may be required)
 ```
+
+**CPU:** `pip install openseespy-solvers[umfpack]` optional for faster direct solves.
+
+**GPU:** after `nvidia-smi`, install matching wheels, e.g. `cupy-cuda13x` and
+`pip install "nvmath-python[cu13]>=0.9.0"`.
+
+Full steps: [installation guide](https://openseespy-solvers.readthedocs.io/en/latest/installation/).
+
+## Recommended solvers
+
+| Analysis | GPU (CUDA) | CPU |
+|----------|------------|-----|
+| Linear (`PythonSparse`, static/transient/…) | `nvmath.direct_solver` | `scipy.spsolve` or `scipy.umfpack` |
+| Eigen | `cupy.eigsh` | `scipy.eigsh` |
+
+These `PythonSparse` backends are **often faster** than native OpenSees sparse/direct/eigen
+solvers on medium-to-large models because they use optimized library implementations.
+Details: [recommended solvers](https://openseespy-solvers.readthedocs.io/en/latest/recommended-solvers/).
 
 ## Example
 
@@ -23,7 +41,7 @@ from openseespy_solvers.scipy import cg
 from openseespy_solvers.scipy import precond
 
 solver = cg(rtol=1e-8, M=precond.jacobi)
-ops.system("PythonSparse", solver.to_opensees())
+ops.system("PythonSparse", solver.to_openseespy())
 ops.analyze(1)
 ```
 
@@ -31,10 +49,11 @@ ops.analyze(1)
 
 | Module | Functions |
 |--------|-----------|
-| `openseespy_solvers.scipy` | `spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg` |
+| `openseespy_solvers.scipy` | `spsolve`, `umfpack`, `cg`, `gmres`, `eigsh`, `lobpcg` |
 | `openseespy_solvers.scipy.precond` | `jacobi`, `ilu` |
-| `openseespy_solvers.cupy` | `spsolve`, `cg`, `gmres`, `lobpcg` |
-| `openseespy_solvers.cupy.precond` | `jacobi`, `ilu` |
+| `openseespy_solvers.cupy` | `spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg` (GPU) |
+| `openseespy_solvers.cupy.precond` | `jacobi`, `nvmath`, `ilu`, `k_inverse` |
+| `openseespy_solvers.nvmath` | `direct_solver` (GPU) |
 
 Factory signatures match [`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html)
 and [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse.html);
