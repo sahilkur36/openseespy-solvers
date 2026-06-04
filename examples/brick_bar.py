@@ -27,6 +27,7 @@ import _brick_common as brick
 
 NUM_STEPS = 10
 DEFAULT_TIME_LIMIT = 120.0
+BUDGET_SKIP_FRACTION = brick.BUDGET_SKIP_FRACTION
 
 # Native OpenSees solvers to compare against. You can also add "ProfileSPD",
 # "SparseGeneral", etc.
@@ -130,10 +131,19 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
     pythonsparse_solvers = brick.pythonsparse_static_solvers()
     results = []
     far_node = None
+    skip_remaining: set[str] = set()
 
     for factor in mesh_factors:
         nx, ny, nz = mesh_counts(factor)
         for label, solver in pythonsparse_solvers:
+            if label in skip_remaining:
+                build_model(nx, ny, nz)
+                equations = ops.systemSize()
+                row = (factor, equations, label, -2, 0.0)
+                results.append(row)
+                if table is not None:
+                    table.add_row(*row)
+                continue
             build_model(nx, ny, nz)
             far_node = far_corner_node()
             apply_load()
@@ -147,11 +157,9 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
             start = time.perf_counter()
             status = ops.analyze(NUM_STEPS)
             seconds = time.perf_counter() - start
-            if seconds > time_limit:
-                status = -2
-                print(
-                    f"  Mesh {factor}: {label} exceeded time limit "
-                    f"({seconds:.3f}s > {time_limit:.1f}s)"
+            if status == 0:
+                status = brick.budget_record_status(
+                    label, seconds, time_limit, factor=factor, skip_remaining=skip_remaining
                 )
             equations = ops.systemSize()
             row = (factor, equations, label, status, seconds)
@@ -159,6 +167,14 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
             if table is not None:
                 table.add_row(*row)
         for name in NATIVE_SOLVERS:
+            if name in skip_remaining:
+                build_model(nx, ny, nz)
+                equations = ops.systemSize()
+                row = (factor, equations, name, -2, 0.0)
+                results.append(row)
+                if table is not None:
+                    table.add_row(*row)
+                continue
             build_model(nx, ny, nz)
             far_node = far_corner_node()
             apply_load()
@@ -172,11 +188,9 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
             start = time.perf_counter()
             status = ops.analyze(NUM_STEPS)
             seconds = time.perf_counter() - start
-            if seconds > time_limit:
-                status = -2
-                print(
-                    f"  Mesh {factor}: {name} exceeded time limit "
-                    f"({seconds:.3f}s > {time_limit:.1f}s)"
+            if status == 0:
+                status = brick.budget_record_status(
+                    name, seconds, time_limit, factor=factor, skip_remaining=skip_remaining
                 )
             equations = ops.systemSize()
             row = (factor, equations, name, status, seconds)
@@ -198,7 +212,11 @@ def main():
         "--time-limit",
         type=float,
         default=DEFAULT_TIME_LIMIT,
-        help="per-run time limit in seconds (default: 120)",
+        help=(
+            "per-run time budget in seconds (default: 120); does not interrupt "
+            "OpenSees—marks status -2 after a slow run and skips finer meshes "
+            f"when a run exceeds {BUDGET_SKIP_FRACTION:.0%} of the budget"
+        ),
     )
     args = parser.parse_args()
 
@@ -217,7 +235,10 @@ def main():
     print(
         f"Running {NUM_STEPS} steps of LoadControl with dLambda = 1 / {NUM_STEPS}"
     )
-    print(f"Per-run time limit: {args.time_limit:.1f}s (override with --time-limit)")
+    print(
+        f"Per-run time budget: {args.time_limit:.1f}s (not a hard timeout; "
+        f"skip finer meshes after >{BUDGET_SKIP_FRACTION:.0%} of budget)"
+    )
     print("PythonSparse solvers:", ", ".join(label for label, _ in pythonsparse_solvers))
     print()
     table = brick.StaticBenchmarkTable(solver_names)

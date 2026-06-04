@@ -27,6 +27,7 @@ import _brick_common as brick
 
 NUM_MODES = 5
 DEFAULT_TIME_LIMIT = 120.0
+BUDGET_SKIP_FRACTION = brick.BUDGET_SKIP_FRACTION
 
 FAST_REFERENCE = brick.FAST_EIGEN_SOLVER
 TRUSTED_REFERENCE = brick.TRUSTED_EIGEN_SOLVER
@@ -92,6 +93,7 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
     results = []
     far_node = None
     mode_shape = None
+    skip_remaining: set[str] = set()
 
     def record(row):
         results.append(row)
@@ -101,30 +103,44 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
     for factor in mesh_factors:
         nx, ny, nz = mesh_counts(factor)
 
-        build_model(nx, ny, nz)
-        far_node = far_corner_node()
-        start = time.perf_counter()
-        ref_ev = ops.eigen(FAST_REFERENCE, NUM_MODES)
-        ref_seconds = time.perf_counter() - start
-        ref_status = 0 if ref_ev else -1
-        if ref_seconds > time_limit:
-            ref_status = -2
+        if FAST_REFERENCE in skip_remaining:
+            build_model(nx, ny, nz)
+            equations = ops.systemSize()
+            far_node = far_corner_node()
             ref_ev = None
-            print(
-                f"  Mesh {factor}: {FAST_REFERENCE} exceeded time limit "
-                f"({ref_seconds:.3f}s > {time_limit:.1f}s)"
+            ref_mode = None
+            ref_mode_last = None
+            record((factor, equations, FAST_REFERENCE, -2, 0.0, float("nan")))
+        else:
+            build_model(nx, ny, nz)
+            far_node = far_corner_node()
+            start = time.perf_counter()
+            ref_ev = ops.eigen(FAST_REFERENCE, NUM_MODES)
+            ref_seconds = time.perf_counter() - start
+            ref_status = 0 if ref_ev else -1
+            if ref_status == 0:
+                ref_status = brick.budget_record_status(
+                    FAST_REFERENCE,
+                    ref_seconds,
+                    time_limit,
+                    factor=factor,
+                    skip_remaining=skip_remaining,
+                )
+            equations = ops.systemSize()
+            ref_mode = ops.nodeEigenvector(far_node, 1) if far_node is not None and ref_ev else None
+            ref_mode_last = (
+                ops.nodeEigenvector(far_node, NUM_MODES)
+                if far_node is not None and ref_ev
+                else None
             )
-        equations = ops.systemSize()
-        ref_mode = ops.nodeEigenvector(far_node, 1) if far_node is not None and ref_ev else None
-        ref_mode_last = (
-            ops.nodeEigenvector(far_node, NUM_MODES)
-            if far_node is not None and ref_ev
-            else None
-        )
-        ref_first = ref_ev[0] if ref_ev else float("nan")
-        record((factor, equations, FAST_REFERENCE, ref_status, ref_seconds, ref_first))
+            ref_first = ref_ev[0] if ref_ev else float("nan")
+            record((factor, equations, FAST_REFERENCE, ref_status, ref_seconds, ref_first))
 
         for label, solver in pythonsparse_solvers:
+            if label in skip_remaining:
+                record((factor, equations, label, -2, 0.0, float("nan")))
+                continue
+
             ev_rel_tol, vec_rel_tol = brick.eigen_verify_tolerances(solver)
 
             build_model(nx, ny, nz)
@@ -138,24 +154,28 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
                 record((factor, equations, label, -1, py_seconds, float("nan")))
                 continue
             py_seconds = time.perf_counter() - start
-            if py_seconds > time_limit:
-                py_status = -2
-                py_ev = None
-                mode_shape = None
-                py_first = float("nan")
-                print(
-                    f"  Mesh {factor}: {label} exceeded time limit "
-                    f"({py_seconds:.3f}s > {time_limit:.1f}s)"
+            py_status = 0 if py_ev else -1
+            if py_status == 0:
+                py_status = brick.budget_record_status(
+                    label,
+                    py_seconds,
+                    time_limit,
+                    factor=factor,
+                    skip_remaining=skip_remaining,
                 )
-                record((factor, equations, label, py_status, py_seconds, py_first))
+            if py_status == -2:
+                record((factor, equations, label, py_status, py_seconds, float("nan")))
                 continue
+
             mode_shape = ops.nodeEigenvector(far_node, 1) if far_node is not None and py_ev else None
             py_first = py_ev[0] if py_ev else float("nan")
-            py_status = 0 if py_ev else -1
+
+            if ref_ev is None:
+                record((factor, equations, label, py_status, py_seconds, py_first))
+                continue
 
             match_fast = (
                 py_ev
-                and ref_ev
                 and brick.eigenvalues_close(ref_ev, py_ev, rel_tol=ev_rel_tol)
                 and brick.eigenvector_close(ref_mode, mode_shape, rel_tol=vec_rel_tol)
             )
@@ -178,6 +198,11 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
                     py_mode_last=py_mode_last,
                     reference=FAST_REFERENCE,
                 )
+            elif TRUSTED_REFERENCE in skip_remaining:
+                print(
+                    f"  Mesh {factor}: {label} mismatch vs {FAST_REFERENCE}; "
+                    f"{TRUSTED_REFERENCE} skipped on finer meshes"
+                )
             else:
                 build_model(nx, ny, nz)
                 far_node = far_corner_node()
@@ -185,12 +210,13 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
                 trusted_ev = ops.eigen(TRUSTED_REFERENCE, NUM_MODES)
                 trusted_seconds = time.perf_counter() - start
                 trusted_status = 0 if trusted_ev else -1
-                if trusted_seconds > time_limit:
-                    trusted_status = -2
-                    trusted_ev = None
-                    print(
-                        f"  Mesh {factor}: {TRUSTED_REFERENCE} exceeded time limit "
-                        f"({trusted_seconds:.3f}s > {time_limit:.1f}s)"
+                if trusted_status == 0:
+                    trusted_status = brick.budget_record_status(
+                        TRUSTED_REFERENCE,
+                        trusted_seconds,
+                        time_limit,
+                        factor=factor,
+                        skip_remaining=skip_remaining,
                     )
                 trusted_mode = (
                     ops.nodeEigenvector(far_node, 1) if far_node is not None and trusted_ev else None
@@ -208,6 +234,7 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
                 )
                 match_trusted = (
                     py_ev
+                    and trusted_ev
                     and brick.eigenvalues_close(trusted_ev, py_ev, rel_tol=ev_rel_tol)
                     and brick.eigenvector_close(trusted_mode, mode_shape, rel_tol=vec_rel_tol)
                 )
@@ -238,7 +265,11 @@ def main():
         "--time-limit",
         type=float,
         default=DEFAULT_TIME_LIMIT,
-        help="per-run time limit in seconds (default: 120)",
+        help=(
+            "per-run time budget in seconds (default: 120); does not interrupt "
+            "OpenSees—marks status -2 after a slow run and skips finer meshes "
+            f"when a run exceeds {BUDGET_SKIP_FRACTION:.0%} of the budget"
+        ),
     )
     args = parser.parse_args()
 
@@ -262,7 +293,10 @@ def main():
         f"Primary reference: {FAST_REFERENCE}; tiebreaker: {TRUSTED_REFERENCE} "
         "(on mismatch only, except cupy.eigsh.lumped)."
     )
-    print(f"Per-run time limit: {args.time_limit:.1f}s (override with --time-limit)")
+    print(
+        f"Per-run time budget: {args.time_limit:.1f}s (not a hard timeout; "
+        f"skip finer meshes after >{BUDGET_SKIP_FRACTION:.0%} of budget)"
+    )
     print("PythonSparse solvers:", ", ".join(label for label, _ in pythonsparse_solvers))
     print()
     table = brick.EigenBenchmarkTable(solver_names)

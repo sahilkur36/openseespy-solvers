@@ -23,6 +23,35 @@ LARGE_STATIC_MESH_FACTORS = [4.0, 5.0, 6.0, 8.0]
 DEFAULT_EIGEN_MESH_FACTORS = [1.0, 2.0, 3.0, 4.0]
 LARGE_EIGEN_MESH_FACTORS = [4.0, 6.0, 8.0, 10.0]
 
+# Benchmark scripts: skip a solver on finer meshes after it uses this fraction of --time-limit.
+BUDGET_SKIP_FRACTION = 0.85
+
+
+def budget_record_status(
+    name: str,
+    seconds: float,
+    time_limit: float,
+    *,
+    factor: float,
+    skip_remaining: set[str],
+) -> int:
+    """Update ``skip_remaining`` when over budget; return OpenSees-style status (0 or -2)."""
+    if seconds > time_limit:
+        skip_remaining.add(name)
+        print(
+            f"  Mesh {factor}: {name} exceeded time budget "
+            f"({seconds:.3f}s > {time_limit:.1f}s); finer meshes skipped"
+        )
+        return -2
+    if seconds > time_limit * BUDGET_SKIP_FRACTION:
+        skip_remaining.add(name)
+        print(
+            f"  Mesh {factor}: {name} used {seconds:.3f}s "
+            f"(>{time_limit * BUDGET_SKIP_FRACTION:.1f}s); finer meshes skipped"
+        )
+    return 0
+
+
 _FACTORY_ALIASES = {
     "SpSolve": "spsolve",
     "Umfpack": "umfpack",
