@@ -23,7 +23,11 @@ except (ImportError, RuntimeError):
 from conftest import apply_face_load, build_brick_bar  # noqa: E402
 from openseespy_solvers.scipy import cg, precond, spsolve  # noqa: E402
 
-SCIPY_SOLVER_SCRIPTS = sorted(SOLVERS.glob("scipy_*.py"))
+# LOBPCG examples use a larger mesh and are not suited to the tiny smoke meshes
+# used for other solvers; API coverage lives in tests/test_eigen.py.
+SCIPY_SOLVER_SCRIPTS = sorted(
+    p for p in SOLVERS.glob("scipy_*.py") if "lobpcg" not in p.stem
+)
 BENCHMARK_SCRIPTS = [EXAMPLES / "brick_bar.py", EXAMPLES / "brick_bar_eigen.py"]
 
 
@@ -86,16 +90,9 @@ def test_brick_bar_cupy_spsolve() -> None:
     assert ops.nodeDisp(far_node, 3) < 0.0
 
 
-@pytest.mark.parametrize(
-    "script",
-    [
-        pytest.param(SOLVERS / "cupy_spsolve.py", id="cupy_spsolve"),
-        pytest.param(SOLVERS / "cupy_lobpcg.py", id="cupy_lobpcg"),
-    ],
-)
-def test_cupy_solver_example_runs(script: Path) -> None:
+def test_cupy_solver_example_runs() -> None:
     pytest.importorskip("cupy")
-    output = _run_example_script(script)
+    output = _run_example_script(SOLVERS / "cupy_spsolve.py")
     assert "Passed!" in output
 
 

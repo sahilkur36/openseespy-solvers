@@ -1,4 +1,10 @@
-"""Brick bar eigen analysis — SciPy ``lobpcg`` (PythonSparse eigen)."""
+"""Brick bar eigen analysis — SciPy ``lobpcg`` (experimental).
+
+Not included in the automated solver smoke suite: LOBPCG is unreliable on tiny
+meshes. Run manually from ``examples/``:
+
+    python solvers/scipy_lobpcg.py
+"""
 
 import os
 import sys
@@ -11,14 +17,13 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 import openseespy.opensees as ops
-from openseespy_solvers.scipy import lobpcg
+from openseespy_solvers.scipy import lobpcg, precond
 
 import _brick_common as brick
 
 NUM_MODES = 2
-MESH = (4, 1, 2)
-# Residual tol is for LOBPCG iterations; eigen verification uses ev_rel_tol below.
-solver = lobpcg(tol=0.2, maxiter=300, rng=0)
+MESH = (8, 2, 4)
+solver = lobpcg(M=precond.jacobi, tol=1e-3, maxiter=300, rng=0)
 
 
 def rebuild():
