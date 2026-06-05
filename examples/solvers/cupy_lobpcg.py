@@ -5,6 +5,9 @@ meshes. Run manually from ``examples/``:
 
     python solvers/cupy_lobpcg.py
 
+Verification compares ``lobpcg`` against ``eigsh`` on the same mesh (see
+``_lobpcg_example.py`` for shared settings).
+
 Install: ``pip install cupy-cuda13x`` (see docs/installation.md)
 """
 
@@ -19,7 +22,7 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 try:
-    from openseespy_solvers.cupy import lobpcg, precond
+    from openseespy_solvers.cupy import eigsh, lobpcg, precond
 except Exception as exc:
     print("CuPy backend not available:", exc)
     print("Install: pip install cupy-cuda13x")
@@ -28,20 +31,29 @@ except Exception as exc:
 import openseespy.opensees as ops
 
 import _brick_common as brick
+import _lobpcg_example as cfg
 
-NUM_MODES = 2
-MESH = (8, 2, 4)
-solver = lobpcg(M=precond.jacobi, tol=1e-3, maxiter=300, rng=0)
+solver = lobpcg(M=precond.jacobi, **cfg.LOBPCG_KWARGS)
+reference = eigsh(**cfg.EIGSH_KWARGS)
 
 
 def rebuild():
-    brick.build_model(ops, *MESH)
+    brick.build_model(ops, *cfg.MESH)
 
 
-brick.build_model(ops, *MESH)
+brick.build_model(ops, *cfg.MESH)
 far_node = brick.far_corner_node(ops)
-status, eigenvalues = brick.run_eigen_verified(
-    ops, solver, NUM_MODES, far_node, rebuild, ev_rel_tol=1e-3, vec_rel_tol=0.05
+status, eigenvalues, _ref_eigenvalues = brick.run_eigen_vs_reference(
+    ops,
+    solver,
+    reference,
+    cfg.NUM_MODES,
+    far_node,
+    rebuild,
+    ev_rel_tol=cfg.EV_REL_TOL,
+    vec_rel_tol=cfg.VEC_REL_TOL,
+    reference_label="cupy.eigsh",
+    test_label="cupy.lobpcg",
 )
 
 print()

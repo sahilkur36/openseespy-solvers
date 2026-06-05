@@ -42,7 +42,9 @@ Each script builds a small 3-D brick bar, runs one analysis, and prints **Passed
 Eigen scripts and `brick_bar_eigen` use **two-tier verification**: compare PythonSparse to
 OpenSees **`genBandArpack`** first; if results disagree, fall back to **`fullGenLapack`**
 (dense tiebreaker). The benchmark sweep uses only recommended eigen solvers. Experimental
-`lobpcg` scripts use a larger mesh and are **manual-only** (not in pytest smoke tests).
+`lobpcg` scripts use a larger mesh, share settings in `_lobpcg_example.py`, and verify
+against the matching backend's `eigsh` (not native OpenSees eigen solvers). They are
+**manual-only** (not in pytest smoke tests).
 Use the default mesh sweep for CI; add `--large-test` only when you want heavier runs.
 
 ### SciPy (`openseespy_solvers.scipy`)

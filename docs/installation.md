@@ -86,7 +86,7 @@ method for your platform:
 | Platform | Install |
 |----------|---------|
 | **Linux** (pip / venv) | `pip install openseespy-solvers[umfpack]` — may need `libsuitesparse-dev` (Debian/Ubuntu) or your distro’s SuiteSparse package |
-| **Linux / macOS / Windows** (conda) | `conda install -c conda-forge scikit-umfpack` |
+| **Linux / macOS / Windows** (conda) | `conda install -c conda-forge scikit-umfpack -y` |
 | **macOS** (pip / venv) | `pip install openseespy-solvers[umfpack]` if wheels are available; otherwise conda-forge |
 | **Windows** (pip / venv) | **Do not** use `pip install …[umfpack]` — PyPI ships source only. Use conda-forge |
 
@@ -297,7 +297,7 @@ leftover `*-cu12` packages and reinstall the matching stack, or recreate the env
 
 ### scikit-umfpack fails on Windows with “Program 'swig' not found”
 
-Use `conda install -c conda-forge scikit-umfpack` instead of
+Use `conda install -c conda-forge scikit-umfpack -y` instead of
 `pip install openseespy-solvers[umfpack]`. See the [UMFPACK](#umfpack) table.
 
 ### CuPy import errors (missing CUDA libraries)

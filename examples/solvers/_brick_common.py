@@ -469,6 +469,84 @@ def _eigen_results_match(ref_ev, ev, ref_mode, test_mode, *, ev_rel_tol, vec_rel
     )
 
 
+def print_eigen_solver_comparison(
+    ref_ev,
+    test_ev,
+    *,
+    ref_mode_first=None,
+    test_mode_first=None,
+    reference_label="eigsh",
+    test_label="lobpcg",
+) -> None:
+    """Per-mode eigenvalue comparison and mode-1 shape cosine at the far corner."""
+    print(f"  Comparison: {test_label} vs {reference_label}")
+    if not ref_ev or not test_ev:
+        print("    (missing eigenvalues)")
+        return
+    n = min(len(ref_ev), len(test_ev))
+    for i in range(n):
+        rel = eigenvalue_rel_diff(ref_ev[i], test_ev[i])
+        rel_str = f"{rel * 100:.2g}%" if rel is not None else "n/a"
+        print(
+            f"    mode {i + 1}: {reference_label}={ref_ev[i]:.6g}  "
+            f"{test_label}={test_ev[i]:.6g}  rel_err={rel_str}"
+        )
+    if ref_mode_first is not None and test_mode_first is not None:
+        cos = mode_shape_cosine(ref_mode_first, test_mode_first)
+        cos_str = f"{cos:.4f}" if cos is not None else "n/a"
+        print(f"    mode 1 far-corner cosine={cos_str}")
+
+
+def run_eigen_vs_reference(
+    ops,
+    solver,
+    reference_solver,
+    num_modes,
+    node,
+    rebuild,
+    *,
+    ev_rel_tol=1e-3,
+    vec_rel_tol=0.05,
+    reference_label="eigsh",
+    test_label="lobpcg",
+):
+    """Verify a PythonSparse eigen solver against another on the same model."""
+    rebuild()
+    node = far_corner_node(ops)
+    ref_status, ref_ev = run_eigen(ops, reference_solver, num_modes)
+    ref_mode = node_mode_shape(ops, node, 1)
+    if ref_status != 0:
+        print_eigen_solver_comparison(
+            None,
+            None,
+            reference_label=reference_label,
+            test_label=test_label,
+        )
+        return -1, None, None
+
+    rebuild()
+    node = far_corner_node(ops)
+    status, ev = run_eigen(ops, solver, num_modes)
+    test_mode = node_mode_shape(ops, node, 1)
+    print_eigen_solver_comparison(
+        ref_ev,
+        ev,
+        ref_mode_first=ref_mode,
+        test_mode_first=test_mode,
+        reference_label=reference_label,
+        test_label=test_label,
+    )
+    if status != 0:
+        return -1, ev, ref_ev
+
+    if _eigen_results_match(
+        ref_ev, ev, ref_mode, test_mode, ev_rel_tol=ev_rel_tol, vec_rel_tol=vec_rel_tol
+    ):
+        return 0, ev, ref_ev
+
+    return -1, ev, ref_ev
+
+
 def run_eigen_verified(
     ops,
     solver,

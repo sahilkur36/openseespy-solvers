@@ -49,9 +49,10 @@ Optional GPU backends (CuPy, nvMath) and UMFPACK: see the
 Preconditioners (`scipy.precond` / `cupy.precond`: `jacobi`, `ilu`, `direct`) are demonstrated via
 `M=` on `cg`, `gmres`, or `lobpcg` in the `*_jacobi`, `*_ilu`, and LOBPCG scripts.
 
-**LOBPCG** (`scipy_lobpcg`, `cupy_lobpcg`) uses a larger mesh and is **manual-only** — it is
-not run by `pytest` on the tiny smoke mesh. Use [`eigsh`](recommended-solvers.md) for normal
-eigen work.
+**LOBPCG** (`scipy_lobpcg`, `cupy_lobpcg`) uses a larger mesh, identical SciPy/CuPy solver
+settings (`_lobpcg_example.py`), and compares each backend's `lobpcg` against its own
+`eigsh` reference. Manual-only — not run by `pytest` on the tiny smoke mesh. Use
+[`eigsh`](recommended-solvers.md) for normal eigen work.
 
 Every catalog script follows the same OpenSeesPy style: top-to-bottom flow,
 `ops.system("PythonSparse", solver.to_openseespy())`, and a **Passed!** / **Failed!**
