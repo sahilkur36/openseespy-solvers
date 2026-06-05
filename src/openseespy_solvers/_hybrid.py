@@ -263,6 +263,14 @@ def hybrid(
     * GMRES fails to converge,
     * ``refresh_every`` steps elapse (if set).
 
+    The frozen factorization lives on the Python solver object, not inside
+    OpenSees. Reuse the **same** ``solver`` instance across ``wipeAnalysis()``
+    or ``wipe()``/model rebuilds (for example multiple ground motions with the
+    same mesh): as long as ``num_eqn`` is unchanged, the first run's
+    factorization is reused even when OpenSees reports
+    ``matrix_status='STRUCTURE_CHANGED'``. Creating a new ``hybrid(...)`` or
+    ``copy.copy(solver)`` starts with an empty factorization cache.
+
     Parameters
     ----------
     direct : LinearSolver

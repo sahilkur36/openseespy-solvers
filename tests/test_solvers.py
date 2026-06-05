@@ -195,6 +195,35 @@ def test_hybrid_reuses_factorization_with_gmres() -> None:
     np.testing.assert_allclose(x_buf, np.linalg.solve(A2.toarray(), b), rtol=1e-8)
 
 
+def test_hybrid_reuses_factorization_after_model_rebuild_same_size() -> None:
+    """Frozen factorization survives wipe-style STRUCTURE_CHANGED when n is unchanged."""
+    import copy
+
+    from openseespy_solvers import hybrid
+
+    A1 = sp.csr_matrix(np.array([[4.0, 1.0], [1.0, 3.0]]))
+    b = np.array([1.0, 2.0])
+    x_buf = np.zeros(2, dtype=np.float64)
+    solver = hybrid(spsolve(), rtol=1e-12)
+
+    kwargs1 = csr_linear_kwargs(A1, b, x=x_buf, matrix_status="STRUCTURE_CHANGED")
+    assert solver.solve(**kwargs1) == 0
+    assert solver.stats.num_factorizations == 1
+
+    # After wipe()/rebuild, OpenSees reports STRUCTURE_CHANGED even for the same mesh.
+    A2 = sp.csr_matrix(np.array([[4.2, 0.9], [0.8, 3.2]]))
+    kwargs2 = csr_linear_kwargs(A2, b, x=x_buf, matrix_status="STRUCTURE_CHANGED")
+    assert solver.solve(**kwargs2) == 0
+    assert solver.stats.num_factorizations == 1
+    assert solver.stats.num_gmres_solves == 1
+    np.testing.assert_allclose(x_buf, np.linalg.solve(A2.toarray(), b), rtol=1e-8)
+
+    clone = copy.copy(solver)
+    assert clone.stats.num_factorizations == 0
+    clone.solve(**kwargs2)
+    assert clone.stats.num_factorizations == 1
+
+
 def test_scipy_precond_direct_callable() -> None:
     A = sp.diags([4.0, 5.0, 6.0]).tocsr()
     M_factory = precond.direct(spsolve())
