@@ -100,7 +100,8 @@ class _Hybrid(LinearSolver):
         }
 
     def __copy__(self) -> _Hybrid:
-        return type(self)(self._inner.copy(), **{k: v for k, v in self._params.items() if k != "direct"})
+        params = {k: v for k, v in self._params.items() if k != "direct"}
+        return type(self)(self._inner.copy(), **params)
 
     def _build_matrix(self, values, indices, indptr, shape, fmt):  # noqa: ANN001
         return self._inner._build_matrix(values, indices, indptr, shape, fmt)

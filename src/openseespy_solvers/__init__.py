@@ -5,7 +5,6 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING
 
-from openseespy_solvers.hybrid import hybrid
 from openseespy_solvers.exceptions import (
     BackendNotAvailableError,
     InvalidOpenSeesDataError,
@@ -14,6 +13,7 @@ from openseespy_solvers.exceptions import (
     UnsupportedComputeDtypeError,
     UnsupportedStorageSchemeError,
 )
+from openseespy_solvers.hybrid import hybrid
 
 __version__ = "0.1.0"
 

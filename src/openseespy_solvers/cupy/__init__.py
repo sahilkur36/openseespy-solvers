@@ -42,13 +42,6 @@ import scipy.sparse as sp_host
 import scipy.sparse.linalg as spla_cpu
 
 from openseespy_solvers._base import EigenSolver, LinearSolver
-from openseespy_solvers._factorization import apply_inner_factorization
-from openseespy_solvers._sparse import (
-    OPENSEES_EIGSH_WHICH,
-    eigsh_arpack_kwargs,
-    opensees_eigsh_sigma,
-)
-from openseespy_solvers.exceptions import SolverConvergenceError
 from openseespy_solvers._docstrings import (
     _EIGEN_NOTES,
     _EIGEN_RETURNS,
@@ -57,7 +50,14 @@ from openseespy_solvers._docstrings import (
     _OPENSEES_EIGEN,
     _OPENSEES_LINEAR,
 )
+from openseespy_solvers._factorization import apply_inner_factorization
+from openseespy_solvers._sparse import (
+    OPENSEES_EIGSH_WHICH,
+    eigsh_arpack_kwargs,
+    opensees_eigsh_sigma,
+)
 from openseespy_solvers.cupy._base import CupyMixin, _import_cupy
+from openseespy_solvers.exceptions import SolverConvergenceError
 
 # Fail fast at import time if CuPy is unavailable.
 _import_cupy()

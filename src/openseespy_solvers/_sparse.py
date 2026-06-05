@@ -70,7 +70,10 @@ OPENSEES_EIGSH_WHICH = "LM"
 
 
 def opensees_eigsh_sigma(find_smallest: bool, sigma: float | None) -> float | None:
-    """Shift for ``eigsh`` matching OpenSees: ``0.0`` when smallest, else optional user ``sigma``."""
+    """Shift for ``eigsh`` matching OpenSees.
+
+    Uses ``0.0`` when smallest, else optional user ``sigma``.
+    """
     if find_smallest:
         return 0.0 if sigma is None else sigma
     return sigma

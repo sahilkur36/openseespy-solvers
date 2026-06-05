@@ -9,8 +9,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
-
 from openseespy_solvers._base import LinearSolver
 from openseespy_solvers._factorization import apply_inner_factorization
 from openseespy_solvers.cupy._base import _import_cupy

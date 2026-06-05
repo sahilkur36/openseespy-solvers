@@ -33,11 +33,6 @@ import numpy as np
 import scipy.sparse.linalg as spla
 
 from openseespy_solvers._base import EigenSolver, LinearSolver
-from openseespy_solvers._sparse import (
-    OPENSEES_EIGSH_WHICH,
-    eigsh_arpack_kwargs,
-    opensees_eigsh_sigma,
-)
 from openseespy_solvers._docstrings import (
     _EIGEN_NOTES,
     _EIGEN_RETURNS,
@@ -45,6 +40,11 @@ from openseespy_solvers._docstrings import (
     _LINEAR_RETURNS,
     _OPENSEES_EIGEN,
     _OPENSEES_LINEAR,
+)
+from openseespy_solvers._sparse import (
+    OPENSEES_EIGSH_WHICH,
+    eigsh_arpack_kwargs,
+    opensees_eigsh_sigma,
 )
 from openseespy_solvers.scipy._base import ScipyMixin, _import_umfpack
 
