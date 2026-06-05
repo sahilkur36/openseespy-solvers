@@ -4,7 +4,7 @@ Sparse linear algebra solvers implemented with CuPy.
 
 This module mirrors [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse.html).
 Importing it requires a CUDA-matched CuPy wheel (for example `cupy-cuda13x`); see
-[GPU install](../installation.md#gpu-install-cuda).
+[GPU install](../installation.md#gpu).
 
 **Recommended on GPU:** [`eigsh`](../api/cupy.md#openseespy_solvers.cupy.eigsh) for modal
 analysis (default `mass_mode="general"`). Pair with

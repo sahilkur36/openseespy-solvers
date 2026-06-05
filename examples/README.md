@@ -14,10 +14,10 @@ copy, and run. The benchmark scripts stay separate for timing sweeps.
 
 ## Quick start
 
-```bash
-pip install openseespy-solvers[opensees]
-cd examples
+Clone the repo and follow [Full setup](../docs/installation.md#full-setup) (environment →
+install → [verify](../docs/installation.md#verify)). Then from `examples/`:
 
+```bash
 # Benchmark comparisons (mesh sweeps)
 python brick_bar.py
 python brick_bar_eigen.py
@@ -26,16 +26,13 @@ python brick_bar_eigen.py
 python brick_bar.py --large-test
 python brick_bar_eigen.py --large-test
 
-# Single-solver smoke tests (from examples/)
+# Single-solver smoke tests
 python solvers/scipy_spsolve.py
+python solvers/scipy_eigsh.py
 ```
 
-Optional backends (UMFPACK, nvMath, CuPy on GPU): see
-[installation guide](../docs/installation.md) — CPU vs GPU paths and `nvidia-smi` wheel
-selection.
-
-**Verify your install** (copy-paste checklist for `pytest`, these scripts, and benchmarks):
-[installation guide — Verify your install](../docs/installation.md#verify-your-install).
+Optional backends (UMFPACK, nvMath, CuPy): see the
+[installation guide](../docs/installation.md).
 
 ## Solver catalog (`solvers/`)
 

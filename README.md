@@ -8,24 +8,40 @@ commands.
 
 ## Installation
 
-Requires **Python ≥ 3.12**, **NumPy ≥ 1.26**, **SciPy ≥ 1.12**, and **OpenSeesPy**
-(already in your environment, or `pip install openseespy-solvers[opensees]`).
+Requires **Python ≥ 3.12**, **NumPy ≥ 1.26**, **SciPy ≥ 1.12**, and **OpenSeesPy**.
+
+### Full setup from scratch
+
+Copy-paste overview — see the [installation guide](https://openseespy-solvers.readthedocs.io/en/latest/installation/#full-setup) for platform notes (UMFPACK, GPU wheels) and the complete verification checklist.
+
+```bash
+# 1. Environment (conda or venv — all platforms)
+conda create -n openseespy-solvers python=3.12 -y
+conda activate openseespy-solvers
+
+# 2. Clone (examples and pytest are in the repo, not the pip wheel)
+git clone https://github.com/gaaraujo/openseespy-solvers.git
+cd openseespy-solvers
+
+# 3. Install
+pip install -e ".[dev,opensees]"
+
+# 4–5. Optional backends — UMFPACK, CuPy, nvMath (see installation guide)
+# 6. pip check
+# 7. Verify
+pytest
+cd examples && python solvers/scipy_spsolve.py && python solvers/scipy_eigsh.py
+python brick_bar.py && python brick_bar_eigen.py
+```
+
+GPU tests in `pytest` run when CuPy/nvMath are installed; skipped otherwise.
+
+### Quick install (library only)
 
 ```bash
 pip install openseespy-solvers
+pip install openseespy-solvers[opensees]   # if OpenSeesPy is missing
 ```
-
-**CPU:** `pip install openseespy-solvers[umfpack]` optional for faster direct solves.
-
-**GPU:** after `nvidia-smi`, install matching wheels, e.g. `cupy-cuda13x` and
-`pip install "nvmath-python[cu13]>=0.9.0"`.
-
-Full steps: [installation guide](https://openseespy-solvers.readthedocs.io/en/latest/installation/).
-
-**Verify install** (after clone + editable install): run `pytest`, the
-[`examples/solvers/`](examples/solvers/) smoke scripts, and
-[`examples/brick_bar*.py`](examples/) benchmarks — see
-[Verify your install](https://openseespy-solvers.readthedocs.io/en/latest/installation/#verify-your-install).
 
 ## Recommended solvers
 

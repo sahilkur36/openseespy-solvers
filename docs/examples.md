@@ -2,7 +2,7 @@
 
 Scripts live in [`examples/`](../examples/) (clone the repo — they are not in the pip
 wheel). After [installing](../installation.md) optional backends, use
-[Verify your install](../installation.md#verify-your-install) for copy-paste commands:
+[Verify your install](../installation.md#verify) for copy-paste commands:
 **`pytest`**, **example scripts**, and **benchmarks**.
 
 There are two kinds of scripts:

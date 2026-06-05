@@ -9,7 +9,7 @@ OpenSees direct solvers on medium-to-large systems. See
 
 Importing this module does not require ``nvmath-python``; the dependency is loaded when
 ``direct_solver()`` is called. Install a CUDA-matched stack (see
-[installation](../installation.md#gpu-install-cuda)), for example:
+[installation](../installation.md#gpu)), for example:
 
 ```bash
 pip install cupy-cuda13x

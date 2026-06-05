@@ -40,13 +40,13 @@ The LU factorization is reused when OpenSees reports an unchanged matrix structu
 sparsity pattern between solves.
 
 For large systems on CPU, prefer [`umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack)
-after installing `openseespy-solvers[umfpack]` (see [installation](installation.md#umfpack-scipyumfpack)).
+after installing UMFPACK (see [installation — UMFPACK](installation.md#umfpack)).
 
 ---
 
 ## Static analysis — GPU (nvMath)
 
-Requires CuPy and nvMath wheels matching your driver ([GPU install](installation.md#gpu-install-cuda)).
+Requires CuPy and nvMath wheels matching your driver ([GPU install](installation.md#gpu)).
 
 ```python
 import openseespy.opensees as ops

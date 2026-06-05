@@ -43,8 +43,8 @@ solver = spsolve()
 ops.system("PythonSparse", solver.to_openseespy())
 ```
 
-Install paths: [GPU install](installation.md#gpu-install-cuda) (CuPy + nvMath wheels) and
-[CPU-only install](installation.md#cpu-only-install) (`[umfpack]` on Linux; conda on Windows).
+Install paths: [GPU backends](installation.md#gpu) (CuPy + nvMath wheels) and
+[UMFPACK](installation.md#umfpack) (platform-specific; conda-forge on Windows).
 
 Iterative solvers (`cg`, `gmres`) are available when a direct factorization is too costly;
 see [Preconditioners](user-guide/preconditioners.md). For many structural static or transient

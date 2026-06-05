@@ -1,168 +1,119 @@
 # Installation
 
-Follow the **quick install** below, then see [Recommended solvers](recommended-solvers.md) for
-which factories to use in OpenSees (`nvmath` / `scipy.spsolve` for `Ax = b`; `cupy.eigsh` /
-`scipy.eigsh` for modal).
+Set up a Python environment, install **openseespy-solvers** and optional backends, then
+verify with **`pytest`**, **example scripts**, and **benchmarks**.
+
+| Goal | Start here |
+|------|------------|
+| First-time setup (recommended) | [Full setup from scratch](#full-setup) |
+| Library only, no clone | [Quick install (pip only)](#quick-install) |
+| UMFPACK on your OS | [Step 4 — UMFPACK](#umfpack) |
+| NVIDIA GPU (CuPy / nvMath) | [Step 5 — GPU](#gpu) |
+| Something failed | [Troubleshooting](#troubleshooting) |
+
+Which solvers to use in OpenSees: [Recommended solvers](recommended-solvers.md).
 
 ---
 
-## Quick install
+## Requirements
 
-### CPU only (no NVIDIA GPU)
+| Component | Version |
+|-----------|---------|
+| Python | ≥ 3.12 |
+| NumPy | ≥ 1.26 |
+| SciPy | ≥ 1.12 |
+| OpenSeesPy | Required for examples, benchmarks, and integration tests |
 
-```bash
-pip install openseespy-solvers
-
-# Faster direct linear solve on large systems (Linux: usually enough)
-pip install openseespy-solvers[umfpack]
-```
-
-Use [`scipy.spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve) or
-[`scipy.umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack) for linear solves
-(static, transient, and any analysis using `ops.system("PythonSparse", ...)`) and
-[`scipy.eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh) for eigenanalysis. Details:
-[Recommended solvers](recommended-solvers.md).
-
-### NVIDIA GPU (linear + eigen)
-
-```bash
-pip install openseespy-solvers
-nvidia-smi
-```
-
-Read **`CUDA Version`** in the `nvidia-smi` header (top right), then install **matching**
-wheels (do not mix 12.x and 13.x):
-
-| `CUDA Version` | Commands |
-|----------------|----------|
-| **12.x** | `pip install cupy-cuda12x` · `pip install "nvmath-python[cu12]>=0.9.0"` |
-| **13.x** | `pip install cupy-cuda13x` · `pip install "nvmath-python[cu13]>=0.9.0"` |
-
-[`nvmath.direct_solver`](api/nvmath.md#openseespy_solvers.nvmath.direct_solver) is recommended
-for a GPU-accelerated direct solver in static and transient analysis.
-[`cupy.eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh) is recommended for modal analysis
-(default `mass_mode="general"`). Step-by-step GPU notes: [GPU install (CUDA)](#gpu-install-cuda).
-
-If CuPy fails at import with missing CUDA libraries:
-
-```bash
-pip install "cupy-cuda13x[ctk]"   # or cupy-cuda12x[ctk]
-```
+OpenSeesPy is **not** installed by `pip install openseespy-solvers` alone. The full setup
+below uses the `[opensees]` extra. Minimum versions are enforced in `pyproject.toml`.
 
 ---
 
-## Requirements (everyone)
+## Full setup from scratch {#full-setup}
 
-- Python ≥ 3.12
-- NumPy ≥ 1.26
-- SciPy ≥ 1.12 (needed for `rtol` / `atol` on sparse iterative solvers)
-- [OpenSeesPy](https://openseespydoc.readthedocs.io/) (not installed by the base package)
+Complete path: **environment → clone → install → optional backends → verify**.
 
-These minimums are enforced in `pyproject.toml`.
+### 1. Create a Python environment
 
-This package assumes OpenSeesPy is available in your environment. If it is not installed:
+Use a **fresh** environment with Python 3.12 or newer.
 
-```bash
-pip install openseespy-solvers[opensees]
-```
-
-**Base install** (SciPy CPU solvers — no GPU required):
+**Conda** (Linux, macOS, or Windows — Miniforge, Mambaforge, or Anaconda):
 
 ```bash
-pip install openseespy-solvers
+conda create -n openseespy-solvers python=3.12 -y
+conda activate openseespy-solvers
 ```
 
-That gives you `openseespy_solvers.scipy` (`spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg`) and
-`openseespy_solvers.scipy.precond` (`jacobi`, `ilu`). For typical OpenSees workflows, start with
-the [recommended solvers](recommended-solvers.md) page rather than comparing every factory.
-
----
-
-## Choose your stack
-
-| You have… | Install path |
-|-----------|--------------|
-| No NVIDIA GPU (or GPU solvers not needed) | [CPU-only](#cpu-only-install) |
-| NVIDIA GPU | [GPU install](#gpu-install-cuda) — CuPy and/or nvMath |
-
----
-
-## CPU-only install
-
-No CUDA driver or toolkit required.
+**venv** (stdlib; all platforms):
 
 ```bash
-pip install openseespy-solvers
-
-pip install openseespy-solvers[dev]       # optional: pytest, ruff
+python3.12 -m venv .venv
+source .venv/bin/activate       # Windows: .venv\Scripts\activate
 ```
 
-### UMFPACK (`scipy.umfpack`)
+To recreate an existing conda environment:
 
 ```bash
-pip install openseespy-solvers[umfpack]
+conda deactivate
+conda env remove -n openseespy-solvers -y
+conda create -n openseespy-solvers python=3.12 -y
+conda activate openseespy-solvers
 ```
 
-On **Linux**, that is usually enough (you may need `libsuitesparse-dev` from your distro).
+### 2. Clone the repository
 
-On **Windows**, PyPI ships **source only** for recent scikit-umfpack — `pip` will try to
-compile and needs SWIG + SuiteSparse. Use conda-forge instead:
+Examples, benchmarks, and `pytest` live in the repository — they are **not** in the pip
+wheel.
 
 ```bash
-conda install -c conda-forge scikit-umfpack
+git clone https://github.com/gaaraujo/openseespy-solvers.git
+cd openseespy-solvers
 ```
+
+### 3. Install the package
+
+Editable install with SciPy solvers, development tools, and OpenSeesPy:
+
+```bash
+pip install -e ".[dev,opensees]"
+```
+
+### 4. Optional — UMFPACK (faster CPU direct solver) {#umfpack}
+
+Enables [`scipy.umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack). Pick **one**
+method for your platform:
+
+| Platform | Install |
+|----------|---------|
+| **Linux** (pip / venv) | `pip install openseespy-solvers[umfpack]` — may need `libsuitesparse-dev` (Debian/Ubuntu) or your distro’s SuiteSparse package |
+| **Linux / macOS / Windows** (conda) | `conda install -c conda-forge scikit-umfpack` |
+| **macOS** (pip / venv) | `pip install openseespy-solvers[umfpack]` if wheels are available; otherwise conda-forge |
+| **Windows** (pip / venv) | **Do not** use `pip install …[umfpack]` — PyPI ships source only. Use conda-forge |
 
 See the [scikit-umfpack install guide](https://scikit-umfpack.github.io/scikit-umfpack/install.html).
 
----
+### 5. Optional — GPU backends (NVIDIA) {#gpu}
 
-## GPU install (CUDA)
-
-Two optional **GPU** backends (like SciPy on CPU, but for CUDA):
-
-| Module | Library | Install (after base package) |
-|--------|---------|------------------------------|
-| `openseespy_solvers.cupy` | CuPy | `cupy-cuda12x` or `cupy-cuda13x` |
-| `openseespy_solvers.nvmath` | nvmath-python | `nvmath-python[cu12]` or `[cu13]` |
-
-SciPy solvers always run on the CPU. CuPy and nvMath require an NVIDIA GPU and a
-matching CUDA wheel (see below).
-
-### Step 1 — Check your NVIDIA driver
+Skip if you have no NVIDIA GPU or only need CPU solvers.
 
 ```bash
 nvidia-smi
 ```
 
-In the header, note **CUDA Version** (top right). That is the **maximum CUDA version your
-driver supports**, not necessarily a CUDA Toolkit installed on disk.
+Read **`CUDA Version`** in the header (top right). Install **matching** wheels — do **not**
+mix CUDA 12.x and 13.x in the same environment.
 
-Example:
+| `CUDA Version` | Install |
+|----------------|---------|
+| **12.x** | `pip install cupy-cuda12x` then `pip install "nvmath-python[cu12]>=0.9.0"` |
+| **13.x** | `pip install cupy-cuda13x` then `pip install "nvmath-python[cu13]>=0.9.0"` |
 
-```text
-| NVIDIA-SMI 591.74    Driver Version: 591.74    CUDA Version: 13.1 |
+Example (CUDA 13):
+
+```bash
+pip install cupy-cuda13x
+pip install "nvmath-python[cu13]>=0.9.0"
 ```
-
-Use the **CUDA 13** wheels below (`cupy-cuda13x`, `nvmath-python[cu13]`).
-
-### Step 2 — Minimum recommended versions
-
-| Component | Minimum / recommended |
-|-----------|------------------------|
-| NVIDIA driver | Recent driver for your GPU (`nvidia-smi` must work) |
-| CUDA generation | **12.x or 13.x** (match the `CUDA Version` line from step 1) |
-| CuPy | ≥ 13 — **`cupy-cuda12x`** or **`cupy-cuda13x`**, not generic `cupy` |
-| nvmath-python | ≥ 0.9 — **`[cu12]`** or **`[cu13]`** matching the same generation as CuPy |
-
-You do **not** need a full CUDA Toolkit on disk if the wheels bundle runtimes (CuPy
-``[ctk]``). A working NVIDIA **driver** is enough.
-
-### Step 3 — Map `nvidia-smi` to install commands
-
-| `nvidia-smi` reports `CUDA Version` | CuPy | nvMath |
-|-------------------------------------|------|--------|
-| **12.x** | `pip install cupy-cuda12x` | `pip install "nvmath-python[cu12]>=0.9.0"` |
-| **13.x** | `pip install cupy-cuda13x` | `pip install "nvmath-python[cu13]>=0.9.0"` |
 
 If CuPy fails at import with missing CUDA libraries:
 
@@ -170,105 +121,39 @@ If CuPy fails at import with missing CUDA libraries:
 pip install "cupy-cuda13x[ctk]"   # or cupy-cuda12x[ctk]
 ```
 
-``nvmath.direct_solver()`` uses the GPU by default (install CuPy + nvMath wheels above).
+Do **not** use `pip install -e ".[cupy]"` — it installs generic `cupy` and may build from
+source. Always install `cupy-cuda12x` or `cupy-cuda13x` explicitly.
 
-### Step 4 — Full GPU stack (editable install from source)
+[`nvmath.direct_solver`](api/nvmath.md#openseespy_solvers.nvmath.direct_solver) — recommended
+for GPU linear solves. [`cupy.eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh) — recommended
+for GPU eigen. Further detail: [GPU reference](#gpu-reference).
+
+### 6. Check dependencies
 
 ```bash
-git clone https://github.com/gaaraujo/openseespy-solvers.git
-cd openseespy-solvers
-
-pip install -e ".[dev,opensees]"
-
-# Replace 13 with 12 if nvidia-smi shows CUDA Version 12.x
-pip install cupy-cuda13x
-pip install "nvmath-python[cu13]>=0.9.0"
-
-# Optional CPU solver on Windows
-conda install -c conda-forge scikit-umfpack
-
 pip check
 ```
 
-The nvMath backend auto-locates the cuDSS threading library shipped with
-``nvidia-cudss-cu13`` / ``nvidia-cudss-cu12`` (e.g. ``cudss_mtlayer_vcomp140.dll``
-under ``site-packages/nvidia/cu13/bin/`` on Windows). To override, set
-``CUDSS_THREADING_LIB`` to the full path or pass
-``multithreading_lib=...`` to :func:`~openseespy_solvers.nvmath.direct_solver`.
+Resolve any reported conflicts before verifying (see [Troubleshooting](#troubleshooting)).
 
-Do **not** use `pip install -e ".[cupy]"` on Windows — it pulls generic `cupy` from
-source. Install `cupy-cuda12x` / `cupy-cuda13x` explicitly (step 3).
+### 7. Verify your install {#verify}
 
----
+Run from the **repository root** with your environment activated. CuPy and nvMath tests in
+`pytest` **run when those packages import** and are **skipped** otherwise.
 
-## Optional extras reference
-
-| Extra | Installs | Enables |
-|-------|----------|---------|
-| *(base)* | NumPy, SciPy | `openseespy_solvers.scipy` |
-| `opensees` | openseespy | OpenSeesPy when missing (see Requirements) |
-| `umfpack` | scikit-umfpack | `scipy.umfpack` (see Windows note above) |
-| `cupy` | generic `cupy>=13` | Prefer `cupy-cuda12x` / `cupy-cuda13x` instead |
-| `dev` | pytest, ruff, build | Development |
-| `docs` | mkdocs, mkdocstrings | Build documentation |
-
-**CuPy** and **nvMath** are not pip extras with fixed CUDA versions — install the wheels
-from [GPU install](#gpu-install-cuda) step 3 so they match your driver.
-
-Further reading:
-
-- [CuPy installation](https://docs.cupy.dev/en/stable/install.html)
-- [nvmath-python installation](https://docs.nvidia.com/cuda/nvmath-python/latest/installation.html)
-- [`nvmath.direct_solver` API](api/nvmath.md#openseespy_solvers.nvmath.direct_solver)
-
----
-
-## Install from source (minimal)
-
-```bash
-git clone https://github.com/gaaraujo/openseespy-solvers.git
-cd openseespy-solvers
-pip install -e ".[dev,opensees]"
-```
-
-Add optional backends using the [CPU-only](#cpu-only-install) or
-[GPU](#gpu-install-cuda) sections above, then [verify your install](#verify-your-install).
-
----
-
-## Verify your install
-
-After installing the package and any optional backends, validate in three layers.
-**Examples and benchmarks** live in the git repository under `examples/` (they are not
-shipped inside the pip wheel), so clone the repo or work from your editable checkout.
-
-**Prerequisites**
-
-```bash
-pip install -e ".[dev,opensees]"   # pytest + OpenSeesPy for integration tests
-pip check                          # optional: catch mixed CUDA / broken deps
-```
-
-Install optional backends first ([UMFPACK](#umfpack-scipyumfpack), [GPU wheels](#gpu-install-cuda))
-if you want `pytest` to exercise them — CuPy and nvMath tests **run when those packages
-import** and are **skipped** otherwise (no extra flags).
-
-### 1. Full test suite (`pytest`)
-
-From the repository root:
+#### 7a. Full test suite
 
 ```bash
 pytest
 ```
 
-This runs unit tests (synthetic linear/eigen systems), OpenSees `PythonSparse` integration
-tests, and smoke execution of most `examples/solvers/*.py` scripts. Expect on the order of
-**~70 passed** on a full CPU+GPU stack; skipped tests mean an optional backend was not
-installed.
+Expect on the order of **~70 passed** on a full CPU+GPU stack. Skipped tests mean an
+optional backend was not installed.
 
-### 2. Example scripts (per-solver smoke tests)
+#### 7b. Example scripts
 
-Each script builds a small brick bar, runs one analysis, and prints **Passed!** or **Failed!**.
+Each script builds a small brick bar, runs one analysis, and prints **Passed!** or
+**Failed!**.
 
 ```bash
 cd examples
@@ -279,13 +164,13 @@ python solvers/scipy_eigsh.py
 python solvers/hybrid_spsolve.py
 
 # CPU — optional
-python solvers/scipy_umfpack.py      # needs scikit-umfpack
+python solvers/scipy_umfpack.py      # needs UMFPACK (step 4)
 python solvers/scipy_cg.py
 python solvers/scipy_cg_jacobi.py
 python solvers/scipy_gmres.py
 python solvers/scipy_gmres_ilu.py
 
-# GPU — when CuPy / nvMath are installed
+# GPU — when CuPy / nvMath are installed (step 5)
 python solvers/cupy_spsolve.py
 python solvers/cupy_eigsh.py
 python solvers/nvmath_direct_solver.py
@@ -295,14 +180,14 @@ python solvers/scipy_lobpcg.py
 python solvers/cupy_lobpcg.py
 ```
 
-See [Examples](examples.md) for the full script catalog.
+See [Examples](examples.md) for the full catalog.
 
-### 3. Benchmarks (compare vs native OpenSees solvers)
+#### 7c. Benchmarks
 
-Mesh sweeps that time PythonSparse against native OpenSees linear and eigen solvers:
+Compare PythonSparse timing against native OpenSees solvers on several mesh sizes:
 
 ```bash
-cd examples
+cd examples    # skip if already there from 7b
 
 python brick_bar.py
 python brick_bar_eigen.py
@@ -312,9 +197,82 @@ python brick_bar.py --large-test
 python brick_bar_eigen.py --large-test
 ```
 
-For day-to-day use after install: **`pytest`** for exhaustive checks, or **`scipy_spsolve.py`**
-+ **`scipy_eigsh.py`** (or GPU equivalents) for a fast OpenSees smoke test. Use benchmarks
-when you want timing comparisons on several mesh sizes.
+**Day-to-day:** `pytest` for exhaustive checks; `scipy_spsolve.py` + `scipy_eigsh.py` (or GPU
+equivalents) for a fast smoke test; benchmarks when you want timing comparisons.
+
+---
+
+## Quick install (pip only) {#quick-install}
+
+Use this when you only need the library inside an existing project — no examples,
+benchmarks, or `pytest`.
+
+```bash
+pip install openseespy-solvers
+
+# OpenSeesPy if not already in your environment
+pip install openseespy-solvers[opensees]
+
+# Faster CPU direct solver (Linux / macOS pip; Windows → conda-forge, see UMFPACK table)
+pip install openseespy-solvers[umfpack]
+```
+
+**GPU** (after `nvidia-smi`, match CUDA generation — see [step 5](#gpu)):
+
+```bash
+pip install cupy-cuda13x
+pip install "nvmath-python[cu13]>=0.9.0"
+```
+
+To run examples and the full [verification checklist](#verify), clone the repo and follow
+[Full setup from scratch](#full-setup).
+
+---
+
+## GPU reference {#gpu-reference}
+
+| Module | Library | Wheels |
+|--------|---------|--------|
+| `openseespy_solvers.cupy` | CuPy | `cupy-cuda12x` or `cupy-cuda13x` |
+| `openseespy_solvers.nvmath` | nvmath-python | `nvmath-python[cu12]` or `[cu13]` |
+
+SciPy solvers always run on the CPU. CuPy and nvMath need an NVIDIA GPU and wheels that
+match `nvidia-smi`.
+
+| Component | Notes |
+|-----------|-------|
+| NVIDIA driver | `nvidia-smi` must work |
+| CUDA generation | **12.x or 13.x** — match the `CUDA Version` line from `nvidia-smi` |
+| CuPy | ≥ 13 — use **`cupy-cuda12x`** / **`cupy-cuda13x`**, not generic `cupy` |
+| nvmath-python | ≥ 0.9 — **`[cu12]`** or **`[cu13]`** on the same generation as CuPy |
+
+A full CUDA Toolkit on disk is **not** required if wheels bundle runtimes (CuPy `[ctk]`).
+
+nvMath auto-locates the cuDSS threading library from `nvidia-cudss-cu13` / `nvidia-cudss-cu12`
+(e.g. `cudss_mtlayer_vcomp140.dll` under `site-packages/nvidia/cu13/bin/` on Windows). Override
+with `CUDSS_THREADING_LIB` or `multithreading_lib=...` on
+:func:`~openseespy_solvers.nvmath.direct_solver`.
+
+Further reading:
+
+- [CuPy installation](https://docs.cupy.dev/en/stable/install.html)
+- [nvmath-python installation](https://docs.nvidia.com/cuda/nvmath-python/latest/installation.html)
+- [`nvmath.direct_solver` API](api/nvmath.md#openseespy_solvers.nvmath.direct_solver)
+
+---
+
+## Optional extras reference
+
+| Extra | Installs | Enables |
+|-------|----------|---------|
+| *(base)* | NumPy, SciPy | `openseespy_solvers.scipy` |
+| `opensees` | openseespy | OpenSeesPy when missing |
+| `umfpack` | scikit-umfpack | `scipy.umfpack` — see [UMFPACK](#umfpack) for platform notes |
+| `cupy` | generic `cupy>=13` | Prefer explicit `cupy-cuda12x` / `cupy-cuda13x` wheels |
+| `dev` | pytest, ruff, build | Development and [verification](#verify) |
+| `docs` | mkdocs, mkdocstrings | Build documentation |
+
+CuPy and nvMath are **not** pinned pip extras — install CUDA-matched wheels from [step 5](#gpu).
 
 ---
 
@@ -325,19 +283,27 @@ pip install -e ".[docs]"
 mkdocs serve
 ```
 
-The site is served at `http://127.0.0.1:8000`.
+Open `http://127.0.0.1:8000`.
 
 ---
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 ### Mixed CUDA 12 / 13 packages
 
-If `pip check` reports conflicts (e.g. `nvidia-cudss-cu12` vs `cuda-toolkit 13.*`),
-remove leftover `*-cu12` packages and reinstall the CUDA 13 stack, or recreate the
-environment and follow [GPU install](#gpu-install-cuda) from scratch.
+If `pip check` reports conflicts (e.g. `nvidia-cudss-cu12` vs `cuda-toolkit 13.*`), remove
+leftover `*-cu12` packages and reinstall the matching stack, or recreate the environment
+([step 1](#1-create-a-python-environment)) and repeat [full setup](#full-setup).
 
 ### scikit-umfpack fails on Windows with “Program 'swig' not found”
 
 Use `conda install -c conda-forge scikit-umfpack` instead of
-`pip install openseespy-solvers[umfpack]`.
+`pip install openseespy-solvers[umfpack]`. See the [UMFPACK](#umfpack) table.
+
+### CuPy import errors (missing CUDA libraries)
+
+```bash
+pip install "cupy-cuda13x[ctk]"   # or cupy-cuda12x[ctk]
+```
+
+Ensure `nvidia-smi` works and wheel CUDA generation matches the driver.
