@@ -34,6 +34,9 @@ Optional backends (UMFPACK, nvMath, CuPy on GPU): see
 [installation guide](../docs/installation.md) — CPU vs GPU paths and `nvidia-smi` wheel
 selection.
 
+**Verify your install** (copy-paste checklist for `pytest`, these scripts, and benchmarks):
+[installation guide — Verify your install](../docs/installation.md#verify-your-install).
+
 ## Solver catalog (`solvers/`)
 
 Each script builds a small 3-D brick bar, runs one analysis, and prints **Passed!** /

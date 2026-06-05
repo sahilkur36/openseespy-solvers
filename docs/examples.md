@@ -1,6 +1,11 @@
 # Examples
 
-Scripts live in [`examples/`](../examples/). There are two kinds:
+Scripts live in [`examples/`](../examples/) (clone the repo — they are not in the pip
+wheel). After [installing](../installation.md) optional backends, use
+[Verify your install](../installation.md#verify-your-install) for copy-paste commands:
+**`pytest`**, **example scripts**, and **benchmarks**.
+
+There are two kinds of scripts:
 
 1. **Benchmarks** — [`brick_bar.py`](../examples/brick_bar.py) and
    [`brick_bar_eigen.py`](../examples/brick_bar_eigen.py) sweep mesh sizes and compare
@@ -9,11 +14,16 @@ Scripts live in [`examples/`](../examples/). There are two kinds:
    script per solver factory** (small mesh, Passed!/Failed! smoke test).
 
 ```bash
-pip install openseespy-solvers
+pip install -e ".[dev,opensees]"   # from repo root; add GPU/UMFPACK extras as needed
 cd examples
+
+# Benchmarks
 python brick_bar.py
-python brick_bar.py --large-test   # finer mesh sweep (slower)
+python brick_bar_eigen.py
+
+# Per-solver smoke tests
 python solvers/scipy_spsolve.py
+python solvers/scipy_eigsh.py
 ```
 
 Optional GPU backends (CuPy, nvMath) and UMFPACK: see the
@@ -32,12 +42,16 @@ Optional GPU backends (CuPy, nvMath) and UMFPACK: see the
 
 | Backend | Scripts |
 |---------|---------|
-| SciPy | `scipy_spsolve`, `scipy_umfpack`, `hybrid_spsolve`, `scipy_cg`, `scipy_cg_jacobi`, `scipy_gmres`, `scipy_gmres_ilu`, `scipy_eigsh`, `scipy_lobpcg` |
-| CuPy | `cupy_spsolve`, `cupy_cg`, `cupy_cg_jacobi`, `cupy_gmres`, `cupy_gmres_ilu`, `cupy_eigsh`, `cupy_lobpcg` |
+| SciPy | `scipy_spsolve`, `scipy_umfpack`, `hybrid_spsolve`, `scipy_cg`, `scipy_cg_jacobi`, `scipy_gmres`, `scipy_gmres_ilu`, `scipy_eigsh`, `scipy_lobpcg` (manual) |
+| CuPy | `cupy_spsolve`, `cupy_cg`, `cupy_cg_jacobi`, `cupy_gmres`, `cupy_gmres_ilu`, `cupy_eigsh`, `cupy_lobpcg` (manual) |
 | nvMath | `nvmath_direct_solver` |
 
 Preconditioners (`scipy.precond` / `cupy.precond`: `jacobi`, `ilu`, `direct`) are demonstrated via
 `M=` on `cg`, `gmres`, or `lobpcg` in the `*_jacobi`, `*_ilu`, and LOBPCG scripts.
+
+**LOBPCG** (`scipy_lobpcg`, `cupy_lobpcg`) uses a larger mesh and is **manual-only** — it is
+not run by `pytest` on the tiny smoke mesh. Use [`eigsh`](recommended-solvers.md) for normal
+eigen work.
 
 Every catalog script follows the same OpenSeesPy style: top-to-bottom flow,
 `ops.system("PythonSparse", solver.to_openseespy())`, and a **Passed!** / **Failed!**

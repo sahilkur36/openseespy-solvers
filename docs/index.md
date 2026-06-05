@@ -53,6 +53,7 @@ as well.
 ## See Also
 
 - [Installation](installation.md)
+- [Verify your install](installation.md#verify-your-install)
 - [Recommended solvers](recommended-solvers.md)
 - [PythonSparse documentation](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system/PythonSparse.html)
 - [Tutorial](getting-started.md)

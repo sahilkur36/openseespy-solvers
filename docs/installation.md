@@ -188,7 +188,6 @@ pip install "nvmath-python[cu13]>=0.9.0"
 conda install -c conda-forge scikit-umfpack
 
 pip check
-pytest
 ```
 
 The nvMath backend auto-locates the cuDSS threading library shipped with
@@ -229,12 +228,93 @@ Further reading:
 ```bash
 git clone https://github.com/gaaraujo/openseespy-solvers.git
 cd openseespy-solvers
-pip install -e ".[dev]"
-pytest
+pip install -e ".[dev,opensees]"
 ```
 
 Add optional backends using the [CPU-only](#cpu-only-install) or
-[GPU](#gpu-install-cuda) sections above.
+[GPU](#gpu-install-cuda) sections above, then [verify your install](#verify-your-install).
+
+---
+
+## Verify your install
+
+After installing the package and any optional backends, validate in three layers.
+**Examples and benchmarks** live in the git repository under `examples/` (they are not
+shipped inside the pip wheel), so clone the repo or work from your editable checkout.
+
+**Prerequisites**
+
+```bash
+pip install -e ".[dev,opensees]"   # pytest + OpenSeesPy for integration tests
+pip check                          # optional: catch mixed CUDA / broken deps
+```
+
+Install optional backends first ([UMFPACK](#umfpack-scipyumfpack), [GPU wheels](#gpu-install-cuda))
+if you want `pytest` to exercise them — CuPy and nvMath tests **run when those packages
+import** and are **skipped** otherwise (no extra flags).
+
+### 1. Full test suite (`pytest`)
+
+From the repository root:
+
+```bash
+pytest
+```
+
+This runs unit tests (synthetic linear/eigen systems), OpenSees `PythonSparse` integration
+tests, and smoke execution of most `examples/solvers/*.py` scripts. Expect on the order of
+**~70 passed** on a full CPU+GPU stack; skipped tests mean an optional backend was not
+installed.
+
+### 2. Example scripts (per-solver smoke tests)
+
+Each script builds a small brick bar, runs one analysis, and prints **Passed!** or **Failed!**.
+
+```bash
+cd examples
+
+# CPU — recommended quick check
+python solvers/scipy_spsolve.py
+python solvers/scipy_eigsh.py
+python solvers/hybrid_spsolve.py
+
+# CPU — optional
+python solvers/scipy_umfpack.py      # needs scikit-umfpack
+python solvers/scipy_cg.py
+python solvers/scipy_cg_jacobi.py
+python solvers/scipy_gmres.py
+python solvers/scipy_gmres_ilu.py
+
+# GPU — when CuPy / nvMath are installed
+python solvers/cupy_spsolve.py
+python solvers/cupy_eigsh.py
+python solvers/nvmath_direct_solver.py
+
+# Experimental — manual only (larger mesh; not run by pytest)
+python solvers/scipy_lobpcg.py
+python solvers/cupy_lobpcg.py
+```
+
+See [Examples](examples.md) for the full script catalog.
+
+### 3. Benchmarks (compare vs native OpenSees solvers)
+
+Mesh sweeps that time PythonSparse against native OpenSees linear and eigen solvers:
+
+```bash
+cd examples
+
+python brick_bar.py
+python brick_bar_eigen.py
+
+# Finer meshes — slower, more equations
+python brick_bar.py --large-test
+python brick_bar_eigen.py --large-test
+```
+
+For day-to-day use after install: **`pytest`** for exhaustive checks, or **`scipy_spsolve.py`**
++ **`scipy_eigsh.py`** (or GPU equivalents) for a fast OpenSees smoke test. Use benchmarks
+when you want timing comparisons on several mesh sizes.
 
 ---
 

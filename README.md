@@ -22,6 +22,11 @@ pip install openseespy-solvers
 
 Full steps: [installation guide](https://openseespy-solvers.readthedocs.io/en/latest/installation/).
 
+**Verify install** (after clone + editable install): run `pytest`, the
+[`examples/solvers/`](examples/solvers/) smoke scripts, and
+[`examples/brick_bar*.py`](examples/) benchmarks — see
+[Verify your install](https://openseespy-solvers.readthedocs.io/en/latest/installation/#verify-your-install).
+
 ## Recommended solvers
 
 | Analysis | GPU (CUDA) | CPU |
