@@ -63,6 +63,26 @@ def budget_record_status(
     return 0
 
 
+# OpenSees-style statuses that do not fail brick_bar / brick_bar_eigen for PythonSparse rows.
+_PYTHONSPARSE_BENCHMARK_OK = frozenset({0, -2})
+
+
+def benchmark_pythonsparse_passed(
+    results: list[tuple],
+    pythonsparse_labels: set[str],
+    *,
+    status_index: int = 3,
+) -> bool:
+    """True when every PythonSparse row succeeded or was budget-skipped (native refs ignored)."""
+    for row in results:
+        label = row[2]
+        if label not in pythonsparse_labels:
+            continue
+        if row[status_index] not in _PYTHONSPARSE_BENCHMARK_OK:
+            return False
+    return True
+
+
 _FACTORY_ALIASES = {
     "SpSolve": "spsolve",
     "Umfpack": "umfpack",

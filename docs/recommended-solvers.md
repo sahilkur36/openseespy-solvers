@@ -50,6 +50,11 @@ Iterative solvers (`cg`, `gmres`) are available when a direct factorization is t
 see [Preconditioners](user-guide/preconditioners.md). For many structural static or transient
 steps with a reusable tangent, a **direct** solver above is the first choice.
 
+For Newton or transient analyses where the tangent changes slowly between steps, consider
+[`hybrid`](../api/hybrid.md) (`hybrid(direct=spsolve(), ...)`) — it factorizes once, then
+reuses that factorization as a GMRES preconditioner until the system size changes or GMRES
+fails to converge.
+
 ---
 
 ## Generalized eigenproblems (`K x = λ M x`)

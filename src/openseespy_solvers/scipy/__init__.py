@@ -324,7 +324,9 @@ class _Lobpcg(ScipyMixin, EigenSolver):
     ) -> None:
         super().__init__(scheme=scheme, debug=debug, dtype=dtype)
         self._X = X
-        self._M = M
+        self._preconditioner = M
+        self._preconditioner_cached: Any | None = None
+        self._eigen_matrix_status = "STRUCTURE_CHANGED"
         self._tol = tol
         self._maxiter = maxiter
         self._largest = largest
@@ -341,6 +343,26 @@ class _Lobpcg(ScipyMixin, EigenSolver):
             "dtype": dtype,
         }
 
+    def solve(self, **kwargs: Any) -> None:
+        status = kwargs["matrix_status"]
+        self._eigen_matrix_status = status
+        if status != "UNCHANGED":
+            self._preconditioner_cached = None
+        super().solve(**kwargs)
+
+    def _resolve_preconditioner(self, K: Any) -> Any | None:
+        M = self._preconditioner
+        if M is None:
+            return None
+        if self._is_sparse(M) or self._is_linear_operator(M):
+            return M
+        if callable(M):
+            if self._eigen_matrix_status == "UNCHANGED" and self._preconditioner_cached is not None:
+                return self._preconditioner_cached
+            self._preconditioner_cached = M(K)
+            return self._preconditioner_cached
+        return M
+
     def _solve_eigen(self, K, M, *, num_modes, find_smallest):  # noqa: ANN001
         X = self._X
         if X is None:
@@ -351,7 +373,7 @@ class _Lobpcg(ScipyMixin, EigenSolver):
             X = np.asarray(X, dtype=self._compute_dtype)
         kwargs: dict[str, Any] = {
             "B": M,
-            "M": self._M,
+            "M": self._resolve_preconditioner(K),
             "maxiter": self._maxiter,
             "largest": not find_smallest,
         }
@@ -653,8 +675,9 @@ def lobpcg(
     X : ndarray, optional
         Initial approximation to the eigenvectors. If ``None``, a random matrix
         with ``num_modes`` columns is generated using ``rng``.
-    M : {sparse matrix, LinearOperator}, optional
-        Optional preconditioner passed to LOBPCG as ``M=``.
+    M : {sparse matrix, LinearOperator, callable}, optional
+        Optional preconditioner passed to LOBPCG as ``M=``. A callable is
+        invoked as ``M(K)``; see :mod:`openseespy_solvers.scipy.precond`.
     tol : float, optional
         Convergence tolerance.
     maxiter : int, optional

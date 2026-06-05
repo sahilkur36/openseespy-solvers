@@ -32,12 +32,12 @@ Optional GPU backends (CuPy, nvMath) and UMFPACK: see the
 
 | Backend | Scripts |
 |---------|---------|
-| SciPy | `scipy_spsolve`, `scipy_umfpack`, `scipy_cg`, `scipy_cg_jacobi`, `scipy_gmres`, `scipy_gmres_ilu`, `scipy_eigsh`, `scipy_lobpcg` |
+| SciPy | `scipy_spsolve`, `scipy_umfpack`, `hybrid_spsolve`, `scipy_cg`, `scipy_cg_jacobi`, `scipy_gmres`, `scipy_gmres_ilu`, `scipy_eigsh`, `scipy_lobpcg` |
 | CuPy | `cupy_spsolve`, `cupy_cg`, `cupy_cg_jacobi`, `cupy_gmres`, `cupy_gmres_ilu`, `cupy_eigsh`, `cupy_lobpcg` |
 | nvMath | `nvmath_direct_solver` |
 
-Preconditioners (`scipy.precond` / `cupy.precond`: `jacobi`, `ilu`) are demonstrated via
-`M=` on `cg` or `gmres` in the `*_jacobi` and `*_ilu` scripts.
+Preconditioners (`scipy.precond` / `cupy.precond`: `jacobi`, `ilu`, `direct`) are demonstrated via
+`M=` on `cg`, `gmres`, or `lobpcg` in the `*_jacobi`, `*_ilu`, and LOBPCG scripts.
 
 Every catalog script follows the same OpenSeesPy style: top-to-bottom flow,
 `ops.system("PythonSparse", solver.to_openseespy())`, and a **Passed!** / **Failed!**

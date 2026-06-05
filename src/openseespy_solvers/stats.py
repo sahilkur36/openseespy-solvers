@@ -15,6 +15,8 @@ class LinearSolverStats:
     last_info: int | None = None
     last_residual_norm: float | None = None
     last_num_iterations: int | None = None
+    num_factorizations: int = 0
+    num_gmres_solves: int = 0
     last_error: BaseException | None = field(default=None, repr=False)
 
 

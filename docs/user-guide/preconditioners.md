@@ -42,6 +42,11 @@ callable
 : Incomplete LU as a `LinearOperator`; extra keywords are forwarded to
   `scipy.sparse.linalg.spilu`.
 
+[`direct`](../api/precond.md#openseespy_solvers.scipy.precond.direct)
+: Full sparse factorization as a `LinearOperator`, primarily for
+  [`lobpcg`](../api/scipy.md#openseespy_solvers.scipy.lobpcg) ``M=``.
+  Pass a direct solver, e.g. ``M=precond.direct(spsolve())``.
+
 ## Built-in factories (CuPy)
 
 [`openseespy_solvers.cupy.precond`](../api/precond_cupy.md) provides the same
@@ -55,6 +60,11 @@ pattern on GPU:
 Defaults to ``fill_factor=1`` so factorization runs on the GPU with **no
 fill-in** (ILU(0)-like). Other ``fill_factor`` values use SciPy on CPU for the
 factorization; only ``solve`` stays on GPU.
+
+[`direct`](../api/precond_cupy.md#openseespy_solvers.cupy.precond.direct)
+: Full sparse factorization as a ``LinearOperator``, primarily for
+  [`lobpcg`](../api/cupy.md#openseespy_solvers.cupy.lobpcg) ``M=``.
+  Pass a direct solver, e.g. ``M=precond.direct(direct_solver())``.
 
 ## Example (SciPy)
 

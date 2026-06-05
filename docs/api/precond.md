@@ -5,3 +5,4 @@
       members:
         - jacobi
         - ilu
+        - direct

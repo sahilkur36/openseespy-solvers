@@ -84,13 +84,18 @@ def test_cupy_eigsh_generalized_spd() -> None:
     # OpenSees uses the same CSR pattern for K and M buffers.
     M = sp.csr_matrix((np.ones(K.nnz), K.indices, K.indptr), shape=(n, n))
     num_modes = 3
+    # ARPACK shift-invert is sensitive to the starting vector; pin v0 so this
+    # test stays stable when other eigen tests run first in the same process.
+    v0 = np.ones(n, dtype=np.float64)
     ref_kwargs = csr_eigen_kwargs(K, M, num_modes=num_modes, find_smallest=True)
-    ref_ev = np.frombuffer(ref_kwargs["eigenvalues"], dtype=np.float64, count=num_modes)
-    eigsh(tol=1e-10).solve(**ref_kwargs)
+    eigsh(tol=1e-10, v0=v0).solve(**ref_kwargs)
+    ref_ev = np.frombuffer(
+        ref_kwargs["eigenvalues"], dtype=np.float64, count=num_modes
+    ).copy()
 
     kwargs = csr_eigen_kwargs(K, M, num_modes=num_modes, find_smallest=True)
-    ev = np.frombuffer(kwargs["eigenvalues"], dtype=np.float64, count=num_modes)
-    cupy_eigsh(tol=1e-10, linear_solver=cupy_spsolve()).solve(**kwargs)
+    cupy_eigsh(tol=1e-10, linear_solver=cupy_spsolve(), v0=v0).solve(**kwargs)
+    ev = np.frombuffer(kwargs["eigenvalues"], dtype=np.float64, count=num_modes).copy()
     np.testing.assert_allclose(np.sort(ev), np.sort(ref_ev), rtol=0.15)
 
 

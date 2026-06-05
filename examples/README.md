@@ -51,6 +51,7 @@ mesh sweep for CI; add `--large-test` only when you want heavier runs.
 |--------|---------|
 | [`scipy_spsolve.py`](solvers/scipy_spsolve.py) | `spsolve()` |
 | [`scipy_umfpack.py`](solvers/scipy_umfpack.py) | `umfpack()` — needs `[umfpack]` |
+| [`hybrid_spsolve.py`](solvers/hybrid_spsolve.py) | `hybrid(spsolve(), ...)` |
 | [`scipy_cg.py`](solvers/scipy_cg.py) | `cg()` |
 | [`scipy_cg_jacobi.py`](solvers/scipy_cg_jacobi.py) | `cg(M=precond.jacobi)` |
 | [`scipy_gmres.py`](solvers/scipy_gmres.py) | `gmres()` |
@@ -58,8 +59,8 @@ mesh sweep for CI; add `--large-test` only when you want heavier runs.
 | [`scipy_eigsh.py`](solvers/scipy_eigsh.py) | `eigsh()` |
 | [`scipy_lobpcg.py`](solvers/scipy_lobpcg.py) | `lobpcg()` |
 
-Preconditioner factories live in `openseespy_solvers.scipy.precond`: **`jacobi`**, **`ilu`**
-(used via `M=` on `cg` / `gmres`, as in the jacobi/ilu scripts above).
+Preconditioner factories live in `openseespy_solvers.scipy.precond`: **`jacobi`**, **`ilu`**,
+**`direct`** (used via `M=` on `cg` / `gmres` / `lobpcg`, as in the scripts above).
 
 ### CuPy (`openseespy_solvers.cupy`)
 
@@ -73,7 +74,7 @@ Preconditioner factories live in `openseespy_solvers.scipy.precond`: **`jacobi`*
 | [`cupy_eigsh.py`](solvers/cupy_eigsh.py) | `eigsh` (default `mass_mode="general"`) |
 | [`cupy_lobpcg.py`](solvers/cupy_lobpcg.py) | `lobpcg()` |
 
-`openseespy_solvers.cupy.precond` exports **`jacobi`** and **`ilu`**.
+`openseespy_solvers.cupy.precond` exports **`jacobi`**, **`ilu`**, and **`direct`**.
 [`eigsh`](solvers/cupy_eigsh.py) uses shift-invert (`diagonal` / `lumped` on GPU;
 `general` with full mass).
 

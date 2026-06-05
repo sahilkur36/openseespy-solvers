@@ -11,8 +11,11 @@ from typing import Any
 
 import numpy as np
 
-from openseespy_solvers._sparse import csr_linear_kwargs_from_matrix
+from openseespy_solvers._base import LinearSolver
+from openseespy_solvers._factorization import apply_inner_factorization
 from openseespy_solvers.cupy._base import _import_cupy
+
+__all__ = ["jacobi", "ilu", "direct"]
 
 
 def _linear_operator_with_matmat(
@@ -44,7 +47,7 @@ def jacobi(A: Any) -> Any:
 
     See Also
     --------
-    nvmath
+    direct
     ilu
     openseespy_solvers.cupy.cg
     openseespy_solvers.cupy.lobpcg
@@ -77,40 +80,6 @@ def jacobi(A: Any) -> Any:
     return _linear_operator_with_matmat(cspla, n, dtype, matvec, matmat)
 
 
-def nvmath(A: Any, *, device: str = "gpu") -> Any:
-    """Return a preconditioner approximating ``A^{-1}`` via nvMath direct solve.
-
-    Intended for :func:`~openseespy_solvers.cupy.lobpcg` as ``M=`` on stiffness
-    ``K`` (same role as :func:`jacobi`, but with a full sparse factorization).
-    Requires ``nvmath-python`` and a GPU.
-
-    Parameters
-    ----------
-    A : cupyx.scipy.sparse.spmatrix
-        Matrix assembled by OpenSees on device (typically stiffness ``K``).
-    device : {'gpu', 'cpu'}, optional
-        Passed to :func:`~openseespy_solvers.nvmath.direct_solver`.
-
-    See Also
-    --------
-    jacobi
-    k_inverse
-    openseespy_solvers.nvmath.direct_solver
-    openseespy_solvers.cupy.lobpcg
-
-    Examples
-    --------
-    >>> from openseespy_solvers.cupy import lobpcg, precond
-    >>> solver = lobpcg(M=precond.nvmath)
-    """
-    from openseespy_solvers.nvmath._base import _import_nvmath
-
-    _import_nvmath()
-    from openseespy_solvers.nvmath import direct_solver
-
-    return k_inverse(A, linear_solver=direct_solver(device=device))
-
-
 def ilu(A: Any, **opts: Any) -> Any:
     """Return an incomplete LU preconditioner as a ``LinearOperator`` on GPU.
 
@@ -137,6 +106,7 @@ def ilu(A: Any, **opts: Any) -> Any:
     --------
     cupyx.scipy.sparse.linalg.spilu
     jacobi
+    direct
     openseespy_solvers.scipy.precond.ilu
 
     Notes
@@ -171,79 +141,70 @@ def ilu(A: Any, **opts: Any) -> Any:
     return _linear_operator_with_matmat(cspla, n, dtype, matvec, matmat)
 
 
-def _default_k_inverse_solver() -> Any:
-    try:
-        from openseespy_solvers.nvmath._base import _import_nvmath
+def direct(solver: LinearSolver):
+    """Return a callable ``M(A)`` that approximates ``A^{-1}`` via a direct solver.
 
-        _import_nvmath()
-        from openseespy_solvers.nvmath import direct_solver
-
-        return direct_solver()
-    except ImportError:
-        from openseespy_solvers.cupy import spsolve
-
-        return spsolve()
-
-
-def k_inverse(K: Any, *, linear_solver: Any | None = None) -> Any:
-    """Return a preconditioner approximating ``K^{-1}`` via one direct solve.
-
-    Intended for :func:`~openseespy_solvers.cupy.lobpcg` as ``M=`` (preconditioner
-    for stiffness ``K``). The first application factors ``K``; later applications
-    in the same eigen solve reuse the factorization when the matrix is unchanged.
+    Intended primarily for :func:`~openseespy_solvers.cupy.lobpcg` as ``M=`` on
+    stiffness ``K``. The first application factors ``A``; later applications in
+    the same eigen solve reuse the factorization when the matrix is unchanged.
 
     Parameters
     ----------
-    K : cupyx.scipy.sparse.spmatrix
-        Stiffness matrix assembled by OpenSees on device.
-    linear_solver : LinearSolver, optional
-        Direct solver for ``K x = b``. Defaults to
-        :func:`~openseespy_solvers.nvmath.direct_solver` on GPU when nvMath is
-        installed, otherwise :func:`~openseespy_solvers.cupy.spsolve`. Pass
-        ``linear_solver`` explicitly to pin the backend.
+    solver : LinearSolver
+        Direct solver for ``A x = b``, for example
+        :func:`~openseespy_solvers.nvmath.direct_solver` or
+        :func:`~openseespy_solvers.cupy.spsolve`.
+
+    Returns
+    -------
+    preconditioner : callable
+        Function ``M(A)`` returning a ``LinearOperator`` suitable for ``M=``.
 
     See Also
     --------
     jacobi
-    nvmath
+    ilu
+    openseespy_solvers.nvmath.direct_solver
     openseespy_solvers.cupy.lobpcg
+    openseespy_solvers.hybrid
 
-    Notes
-    -----
-    Prefer :func:`nvmath` or :func:`jacobi` when the backend is fixed; use this
-    function when you need an explicit ``linear_solver``.
+    Examples
+    --------
+    >>> from openseespy_solvers.cupy import lobpcg, precond, spsolve
+    >>> eigsolver = lobpcg(M=precond.direct(spsolve()), tol=1e-8)
     """
+    if not isinstance(solver, LinearSolver):
+        raise TypeError("precond.direct() requires a LinearSolver instance.")
+
     cp, _csp, cspla = _import_cupy()
-    solver = linear_solver or _default_k_inverse_solver()
-    needs_refactor = True
-    dtype = K.dtype
-    n = K.shape[0]
 
-    def _apply_column(rhs: Any) -> Any:
-        nonlocal needs_refactor
-        vec = cp.asarray(rhs, dtype=dtype).ravel()
-        x_host = np.zeros(n, dtype=np.float64)
-        matrix_status = "STRUCTURE_CHANGED" if needs_refactor else "UNCHANGED"
-        lin_kwargs = csr_linear_kwargs_from_matrix(
-            K,
-            cp.asnumpy(vec),
-            matrix_status=matrix_status,
-            x=x_host,
-        )
-        info = solver.solve(**lin_kwargs)
-        if info != 0:
-            raise RuntimeError(f"LOBPCG K-inverse preconditioner failed with info={info}")
-        needs_refactor = False
-        return cp.asarray(x_host, dtype=dtype)
+    def preconditioner(A: Any) -> Any:
+        needs_refactor = True
+        dtype = A.dtype
+        n = A.shape[0]
 
-    def matvec(x: Any) -> Any:
-        arr = cp.asarray(x, dtype=dtype)
-        if arr.ndim == 1:
-            return _apply_column(arr)
-        return cp.column_stack([_apply_column(arr[:, j]) for j in range(arr.shape[1])])
+        def _apply_column(rhs: Any) -> Any:
+            nonlocal needs_refactor
+            result = apply_inner_factorization(
+                solver,
+                A,
+                rhs,
+                refactor=needs_refactor,
+                on_device=False,
+            )
+            needs_refactor = False
+            return cp.asarray(result, dtype=dtype)
 
-    def matmat(X: Any) -> Any:
-        X = cp.asarray(X, dtype=dtype)
-        return cp.column_stack([_apply_column(X[:, j]) for j in range(X.shape[1])])
+        def matvec(x: Any) -> Any:
+            arr = cp.asarray(x, dtype=dtype)
+            if arr.ndim == 1:
+                return _apply_column(arr)
+            return cp.column_stack([_apply_column(arr[:, j]) for j in range(arr.shape[1])])
 
-    return _linear_operator_with_matmat(cspla, n, dtype, matvec, matmat)
+        def matmat(X: Any) -> Any:
+            X = cp.asarray(X, dtype=dtype)
+            return cp.column_stack([_apply_column(X[:, j]) for j in range(X.shape[1])])
+
+        return _linear_operator_with_matmat(cspla, n, dtype, matvec, matmat)
+
+    return preconditioner

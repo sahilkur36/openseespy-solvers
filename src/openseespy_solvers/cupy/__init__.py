@@ -42,9 +42,9 @@ import scipy.sparse as sp_host
 import scipy.sparse.linalg as spla_cpu
 
 from openseespy_solvers._base import EigenSolver, LinearSolver
+from openseespy_solvers._factorization import apply_inner_factorization
 from openseespy_solvers._sparse import (
     OPENSEES_EIGSH_WHICH,
-    csr_linear_kwargs_from_matrix,
     eigsh_arpack_kwargs,
     opensees_eigsh_sigma,
 )
@@ -463,25 +463,17 @@ class _Eigsh(CupyMixin, EigenSolver):
         return eigvals, phi
 
     def _inner_linear_solve(self, A, b):  # noqa: ANN001
-        cp = self._cp
-        rhs = cp.asarray(b, dtype=self._cupy_dtype).ravel()
-        n = A.shape[0]
-        x_host = np.zeros(n, dtype=np.float64)
-        matrix_status = (
-            "STRUCTURE_CHANGED" if self._inner_needs_refactor else "UNCHANGED"
+        refactor = self._inner_needs_refactor
+        result = apply_inner_factorization(
+            self._inner_solver,
+            A,
+            b,
+            refactor=refactor,
+            on_device=False,
+            structure_changed=refactor,
         )
-        lin_kwargs = csr_linear_kwargs_from_matrix(
-            A, self._to_host(rhs), matrix_status=matrix_status, x=x_host
-        )
-        info = self._inner_solver.solve(**lin_kwargs)
-        if info != 0:
-            raise SolverConvergenceError(
-                f"Shift-invert inner linear solve failed with info={info}"
-            )
         self._inner_needs_refactor = False
-        return self._to_device(
-            np.frombuffer(lin_kwargs["x"], dtype=np.float64, count=n).copy()
-        )
+        return result
 
     def _host_csr(self, matrix):  # noqa: ANN001
         return sp_host.csr_matrix(
@@ -836,9 +828,8 @@ def lobpcg(
     -----
     ``M`` in LOBPCG approximates ``K^{-1}`` (not the mass matrix ``B``). Use the same
     callable preconditioner pattern as :func:`cg` / :func:`gmres``, e.g.
-    ``M=precond.jacobi`` (diagonal) or ``M=precond.nvmath`` (sparse direct ``K^{-1}``).
-    Use :func:`~openseespy_solvers.cupy.precond.k_inverse` only when selecting a custom
-    inner direct solver.
+    ``M=precond.jacobi`` (diagonal) or ``M=precond.direct(direct_solver())`` (sparse
+    direct ``K^{-1}``).
     Prefer :func:`eigsh` for shift-invert modal analysis when that fits the mass model.
     """
     return _Lobpcg(

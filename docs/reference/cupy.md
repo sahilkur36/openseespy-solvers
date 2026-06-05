@@ -23,7 +23,7 @@ analysis (default `mass_mode="general"`). Pair with
 
 ## Submodule
 
-[`precond`](../api/precond_cupy.md) — ``jacobi``, ``nvmath`` (LOBPCG on ``K``), ``ilu``, and ``k_inverse`` factories.
+[`precond`](../api/precond_cupy.md) — ``jacobi``, ``direct`` (LOBPCG on ``K``), and ``ilu`` factories.
 
 ## Notes
 

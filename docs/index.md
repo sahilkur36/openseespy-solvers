@@ -21,9 +21,11 @@ because they delegate to heavily optimized third-party libraries.
 | Module | Description |
 |--------|-------------|
 | [`scipy`](reference/scipy.md) | CPU solvers (`spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg`) |
-| [`scipy.precond`](api/precond.md) | Preconditioner factories for iterative solvers |
+| [`scipy.precond`](api/precond.md) | Preconditioner factories (`jacobi`, `ilu`, `direct`) |
 | [`cupy`](reference/cupy.md) | GPU solvers (`spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg`) |
+| [`cupy.precond`](api/precond_cupy.md) | GPU preconditioner factories (`jacobi`, `ilu`, `direct`) |
 | [`nvmath`](reference/nvmath.md) | GPU direct sparse solver (`direct_solver`) |
+| [`hybrid`](api/hybrid.md) | Frozen factorization + GMRES (`hybrid(direct=...)`) |
 
 ## Quick reference
 

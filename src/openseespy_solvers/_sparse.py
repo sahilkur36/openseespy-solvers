@@ -109,6 +109,8 @@ def csr_linear_kwargs_from_matrix(
     x: np.ndarray | None = None,
 ) -> dict:
     """Build OpenSees-style linear ``solve`` kwargs from a CSR matrix and RHS."""
+    if hasattr(matrix, "tocsr"):
+        matrix = matrix.tocsr()
     indptr = _host_array(matrix.indptr).astype(np.int32, copy=False)
     indices = _host_array(matrix.indices).astype(np.int32, copy=False)
     values = _host_array(matrix.data).astype(np.float64, copy=False)

@@ -116,8 +116,9 @@ For row-sum **lumped** mass (faster, different physics), use `mass_mode="lumped"
 
 ```python
 from openseespy_solvers.cupy import lobpcg, precond
+from openseespy_solvers.nvmath import direct_solver
 
-eigsolver = lobpcg(M=precond.nvmath, tol=1e-8)  # requires nvMath
+eigsolver = lobpcg(M=precond.direct(direct_solver()), tol=1e-8)
 lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
 ```
 

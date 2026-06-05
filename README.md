@@ -36,24 +36,28 @@ Details: [recommended solvers](https://openseespy-solvers.readthedocs.io/en/late
 ## Example
 
 ```python
-import openseespy.opensees as ops
-from openseespy_solvers.scipy import cg
-from openseespy_solvers.scipy import precond
+from openseespy_solvers import hybrid
+from openseespy_solvers.scipy import spsolve
 
-solver = cg(rtol=1e-8, M=precond.jacobi)
+solver = hybrid(spsolve(), rtol=1e-6, restart=50)
 ops.system("PythonSparse", solver.to_openseespy())
-ops.analyze(1)
+ops.analyze(n)
 ```
+
+For Newton or transient steps where the tangent changes slowly, ``hybrid`` factorizes once
+then reuses that factorization as a GMRES preconditioner until the system size changes or
+GMRES fails to converge.
 
 ## Submodules
 
 | Module | Functions |
 |--------|-----------|
 | `openseespy_solvers.scipy` | `spsolve`, `umfpack`, `cg`, `gmres`, `eigsh`, `lobpcg` |
-| `openseespy_solvers.scipy.precond` | `jacobi`, `ilu` |
+| `openseespy_solvers.scipy.precond` | `jacobi`, `ilu`, `direct` |
 | `openseespy_solvers.cupy` | `spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg` (GPU) |
-| `openseespy_solvers.cupy.precond` | `jacobi`, `nvmath`, `ilu`, `k_inverse` |
+| `openseespy_solvers.cupy.precond` | `jacobi`, `ilu`, `direct` |
 | `openseespy_solvers.nvmath` | `direct_solver` (GPU) |
+| `openseespy_solvers.hybrid` | `hybrid(direct=...)` — frozen factorization + GMRES |
 
 Factory signatures match [`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html)
 and [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse.html);

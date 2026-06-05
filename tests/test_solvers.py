@@ -159,6 +159,51 @@ def test_cg_float32_compute_dtype() -> None:
     np.testing.assert_allclose(x_buf, b / np.diag(A), rtol=1e-5)
 
 
+def test_hybrid_first_solve_factorizes() -> None:
+    from openseespy_solvers import hybrid
+
+    A = np.array([[4.0, 1.0], [1.0, 3.0]])
+    b = np.array([1.0, 2.0])
+    x_expected = np.linalg.solve(A, b)
+    x_buf = np.zeros(2, dtype=np.float64)
+    kwargs = csr_linear_kwargs(A, b, x=x_buf, matrix_status="STRUCTURE_CHANGED")
+    solver = hybrid(spsolve())
+    assert solver.solve(**kwargs) == 0
+    np.testing.assert_allclose(x_buf, x_expected, rtol=1e-10)
+    assert solver.stats.num_factorizations == 1
+    assert solver.stats.num_gmres_solves == 0
+
+
+def test_hybrid_reuses_factorization_with_gmres() -> None:
+    from openseespy_solvers import hybrid
+
+    A = sp.csr_matrix(np.array([[4.0, 1.0], [1.0, 3.0]]))
+    b = np.array([1.0, 2.0])
+    x_buf = np.zeros(2, dtype=np.float64)
+    inner = spsolve()
+    solver = hybrid(inner, rtol=1e-12)
+
+    kwargs1 = csr_linear_kwargs(A, b, x=x_buf, matrix_status="STRUCTURE_CHANGED")
+    assert solver.solve(**kwargs1) == 0
+    assert solver.stats.num_factorizations == 1
+
+    A2 = sp.csr_matrix(np.array([[4.1, 1.0], [1.0, 3.1]]))
+    kwargs2 = csr_linear_kwargs(A2, b, x=x_buf, matrix_status="COEFFICIENTS_CHANGED")
+    assert solver.solve(**kwargs2) == 0
+    assert solver.stats.num_factorizations == 1
+    assert solver.stats.num_gmres_solves == 1
+    np.testing.assert_allclose(x_buf, np.linalg.solve(A2.toarray(), b), rtol=1e-8)
+
+
+def test_scipy_precond_direct_callable() -> None:
+    A = sp.diags([4.0, 5.0, 6.0]).tocsr()
+    M_factory = precond.direct(spsolve())
+    M = M_factory(A)
+    x = np.array([1.0, 1.0, 1.0])
+    y = M @ x
+    np.testing.assert_allclose(y, x / np.array([4.0, 5.0, 6.0]), rtol=1e-10)
+
+
 def test_unsupported_compute_dtype() -> None:
     from openseespy_solvers._dtype import resolve_compute_dtype
     from openseespy_solvers.exceptions import UnsupportedComputeDtypeError

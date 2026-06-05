@@ -48,6 +48,14 @@ def test_cupy_namespace() -> None:
         assert cupy_ns.eigsh().backend == "cupy"
 
 
+def test_hybrid_export() -> None:
+    from openseespy_solvers import hybrid
+
+    solver = hybrid(scipy_ns.spsolve())
+    assert solver.backend == "scipy"
+    assert solver._on_device is False
+
+
 def test_nvmath_namespace() -> None:
     nvmath_ns = importlib.import_module("openseespy_solvers.nvmath")
     assert nvmath_ns.__all__ == ["direct_solver"]

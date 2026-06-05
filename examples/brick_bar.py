@@ -246,7 +246,9 @@ def main():
         print("Far-corner displacement:", ops.nodeDisp(far_node))
 
     print()
-    print("Passed!" if all(status == 0 for _, _, _, status, _ in results) else "Failed!")
+    py_labels = {label for label, _ in pythonsparse_solvers}
+    passed = brick.benchmark_pythonsparse_passed(results, py_labels)
+    print("Passed!" if passed else "Failed!")
     print("==========================")
 
 

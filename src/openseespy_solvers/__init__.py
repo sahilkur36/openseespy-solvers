@@ -5,6 +5,7 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING
 
+from openseespy_solvers.hybrid import hybrid
 from openseespy_solvers.exceptions import (
     BackendNotAvailableError,
     InvalidOpenSeesDataError,
@@ -25,6 +26,7 @@ __all__ = [
     "UnsupportedStorageSchemeError",
     "__version__",
     "cupy",
+    "hybrid",
     "scipy",
 ]
 

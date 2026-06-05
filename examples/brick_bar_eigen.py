@@ -309,7 +309,9 @@ def main():
         print("Mode 1 eigenvector at far corner:", mode_shape)
 
     print()
-    print("Passed!" if all(status == 0 for _, _, _, status, _, _ in results) else "Failed!")
+    py_labels = {label for label, _ in pythonsparse_solvers}
+    passed = brick.benchmark_pythonsparse_passed(results, py_labels)
+    print("Passed!" if passed else "Failed!")
     print("==========================")
 
 
