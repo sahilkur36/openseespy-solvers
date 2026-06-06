@@ -1,6 +1,6 @@
 """Brick bar static analysis — SciPy ``umfpack`` (optional scikit-umfpack).
 
-Install: ``pip install openseespy-solvers[umfpack]``
+Install: ``python -m pip install "openseespy-solvers[umfpack]"``
 """
 
 import os
@@ -17,7 +17,7 @@ try:
     from openseespy_solvers.scipy import umfpack
 except ImportError as exc:
     print("umfpack backend not available:", exc)
-    print("Install: pip install openseespy-solvers[umfpack]")
+    print('Install: python -m pip install "openseespy-solvers[umfpack]"')
     raise SystemExit(1) from exc
 
 import openseespy.opensees as ops

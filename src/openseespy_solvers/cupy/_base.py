@@ -17,7 +17,8 @@ def _import_cupy() -> tuple[Any, Any, Any]:
         import cupyx.scipy.sparse.linalg as cspla
     except ImportError as exc:  # pragma: no cover - exercised only without CuPy
         raise BackendNotAvailableError(
-            "The 'cupy' backend requires CuPy. Install with: pip install openseespy-solvers[cupy]"
+            "The 'cupy' backend requires CuPy. Install a CUDA-matched wheel, "
+            "for example: python -m pip install \"openseespy-solvers[cuda13]\""
         ) from exc
     return cp, csp, cspla
 

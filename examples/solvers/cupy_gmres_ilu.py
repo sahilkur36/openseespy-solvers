@@ -14,7 +14,7 @@ try:
     from openseespy_solvers.cupy import gmres, precond
 except Exception as exc:
     print("CuPy backend not available:", exc)
-    print("Install: pip install openseespy-solvers[cupy]")
+    print('Install: python -m pip install "openseespy-solvers[cuda13]"  # or [cuda12]')
     raise SystemExit(1) from exc
 
 import openseespy.opensees as ops

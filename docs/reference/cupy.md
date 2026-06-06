@@ -3,7 +3,8 @@
 Sparse linear algebra solvers implemented with CuPy.
 
 This module mirrors [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse.html).
-Importing it requires a CUDA-matched CuPy wheel (for example `cupy-cuda13x`); see
+Importing it requires CuPy. Install a CUDA-matched extra such as
+`openseespy-solvers[cuda13]` or `openseespy-solvers[cuda12]`; see
 [GPU install](../installation.md#gpu).
 
 Requires **serial OpenSeesPy** — OpenSees assembles the matrix on the CPU; CuPy runs the

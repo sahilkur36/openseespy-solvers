@@ -1,101 +1,130 @@
 # openseespy-solvers
 
-Sparse linear algebra solvers for OpenSeesPy
-[`PythonSparse`](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system/PythonSparse.html)
-commands.
+SciPy-style sparse linear and eigen solvers for OpenSeesPy
+[`PythonSparse`](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system/PythonSparse.html).
 
-**Documentation:** [openseespy-solvers.readthedocs.io](https://openseespy-solvers.readthedocs.io/)
+`openseespy-solvers` wraps familiar numerical backends such as SciPy, CuPy, and
+NVIDIA nvMath as solver objects that OpenSeesPy can call directly. OpenSeesPy
+assembles the stiffness, mass, and right-hand-side arrays; the solver object performs
+the sparse solve and writes the result back to OpenSeesPy.
+
+Documentation: [openseespy-solvers.readthedocs.io](https://openseespy-solvers.readthedocs.io/)
 
 ## Installation
 
-Requires **Python ≥ 3.12**, **NumPy ≥ 1.26**, **SciPy ≥ 1.12**, and **serial OpenSeesPy**
-(parallel/MPI OpenSeesPy builds are not supported — see
-[docs](https://openseespy-solvers.readthedocs.io/en/latest/user-guide/pythonsparse-interface/#parallelism)).
-
-### Full setup from scratch
-
-Copy-paste overview — see the [installation guide](https://openseespy-solvers.readthedocs.io/en/latest/installation/#full-setup) for platform notes (UMFPACK, GPU wheels) and the complete verification checklist.
-
 ```bash
-# 1. Environment (conda or venv — all platforms)
-conda create -n openseespy-solvers python=3.12 -y
-conda activate openseespy-solvers
-
-# 2. Clone (examples and pytest are in the repo, not the pip wheel)
-git clone https://github.com/gaaraujo/openseespy-solvers.git
-cd openseespy-solvers
-
-# 3. Install
-pip install -e ".[dev,opensees]"
-
-# 4–5. Optional backends — UMFPACK, CuPy, nvMath (see installation guide)
-# 6. pip check
-# 7. Verify
-pytest
-cd examples && python solvers/scipy_spsolve.py && python solvers/scipy_eigsh.py
-python brick_bar.py && python brick_bar_eigen.py
+python -m pip install openseespy-solvers
 ```
 
-GPU tests in `pytest` run when CuPy/nvMath are installed; skipped otherwise.
+The base install provides NumPy/SciPy CPU solvers. It requires Python 3.12 or newer.
 
-### Quick install (library only)
+OpenSeesPy is optional so the package can be used and tested without forcing an OpenSees
+install. If OpenSeesPy is not already in your environment, install the extra:
 
 ```bash
-pip install openseespy-solvers
-pip install openseespy-solvers[opensees]   # if OpenSeesPy is missing
+python -m pip install "openseespy-solvers[opensees]"
 ```
 
-## Recommended solvers
+Optional backends:
 
-| Analysis | GPU (CUDA) | CPU |
-|----------|------------|-----|
-| Linear (`PythonSparse`, static/transient/…) | `nvmath.direct_solver` | `scipy.spsolve` or `scipy.umfpack` |
-| Eigen | `cupy.eigsh` | `scipy.eigsh` |
+```bash
+# CPU UMFPACK direct solver
+python -m pip install "openseespy-solvers[umfpack]"
 
-These `PythonSparse` backends are **often faster** than native OpenSees sparse/direct/eigen
-solvers on medium-to-large models because they use optimized library implementations.
-Details: [recommended solvers](https://openseespy-solvers.readthedocs.io/en/latest/recommended-solvers/).
+# NVIDIA GPU backends: choose the CUDA generation reported by nvidia-smi
+python -m pip install "openseespy-solvers[cuda13]"   # or [cuda12]
+```
 
-## Example
+On Windows, install UMFPACK with conda-forge instead of pip:
+
+```bash
+conda install -c conda-forge scikit-umfpack
+```
+
+See the [installation guide](https://openseespy-solvers.readthedocs.io/en/latest/installation/)
+for platform notes, CUDA 12.x alternatives, and verification steps.
+
+## Quick Example
 
 ```python
-from openseespy_solvers import hybrid
+import openseespy.opensees as ops
 from openseespy_solvers.scipy import spsolve
 
-solver = hybrid(spsolve(), rtol=1e-6, restart=50)
+solver = spsolve()
+
+# after defining the OpenSeesPy model:
 ops.system("PythonSparse", solver.to_openseespy())
-ops.analyze(n)
+ops.numberer("RCM")
+ops.constraints("Plain")
+ops.integrator("LoadControl", 1.0)
+ops.algorithm("Linear")
+ops.analysis("Static")
+ops.analyze(1)
 ```
 
-For Newton or transient steps where the tangent changes slowly, ``hybrid`` factorizes once
-then reuses that factorization as a GMRES preconditioner until the system size changes or
-GMRES fails to converge.
+For eigen analysis:
 
-## Submodules
+```python
+from openseespy_solvers.scipy import eigsh
 
-| Module | Functions |
-|--------|-----------|
-| `openseespy_solvers.scipy` | `spsolve`, `umfpack`, `cg`, `gmres`, `eigsh`, `lobpcg` |
-| `openseespy_solvers.scipy.precond` | `jacobi`, `ilu`, `direct` |
-| `openseespy_solvers.cupy` | `spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg` (GPU) |
-| `openseespy_solvers.cupy.precond` | `jacobi`, `ilu`, `direct` |
-| `openseespy_solvers.nvmath` | `direct_solver` (GPU) |
-| `openseespy_solvers.hybrid` | `hybrid(direct=...)` — frozen factorization + GMRES |
+eigsolver = eigsh(tol=1e-8)
+eigenvalues = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
+```
 
-Factory signatures match [`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html)
-and [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse.html);
-`A` and `b` are supplied by OpenSees at solve time.
+## Recommended Solvers
 
-See the [tutorial](https://openseespy-solvers.readthedocs.io/en/latest/getting-started/) and
-[API reference](https://openseespy-solvers.readthedocs.io/en/latest/api/scipy/) for details.
+These are good first choices for typical OpenSeesPy analyses:
 
-## GitHub
+| Analysis | CPU | NVIDIA GPU |
+|----------|-----|-------------|
+| Static or transient linear solve | `scipy.spsolve`; `scipy.umfpack` for larger CPU systems | `nvmath.direct_solver` |
+| Generalized eigen solve | `scipy.eigsh` | `cupy.eigsh` |
 
-Repository: [github.com/gaaraujo/openseespy-solvers](https://github.com/gaaraujo/openseespy-solvers).
-Report bugs and ask questions via
-[issues](https://github.com/gaaraujo/openseespy-solvers/issues); send contributions
-(pull requests) there as well.
+Iterative solvers (`cg`, `gmres`, `lobpcg`) and preconditioners are also available when a
+direct factorization is too expensive or a model benefits from a custom strategy.
+
+More detail: [Recommended solvers](https://openseespy-solvers.readthedocs.io/en/latest/recommended-solvers/).
+
+## Modules
+
+| Module | Provides |
+|--------|----------|
+| `openseespy_solvers.scipy` | CPU solvers: `spsolve`, `umfpack`, `cg`, `gmres`, `eigsh`, `lobpcg` |
+| `openseespy_solvers.scipy.precond` | CPU preconditioners: `jacobi`, `ilu`, `direct` |
+| `openseespy_solvers.cupy` | GPU solvers: `spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg` |
+| `openseespy_solvers.cupy.precond` | GPU preconditioners: `jacobi`, `ilu`, `direct` |
+| `openseespy_solvers.nvmath` | GPU direct sparse solver: `direct_solver` |
+| `openseespy_solvers.hybrid` | Direct factorization reused as a GMRES preconditioner |
+
+Factory signatures follow the corresponding SciPy/CuPy functions where possible. The
+matrix and right-hand side are supplied by OpenSeesPy at solve time.
+
+## Examples and Development
+
+The pip wheel contains the library. Examples, benchmarks, and tests live in the source
+repository:
+
+```bash
+git clone https://github.com/gaaraujo/openseespy-solvers.git
+cd openseespy-solvers
+python -m pip install -e ".[dev,opensees]"
+pytest
+```
+
+Then run a smoke example:
+
+```bash
+cd examples
+python solvers/scipy_spsolve.py
+python solvers/scipy_eigsh.py
+```
+
+## Project Links
+
+- Documentation: [openseespy-solvers.readthedocs.io](https://openseespy-solvers.readthedocs.io/)
+- Source: [github.com/gaaraujo/openseespy-solvers](https://github.com/gaaraujo/openseespy-solvers)
+- Issues: [github.com/gaaraujo/openseespy-solvers/issues](https://github.com/gaaraujo/openseespy-solvers/issues)
 
 ## License
 
-BSD 3-Clause — see [LICENSE](LICENSE).
+BSD 3-Clause. See [LICENSE](LICENSE).

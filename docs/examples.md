@@ -1,21 +1,19 @@
 # Examples
 
-Scripts live in the repository [`examples/`](https://github.com/gaaraujo/openseespy-solvers/tree/main/examples)
-directory (clone the repo — they are not in the pip wheel). After
-[installing](installation.md) optional backends, use
-[Verify your install](installation.md#verify) for copy-paste commands:
-**`pytest`**, **example scripts**, and **benchmarks**.
+Examples live in the source repository under
+[`examples/`](https://github.com/gaaraujo/openseespy-solvers/tree/main/examples). They are
+not included in the pip wheel.
 
-There are two kinds of scripts:
+There are two groups:
 
-1. **Benchmarks** — [`brick_bar.py`](https://github.com/gaaraujo/openseespy-solvers/blob/main/examples/brick_bar.py) and
-   [`brick_bar_eigen.py`](https://github.com/gaaraujo/openseespy-solvers/blob/main/examples/brick_bar_eigen.py) sweep mesh sizes and compare
-   PythonSparse against native OpenSees solvers.
-2. **Solver catalog** — [`examples/solvers/`](https://github.com/gaaraujo/openseespy-solvers/tree/main/examples/solvers) has **one runnable
-   script per solver factory** (small mesh, Passed!/Failed! smoke test).
+1. **Benchmarks**: [`brick_bar.py`](https://github.com/gaaraujo/openseespy-solvers/blob/main/examples/brick_bar.py)
+   and [`brick_bar_eigen.py`](https://github.com/gaaraujo/openseespy-solvers/blob/main/examples/brick_bar_eigen.py)
+   compare recommended PythonSparse solvers with native OpenSees solvers.
+2. **Solver catalog**: [`examples/solvers/`](https://github.com/gaaraujo/openseespy-solvers/tree/main/examples/solvers)
+   contains one small runnable script per solver factory.
 
 ```bash
-pip install -e ".[dev,opensees]"   # from repo root; add GPU/UMFPACK extras as needed
+python -m pip install -e ".[dev,opensees]"   # from repo root; add optional backends as needed
 cd examples
 
 # Benchmarks
@@ -27,32 +25,30 @@ python solvers/scipy_spsolve.py
 python solvers/scipy_eigsh.py
 ```
 
-Optional GPU backends (CuPy, nvMath) and UMFPACK: see the
+Optional GPU backends and UMFPACK are documented in the
 [installation guide](installation.md). For which factories to try first, see
-[Recommended solvers](recommended-solvers.md) (`scipy_spsolve`, `scipy_umfpack`,
-`scipy_eigsh`, `nvmath_direct_solver`, `cupy_eigsh`).
+[Recommended solvers](recommended-solvers.md).
 
 ## Benchmark scripts
 
 | Script | Analysis | Solvers compared |
 |--------|----------|------------------|
-| [`brick_bar.py`](https://github.com/gaaraujo/openseespy-solvers/blob/main/examples/brick_bar.py) | static | [Recommended](recommended-solvers.md) PythonSparse vs `BandGeneral`, `SuperLU`, `UmfPack` |
-| [`brick_bar_eigen.py`](https://github.com/gaaraujo/openseespy-solvers/blob/main/examples/brick_bar_eigen.py) | eigen | Recommended `scipy.eigsh` / `cupy.eigsh` vs `genBandArpack` (`fullGenLapack` tiebreaker) |
+| [`brick_bar.py`](https://github.com/gaaraujo/openseespy-solvers/blob/main/examples/brick_bar.py) | Static | Recommended PythonSparse solvers vs `BandGeneral`, `SuperLU`, `UmfPack` |
+| [`brick_bar_eigen.py`](https://github.com/gaaraujo/openseespy-solvers/blob/main/examples/brick_bar_eigen.py) | Eigen | Recommended `scipy.eigsh` / `cupy.eigsh` vs `genBandArpack` |
 
 ## Solver catalog (one factory per script)
 
 | Backend | Scripts |
 |---------|---------|
-| SciPy | `scipy_spsolve`, `scipy_umfpack`, `hybrid_spsolve`, `scipy_cg`, `scipy_cg_jacobi`, `scipy_gmres`, `scipy_gmres_ilu`, `scipy_eigsh`, `scipy_lobpcg` (manual) |
-| CuPy | `cupy_spsolve`, `cupy_cg`, `cupy_cg_jacobi`, `cupy_gmres`, `cupy_gmres_ilu`, `cupy_eigsh`, `cupy_lobpcg` (manual) |
+| SciPy | `scipy_spsolve`, `scipy_umfpack`, `hybrid_spsolve`, `scipy_cg`, `scipy_cg_jacobi`, `scipy_gmres`, `scipy_gmres_ilu`, `scipy_eigsh`, `scipy_lobpcg` |
+| CuPy | `cupy_spsolve`, `cupy_cg`, `cupy_cg_jacobi`, `cupy_gmres`, `cupy_gmres_ilu`, `cupy_eigsh`, `cupy_lobpcg` |
 | nvMath | `nvmath_direct_solver` |
 
 Preconditioners (`scipy.precond` / `cupy.precond`: `jacobi`, `ilu`, `direct`) are demonstrated via
 `M=` on `cg`, `gmres`, or `lobpcg` in the `*_jacobi`, `*_ilu`, and LOBPCG scripts.
 
-**LOBPCG** (`scipy_lobpcg`, `cupy_lobpcg`) uses a larger mesh, identical SciPy/CuPy solver
-settings (`_lobpcg_example.py`), and compares each backend's `lobpcg` against its own
-`eigsh` reference. Manual-only — not run by `pytest` on the tiny smoke mesh. Use
+`scipy_lobpcg` and `cupy_lobpcg` use a larger mesh and compare each backend's `lobpcg`
+against its own `eigsh` reference. They are intended for manual experiments; use
 [`eigsh`](recommended-solvers.md) for normal eigen work.
 
 Every catalog script follows the same OpenSeesPy style: top-to-bottom flow,
@@ -67,9 +63,9 @@ MESH_FACTORS = [1.5, 2.0, 2.5, 3.0]
 
 ## Two-tier eigen verification
 
-Eigen examples compare `PythonSparse` to OpenSees **`genBandArpack`** first (fast banded
-reference). If eigenvalues or the mode shape disagree, they fall back to **`fullGenLapack`**
-(dense LAPACK tiebreaker). Catalog scripts use the same logic via
+Eigen examples compare `PythonSparse` to OpenSees **`genBandArpack`** first. If eigenvalues
+or the mode shape disagree, they fall back to **`fullGenLapack`** as a dense LAPACK
+tiebreaker. Catalog scripts use the same logic via
 [`run_eigen_verified()`](https://github.com/gaaraujo/openseespy-solvers/blob/main/examples/solvers/_brick_common.py).
 
 ## String-based solver loop (benchmarks)

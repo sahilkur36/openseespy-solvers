@@ -2,10 +2,8 @@
 
 GPU direct sparse linear solver implemented with [NVIDIA nvmath-python](https://pypi.org/project/nvmath-python/).
 
-**Recommended for `Ax = b` via `PythonSparse` when you have CUDA** (static, transient, etc.) —
-often faster than many native
-OpenSees direct solvers on medium-to-large systems. See
-[Recommended solvers](../recommended-solvers.md).
+**Recommended for `Ax = b` via `PythonSparse` when you have CUDA** for static, transient,
+and similar linear solve steps. See [Recommended solvers](../recommended-solvers.md).
 
 Requires **serial OpenSeesPy** — assembly stays on the CPU; nvMath factorizes on GPU.
 See [parallelism](../user-guide/pythonsparse-interface.md#parallelism).
@@ -15,8 +13,7 @@ Importing this module does not require ``nvmath-python``; the dependency is load
 [installation](../installation.md#gpu)), for example:
 
 ```bash
-pip install cupy-cuda13x
-pip install "nvmath-python[cu13]>=0.9.0"
+python -m pip install "openseespy-solvers[cuda13]"
 ```
 
 ## Functions

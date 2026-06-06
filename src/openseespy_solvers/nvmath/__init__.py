@@ -5,8 +5,8 @@ This module wraps :class:`nvmath.sparse.advanced.DirectSolver` for OpenSeesPy's
 Requires CuPy and a CUDA-capable GPU; use SciPy solvers on CPU instead.
 
 Importing this module does **not** require ``nvmath-python``; the dependency is
-loaded when ``direct_solver()`` is called. Install a CUDA-matched stack — see
-:doc:`installation`.
+loaded when ``direct_solver()`` is called. Install a CUDA-matched extra, for example
+``python -m pip install "openseespy-solvers[cuda13]"``.
 
 See Also
 --------

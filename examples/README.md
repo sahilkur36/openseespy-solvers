@@ -14,8 +14,8 @@ copy, and run. The benchmark scripts stay separate for timing sweeps.
 
 ## Quick start
 
-Clone the repo and follow [Full setup](../docs/installation.md#full-setup) (environment →
-install → [verify](../docs/installation.md#verify)). Then from `examples/`:
+Clone the repo and follow [Fresh Environment](../docs/installation.md#full-setup), then run
+the checks in [Verify](../docs/installation.md#verify). From `examples/`:
 
 ```bash
 # Benchmark comparisons (mesh sweeps)
@@ -36,7 +36,7 @@ Optional backends (UMFPACK, nvMath, CuPy): see the
 
 ## Solver catalog (`solvers/`)
 
-Each script builds a small 3-D brick bar, runs one analysis, and prints **Passed!** /
+Each script builds a small 3-D brick bar, runs one analysis, and prints **Passed!** or
 **Failed!**. All use `solver.to_openseespy()` with `ops.system("PythonSparse", ...)`.
 
 Eigen scripts and `brick_bar_eigen` use **two-tier verification**: compare PythonSparse to
@@ -44,7 +44,7 @@ OpenSees **`genBandArpack`** first; if results disagree, fall back to **`fullGen
 (dense tiebreaker). The benchmark sweep uses only recommended eigen solvers. Experimental
 `lobpcg` scripts use a larger mesh, share settings in `_lobpcg_example.py`, and verify
 against the matching backend's `eigsh` (not native OpenSees eigen solvers). They are
-**manual-only** (not in pytest smoke tests).
+manual-only and are not part of the default pytest smoke tests.
 Use the default mesh sweep for CI; add `--large-test` only when you want heavier runs.
 
 ### SciPy (`openseespy_solvers.scipy`)
@@ -84,7 +84,7 @@ Preconditioner factories live in `openseespy_solvers.scipy.precond`: **`jacobi`*
 
 | Script | Factory |
 |--------|---------|
-| [`nvmath_direct_solver.py`](solvers/nvmath_direct_solver.py) | `direct_solver()` — needs `cupy-cuda12x`/`cupy-cuda13x` and matching `nvmath-python[cu12]`/`[cu13]` |
+| [`nvmath_direct_solver.py`](solvers/nvmath_direct_solver.py) | `direct_solver()` — needs `[cuda12]` or `[cuda13]` |
 
 ## Benchmark scripts
 

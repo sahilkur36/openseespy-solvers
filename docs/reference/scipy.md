@@ -34,7 +34,8 @@ interface; they are described in each function's docstring.
 [`umfpack`](../api/scipy.md#openseespy_solvers.scipy.umfpack) is a 64-bit direct
 solver (`scikits.umfpack.UmfpackContext("dl")`) distinct from the SuperLU-based
 [`spsolve`](../api/scipy.md#openseespy_solvers.scipy.spsolve). It requires the
-optional `scikit-umfpack` package: `pip install openseespy-solvers[umfpack]`.
+optional `scikit-umfpack` package:
+`python -m pip install "openseespy-solvers[umfpack]"`.
 The import is deferred until `umfpack()` is called, so the SciPy namespace
 imports without it.
 

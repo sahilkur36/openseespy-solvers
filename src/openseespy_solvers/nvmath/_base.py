@@ -36,7 +36,8 @@ def _import_nvmath() -> Any:
     except ImportError as exc:  # pragma: no cover - exercised only without nvmath
         raise ImportError(
             "The 'nvmath' backend requires nvmath-python. "
-            "Install with: pip install \"nvmath-python[cu13]\" (or [cu12]; see installation docs)"
+            "Install with: python -m pip install \"openseespy-solvers[cuda13]\" "
+            "(or [cuda12]; see installation docs)"
         ) from exc
     return nvmath
 
@@ -60,7 +61,8 @@ def _resolve_sp_module(
             except ImportError as exc:  # pragma: no cover
                 raise ImportError(
                     "CuPy sparse matrices require CuPy. "
-                    "Install with: pip install openseespy-solvers[cupy]"
+                    "Install with: python -m pip install "
+                    '"openseespy-solvers[cuda13]"'
                 ) from exc
         return sp_module, is_gpu
 
@@ -72,7 +74,8 @@ def _resolve_sp_module(
         except ImportError as exc:  # pragma: no cover
             raise ImportError(
                 "device='gpu' requires CuPy. "
-                "Install with: pip install openseespy-solvers[cupy]"
+                "Install with: python -m pip install "
+                '"openseespy-solvers[cuda13]"'
             ) from exc
         return csp, True
 

@@ -1,4 +1,4 @@
-"""Ready-to-use PythonSparse solvers for OpenSeesPy."""
+"""SciPy-style PythonSparse solvers for OpenSeesPy."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from openseespy_solvers.exceptions import (
 )
 from openseespy_solvers.hybrid import hybrid
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "BackendNotAvailableError",

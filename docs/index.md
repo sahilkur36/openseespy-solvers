@@ -1,62 +1,74 @@
-# openseespy_solvers
+# openseespy-solvers
 
-Sparse linear algebra solvers for [OpenSeesPy](https://openseespydoc.readthedocs.io/)
-`PythonSparse` system and eigen commands.
+`openseespy-solvers` provides SciPy-style sparse linear and eigen solvers for
+[OpenSeesPy](https://openseespydoc.readthedocs.io/) `PythonSparse` commands.
 
-The package wraps existing numerical libraries—primarily
-[`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html)
-and [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse.html)—as
-solver objects that OpenSeesPy can call directly. Factory signatures match the
-underlying library except that the system matrix and right-hand side are assembled
-by OpenSees and passed at solve time.
+The package wraps numerical libraries such as
+[`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html),
+[`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse.html),
+and NVIDIA nvMath as solver objects. OpenSeesPy assembles the model matrices; the solver
+object receives those arrays, runs the selected backend, and writes results back to
+OpenSeesPy.
 
-For linear (static, transient, …) and modal analysis, see **[Recommended solvers](recommended-solvers.md)**:
-**`nvmath.direct_solver`** or **`cupy.eigsh`** with a CUDA GPU;
-**`scipy.spsolve`** / **`scipy.umfpack`** and **`scipy.eigsh`** on CPU. These paths are
-often faster than native OpenSees sparse/direct/eigen solvers on medium-to-large models
-because they delegate to heavily optimized third-party libraries.
+## Start Here
 
-## Submodules
+```bash
+python -m pip install openseespy-solvers
+```
 
-| Module | Description |
-|--------|-------------|
-| [`scipy`](reference/scipy.md) | CPU solvers (`spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg`) |
-| [`scipy.precond`](api/precond.md) | Preconditioner factories (`jacobi`, `ilu`, `direct`) |
-| [`cupy`](reference/cupy.md) | GPU solvers (`spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg`) |
-| [`cupy.precond`](api/precond_cupy.md) | GPU preconditioner factories (`jacobi`, `ilu`, `direct`) |
-| [`nvmath`](reference/nvmath.md) | GPU direct sparse solver (`direct_solver`) |
-| [`hybrid`](api/hybrid.md) | Frozen factorization + GMRES (`hybrid(direct=...)`) |
+If OpenSeesPy is not already installed:
 
-## Quick reference
+```bash
+python -m pip install "openseespy-solvers[opensees]"
+```
+
+Then wire a solver into OpenSeesPy:
 
 ```python
 import openseespy.opensees as ops
-from openseespy_solvers.scipy import cg
-from openseespy_solvers.scipy import precond
+from openseespy_solvers.scipy import spsolve
 
-solver = cg(rtol=1e-8, M=precond.jacobi)
+solver = spsolve()
 ops.system("PythonSparse", solver.to_openseespy())
-ops.analyze(1)
 ```
 
-After a linear solve, `solver.A`, `solver.b`, and `solver.x` refer to the cached
-matrix and vectors from the last call. See [LinearSolver attributes](user-guide/solver-objects.md).
+For a full model example, continue with the [tutorial](getting-started.md).
 
-## GitHub
+## Recommended Defaults
 
-Source, bug reports, and feature requests:
-[github.com/gaaraujo/openseespy-solvers](https://github.com/gaaraujo/openseespy-solvers).
-Open an [issue](https://github.com/gaaraujo/openseespy-solvers/issues) for problems or
-questions; contributions (pull requests, documentation fixes, examples) are welcome there
-as well.
+| Analysis | CPU | NVIDIA GPU |
+|----------|-----|-------------|
+| Static or transient linear solve | `scipy.spsolve`; `scipy.umfpack` for larger CPU systems | `nvmath.direct_solver` |
+| Generalized eigen solve | `scipy.eigsh` | `cupy.eigsh` |
 
-## See Also
+See [Recommended solvers](recommended-solvers.md) for the reasoning, install notes, and
+alternatives.
+
+## Modules
+
+| Module | Provides |
+|--------|----------|
+| [`scipy`](reference/scipy.md) | CPU solvers: `spsolve`, `umfpack`, `cg`, `gmres`, `eigsh`, `lobpcg` |
+| [`scipy.precond`](api/precond.md) | CPU preconditioners: `jacobi`, `ilu`, `direct` |
+| [`cupy`](reference/cupy.md) | GPU solvers: `spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg` |
+| [`cupy.precond`](api/precond_cupy.md) | GPU preconditioners: `jacobi`, `ilu`, `direct` |
+| [`nvmath`](reference/nvmath.md) | GPU direct sparse solver: `direct_solver` |
+| [`hybrid`](api/hybrid.md) | Direct factorization reused as a GMRES preconditioner |
+
+Factory signatures match the underlying SciPy or CuPy functions where possible. The matrix
+and right-hand side are supplied by OpenSeesPy at solve time.
+
+## Helpful Pages
 
 - [Installation](installation.md)
-- [Full setup from scratch](installation.md#full-setup)
-- [Verify your install](installation.md#verify)
-- [Recommended solvers](recommended-solvers.md)
-- [PythonSparse documentation](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system/PythonSparse.html)
 - [Tutorial](getting-started.md)
+- [Recommended solvers](recommended-solvers.md)
+- [Examples](examples.md)
+- [Solver objects](user-guide/solver-objects.md)
+- [PythonSparse interface](user-guide/pythonsparse-interface.md)
 - [API reference](api/scipy.md)
-- [Serial OpenSeesPy and parallelism](user-guide/pythonsparse-interface.md#parallelism)
+
+## Support
+
+Source, issues, and contributions are hosted on
+[GitHub](https://github.com/gaaraujo/openseespy-solvers).

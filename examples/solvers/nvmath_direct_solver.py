@@ -1,7 +1,7 @@
 """Brick bar static analysis — nvMath ``direct_solver`` (GPU).
 
-Install: ``pip install cupy-cuda13x`` and ``pip install "nvmath-python[cu13]"``
-(see docs/installation.md; use ``cu12`` / ``cupy-cuda12x`` for CUDA 12.x).
+Install: ``python -m pip install "openseespy-solvers[cuda13]"``
+(see docs/installation.md; use ``[cuda12]`` for CUDA 12.x).
 """
 
 import os
@@ -18,7 +18,7 @@ try:
     from openseespy_solvers.nvmath import direct_solver
 except ImportError as exc:
     print("nvMath backend not available:", exc)
-    print('Install: pip install "nvmath-python[cu13]" and cupy-cuda13x')
+    print('Install: python -m pip install "openseespy-solvers[cuda13]"  # or [cuda12]')
     raise SystemExit(1) from exc
 
 import openseespy.opensees as ops

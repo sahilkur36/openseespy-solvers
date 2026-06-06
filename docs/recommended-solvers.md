@@ -1,31 +1,30 @@
-# Recommended solvers
+# Recommended Solvers
 
-These are practical defaults for **linear** analysis steps (`ops.system("PythonSparse", ...)`
-— static, transient, and any procedure that assembles `Ax = b`) and **modal**
-(`ops.eigen("PythonSparse", ...)`). They route work through
-[SciPy](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html),
-[UMFPACK](https://scikit-umfpack.github.io/scikit-umfpack/),
-[ARPACK](https://docs.scipy.org/doc/scipy/tutorial/arpack.html), and (with a GPU)
-[NVIDIA nvMath](https://docs.nvidia.com/cuda/nvmath-python/latest/) / [CuPy](https://docs.cupy.dev/)
-instead of OpenSees’s built-in sparse/direct/eigen routines.
+These are practical first choices for OpenSeesPy `PythonSparse` analyses. They are not
+universal winners: performance depends on model size, sparsity, hardware, and the native
+OpenSees solver used for comparison.
 
-On many medium-to-large models, the combinations below are **often faster** than native OpenSees
-solvers (for example `BandSPD`, `UmfPack`, or bundled ARPACK paths), because they reuse
-long‑optimized library implementations and factorization reuse via `matrix_status`. Exact
-speedups depend on problem size, sparsity, hardware, and which OpenSees solver you compare
-against.
+## Linear Systems
 
----
+Use these for static, transient, or other analyses that solve `Ax = b` through
+`ops.system("PythonSparse", ...)`.
 
-## Linear systems (`Ax = b`)
+| Situation | Start with | Notes |
+|-----------|------------|-------|
+| CPU | [`scipy.spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve) | Good default; uses SciPy's sparse direct solver |
+| CPU, larger systems | [`scipy.umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack) | Optional UMFPACK backend; often worth trying for larger sparse systems |
+| NVIDIA GPU | [`nvmath.direct_solver`](api/nvmath.md#openseespy_solvers.nvmath.direct_solver) | Recommended GPU direct solver |
 
-| Situation | Recommended | OpenSees hook |
-|-----------|-------------|-----------------|
-| **NVIDIA GPU + CUDA** | [`nvmath.direct_solver`](api/nvmath.md#openseespy_solvers.nvmath.direct_solver) | `ops.system("PythonSparse", solver.to_openseespy())` |
-| **CPU only** | [`scipy.spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve) | same |
-| **CPU, large systems** | [`scipy.umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack) (optional extra) | same |
+CPU example:
 
-**GPU example**
+```python
+from openseespy_solvers.scipy import spsolve
+
+solver = spsolve()
+ops.system("PythonSparse", solver.to_openseespy())
+```
+
+GPU example:
 
 ```python
 from openseespy_solvers.nvmath import direct_solver
@@ -34,46 +33,24 @@ solver = direct_solver()
 ops.system("PythonSparse", solver.to_openseespy())
 ```
 
-**CPU example**
+Iterative solvers (`cg`, `gmres`) are useful when direct factorization is too expensive or
+when you have a good preconditioner. See [Preconditioners](user-guide/preconditioners.md).
 
-```python
-from openseespy_solvers.scipy import spsolve  # or umfpack
+For Newton or transient analyses where the tangent changes slowly, consider
+[`hybrid`](api/hybrid.md). It reuses a direct factorization as a GMRES preconditioner until
+the system size changes or GMRES fails to converge.
 
-solver = spsolve()
-ops.system("PythonSparse", solver.to_openseespy())
-```
+## Eigenproblems
 
-Install paths: [GPU backends](installation.md#gpu) (CuPy + nvMath wheels) and
-[UMFPACK](installation.md#umfpack) (platform-specific; conda-forge on Windows).
+Use these for generalized modal problems `K x = lambda M x` through
+`ops.eigen("PythonSparse", ...)`.
 
-Iterative solvers (`cg`, `gmres`) are available when a direct factorization is too costly;
-see [Preconditioners](user-guide/preconditioners.md). For many structural static or transient
-steps with a reusable tangent, a **direct** solver above is the first choice.
+| Situation | Start with | Notes |
+|-----------|------------|-------|
+| CPU | [`scipy.eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh) | ARPACK through SciPy |
+| NVIDIA GPU | [`cupy.eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh) | Uses GPU work in the shift-invert path |
 
-For Newton or transient analyses where the tangent changes slowly between steps, consider
-[`hybrid`](api/hybrid.md) (`hybrid(direct=spsolve(), ...)`) — it factorizes once, then
-reuses that factorization as a GMRES preconditioner until the system size changes or GMRES
-fails to converge.
-
----
-
-## Generalized eigenproblems (`K x = λ M x`)
-
-| Situation | Recommended | Notes |
-|-----------|-------------|--------|
-| **NVIDIA GPU + CUDA** | [`cupy.eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh) | Default `mass_mode="general"`; SciPy ARPACK + GPU shift-invert inner solves |
-| **CPU only** | [`scipy.eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh) | Same physical problem; ARPACK on CPU |
-
-**GPU (consistent mass)**
-
-```python
-from openseespy_solvers.cupy import eigsh
-
-eigsolver = eigsh(tol=1e-8)
-lam = ops.eigen("PythonSparse", num_modes, eigsolver.to_openseespy())
-```
-
-**CPU**
+CPU example:
 
 ```python
 from openseespy_solvers.scipy import eigsh
@@ -82,49 +59,50 @@ eigsolver = eigsh(tol=1e-8)
 lam = ops.eigen("PythonSparse", num_modes, eigsolver.to_openseespy())
 ```
 
-Additional **experimental** eigen solvers are available (for example
-[`cupy.lobpcg`](api/cupy.md#openseespy_solvers.cupy.lobpcg), other
-[`cupy.eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh) `mass_mode` values, and
-[`scipy.lobpcg`](api/scipy.md#openseespy_solvers.scipy.lobpcg)). For most models, use the
-recommended [`scipy.eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh) or
-[`cupy.eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh) paths above.
+GPU example:
 
----
+```python
+from openseespy_solvers.cupy import eigsh
 
-## Quick install recap
-
-**CPU (eigen + linear)**
-
-```bash
-pip install openseespy-solvers
-pip install openseespy-solvers[umfpack]   # optional; see installation.md on Windows
+eigsolver = eigsh(tol=1e-8)
+lam = ops.eigen("PythonSparse", num_modes, eigsolver.to_openseespy())
 ```
 
-**GPU (recommended stack for both tables above)**
+`lobpcg` is available for experiments and specialized workflows. For routine modal
+analysis, start with `eigsh`.
+
+## Install Recap
+
+CPU:
 
 ```bash
-pip install openseespy-solvers
-nvidia-smi   # read CUDA Version (12.x or 13.x)
-pip install cupy-cuda13x                  # or cupy-cuda12x
-pip install "nvmath-python[cu13]>=0.9.0"  # or [cu12]
+python -m pip install "openseespy-solvers[opensees]"
 ```
 
-Full steps, driver checks, and troubleshooting: [Installation](installation.md).
+Optional UMFPACK:
 
----
+```bash
+python -m pip install "openseespy-solvers[umfpack]"
+```
 
-## Serial OpenSeesPy and parallelism
+NVIDIA GPU, using CUDA 13.x as an example:
 
-All solvers in this package assume **serial OpenSeesPy** — state determination, assembly,
-and the rest of the analysis pipeline run on one process. GPU backends (CuPy, nvMath)
-parallelize the **sparse solve** on CUDA, not domain decomposition or MPI OpenSees.
+```bash
+python -m pip install "openseespy-solvers[opensees,cuda13]"
+```
 
-Full detail: [Serial OpenSeesPy and parallelism](user-guide/pythonsparse-interface.md#parallelism).
+See [Installation](installation.md) for CUDA 12.x, Windows UMFPACK, and troubleshooting.
 
----
+## Parallelism
 
-## See also
+These solvers target serial OpenSeesPy. GPU backends accelerate the sparse solve, but model
+assembly and the `PythonSparse` callback still run in one process. See
+[PythonSparse and parallelism](user-guide/pythonsparse-interface.md#parallelism).
 
-- [Tutorial](getting-started.md) — copy-paste OpenSees wiring
-- [Examples](examples.md) — brick bar scripts
-- [Reference: scipy](reference/scipy.md) · [cupy](reference/cupy.md) · [nvmath](reference/nvmath.md)
+## See Also
+
+- [Tutorial](getting-started.md)
+- [Examples](examples.md)
+- [Reference: scipy](reference/scipy.md)
+- [Reference: cupy](reference/cupy.md)
+- [Reference: nvmath](reference/nvmath.md)

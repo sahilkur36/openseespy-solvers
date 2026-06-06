@@ -5,7 +5,8 @@ for OpenSeesPy's ``PythonSparse`` commands. Factory signatures match CuPy's
 SciPy-compatible API except that ``A`` and ``b`` (or ``K`` and ``M``) are
 supplied by OpenSees at solve time.
 
-Importing this module requires CuPy (``pip install openseespy-solvers[cupy]``).
+Importing this module requires CuPy. Install a CUDA-matched extra, for example
+``python -m pip install "openseespy-solvers[cuda13]"`` or use ``[cuda12]``.
 
 Notes
 -----

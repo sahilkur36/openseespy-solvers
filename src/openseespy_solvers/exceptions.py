@@ -30,5 +30,6 @@ class BackendNotAvailableError(OpenSeesSolverError, ImportError):
     """Optional backend library is not installed.
 
     For example, importing :mod:`openseespy_solvers.cupy` without CuPy raises
-    this exception. Install with ``pip install openseespy-solvers[cupy]``.
+    this exception. Install the CUDA 13 extra, for example
+    ``python -m pip install "openseespy-solvers[cuda13]"``.
     """

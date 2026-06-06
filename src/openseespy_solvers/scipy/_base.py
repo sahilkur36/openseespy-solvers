@@ -33,7 +33,7 @@ def _import_umfpack() -> Any:
     except ImportError as exc:  # pragma: no cover - exercised only without umfpack
         raise ImportError(
             "The 'umfpack' solver requires scikit-umfpack. "
-            "Install with: pip install openseespy-solvers[umfpack]"
+            "Install with: python -m pip install \"openseespy-solvers[umfpack]\""
         ) from exc
     return umfpack
 

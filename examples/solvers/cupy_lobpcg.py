@@ -8,7 +8,7 @@ meshes. Run manually from ``examples/``:
 Verification compares ``lobpcg`` against ``eigsh`` on the same mesh (see
 ``_lobpcg_example.py`` for shared settings).
 
-Install: ``pip install cupy-cuda13x`` (see docs/installation.md)
+Install: ``python -m pip install "openseespy-solvers[cuda13]"`` (or ``[cuda12]``)
 """
 
 import os
@@ -25,7 +25,7 @@ try:
     from openseespy_solvers.cupy import eigsh, lobpcg, precond
 except Exception as exc:
     print("CuPy backend not available:", exc)
-    print("Install: pip install cupy-cuda13x")
+    print('Install: python -m pip install "openseespy-solvers[cuda13]"  # or [cuda12]')
     raise SystemExit(1) from exc
 
 import openseespy.opensees as ops

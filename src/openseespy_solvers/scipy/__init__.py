@@ -438,7 +438,7 @@ def umfpack(
     Unlike :func:`spsolve` (SuperLU), this uses the UMFPACK library and 64-bit
     (``int64``) indices, which suits very large systems whose index count
     exceeds the 32-bit range. Requires the optional ``scikit-umfpack`` package
-    (``pip install openseespy-solvers[umfpack]``); the import is deferred until
+    (``python -m pip install "openseespy-solvers[umfpack]"``); the import is deferred until
     this factory is called.
 
     Parameters
