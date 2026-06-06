@@ -57,6 +57,28 @@ OpenSees indicates how the system matrix changed since the previous solve:
 `UNCHANGED`
 : Reuse the cached matrix. Direct solvers also reuse the LU factorization.
 
+## Serial OpenSeesPy and parallelism {#parallelism}
+
+These solvers work with **serial OpenSeesPy** — the standard build where the full
+analysis pipeline runs on **one process**. That includes state determination, element
+and nodal assembly, constraint handling, convergence tests, and the call into
+`PythonSparse` with the assembled stiffness (and mass, for eigen).
+
+This package does **not** support parallel or MPI OpenSeesPy builds where the model
+is partitioned across processes. `PythonSparse` callbacks always run in the same
+process that owns the model.
+
+**Where parallelism exists today**
+
+| Layer | Behavior |
+|-------|----------|
+| OpenSees model pipeline | Serial (single CPU process) |
+| SciPy backends (`spsolve`, `cg`, `eigsh`, …) | CPU linear algebra; may use multithreaded BLAS/LAPACK inside SciPy/UMFPACK |
+| CuPy / nvMath backends | **GPU** factorization, iterative solve, or eigen iteration; matrix assembly still happens on the CPU in OpenSees, with host↔device transfers inside the solver |
+
+So a GPU setup speeds up the **sparse solve step**, not domain decomposition or
+multi-rank OpenSees analysis.
+
 ## See Also
 
 [solver objects](solver-objects.md), [to_openseespy()](to-openseespy.md)

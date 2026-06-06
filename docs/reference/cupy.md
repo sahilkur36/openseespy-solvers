@@ -6,6 +6,9 @@ This module mirrors [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stabl
 Importing it requires a CUDA-matched CuPy wheel (for example `cupy-cuda13x`); see
 [GPU install](../installation.md#gpu).
 
+Requires **serial OpenSeesPy** — OpenSees assembles the matrix on the CPU; CuPy runs the
+solve on GPU. See [parallelism](../user-guide/pythonsparse-interface.md#parallelism).
+
 **Recommended on GPU:** [`eigsh`](../api/cupy.md#openseespy_solvers.cupy.eigsh) for modal
 analysis (default `mass_mode="general"`). Pair with
 [`nvmath.direct_solver`](nvmath.md) for linear `PythonSparse` steps. See

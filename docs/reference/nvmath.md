@@ -7,6 +7,9 @@ often faster than many native
 OpenSees direct solvers on medium-to-large systems. See
 [Recommended solvers](../recommended-solvers.md).
 
+Requires **serial OpenSeesPy** — assembly stays on the CPU; nvMath factorizes on GPU.
+See [parallelism](../user-guide/pythonsparse-interface.md#parallelism).
+
 Importing this module does not require ``nvmath-python``; the dependency is loaded when
 ``direct_solver()`` is called. Install a CUDA-matched stack (see
 [installation](../installation.md#gpu)), for example:

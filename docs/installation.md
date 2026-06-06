@@ -22,7 +22,7 @@ Which solvers to use in OpenSees: [Recommended solvers](recommended-solvers.md).
 | Python | ≥ 3.12 |
 | NumPy | ≥ 1.26 |
 | SciPy | ≥ 1.12 |
-| OpenSeesPy | Required for examples, benchmarks, and integration tests |
+| OpenSeesPy | Required for examples, benchmarks, and integration tests — **serial build only** (see [parallelism](user-guide/pythonsparse-interface.md#parallelism)) |
 
 OpenSeesPy is **not** installed by `pip install openseespy-solvers` alone. The full setup
 below uses the `[opensees]` extra. Minimum versions are enforced in `pyproject.toml`.

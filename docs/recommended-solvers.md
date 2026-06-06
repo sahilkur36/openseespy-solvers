@@ -113,6 +113,16 @@ Full steps, driver checks, and troubleshooting: [Installation](installation.md).
 
 ---
 
+## Serial OpenSeesPy and parallelism
+
+All solvers in this package assume **serial OpenSeesPy** — state determination, assembly,
+and the rest of the analysis pipeline run on one process. GPU backends (CuPy, nvMath)
+parallelize the **sparse solve** on CUDA, not domain decomposition or MPI OpenSees.
+
+Full detail: [Serial OpenSeesPy and parallelism](user-guide/pythonsparse-interface.md#parallelism).
+
+---
+
 ## See also
 
 - [Tutorial](getting-started.md) — copy-paste OpenSees wiring

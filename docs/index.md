@@ -59,3 +59,4 @@ as well.
 - [PythonSparse documentation](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system/PythonSparse.html)
 - [Tutorial](getting-started.md)
 - [API reference](api/scipy.md)
+- [Serial OpenSeesPy and parallelism](user-guide/pythonsparse-interface.md#parallelism)

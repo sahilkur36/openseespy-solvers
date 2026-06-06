@@ -8,7 +8,9 @@ commands.
 
 ## Installation
 
-Requires **Python ≥ 3.12**, **NumPy ≥ 1.26**, **SciPy ≥ 1.12**, and **OpenSeesPy**.
+Requires **Python ≥ 3.12**, **NumPy ≥ 1.26**, **SciPy ≥ 1.12**, and **serial OpenSeesPy**
+(parallel/MPI OpenSeesPy builds are not supported — see
+[docs](https://openseespy-solvers.readthedocs.io/en/latest/user-guide/pythonsparse-interface/#parallelism)).
 
 ### Full setup from scratch
 
