@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Documentation: [Recommended solvers](docs/recommended-solvers.md) (CPU/GPU defaults, performance notes vs native OpenSees); installation quick-start recipes.
+- Documentation: [Recommended solvers](recommended-solvers.md) (CPU/GPU defaults, performance notes vs native OpenSees); installation quick-start recipes.
 - CuPy `eigsh` for `K x = λ M x` with shift-invert (`mass_mode`: `diagonal`, `lumped`, `general`).
 - nvMath `direct_solver` factory: NVIDIA `nvmath.sparse.advanced.DirectSolver` with plan/factorize/solve caching; namespace `openseespy_solvers.nvmath`; optional `[nvmath]` extra (`nvmath-python[cpu]>=0.8.0`). CPU execution uses SciPy sparse matrices; GPU execution also requires `[cupy]` and a GPU-capable nvmath-python install (e.g. `nvmath-python[cu12-dx]`).
 - SciPy `umfpack` solver: 64-bit UMFPACK direct solver (`scikits.umfpack.UmfpackContext("dl")`) with cached symbolic/numeric factorization; optional `[umfpack]` extra (`scikit-umfpack>=0.3.3`).

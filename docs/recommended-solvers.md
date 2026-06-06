@@ -51,7 +51,7 @@ see [Preconditioners](user-guide/preconditioners.md). For many structural static
 steps with a reusable tangent, a **direct** solver above is the first choice.
 
 For Newton or transient analyses where the tangent changes slowly between steps, consider
-[`hybrid`](../api/hybrid.md) (`hybrid(direct=spsolve(), ...)`) — it factorizes once, then
+[`hybrid`](api/hybrid.md) (`hybrid(direct=spsolve(), ...)`) — it factorizes once, then
 reuses that factorization as a GMRES preconditioner until the system size changes or GMRES
 fails to converge.
 
