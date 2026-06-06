@@ -1,6 +1,6 @@
 site_name: openseespy-solvers
 site_description: SciPy-style PythonSparse solvers for OpenSeesPy
-site_url: https://openseespy-solvers.github.io/openseespy-solvers/
+site_url: https://openseespy-solvers.readthedocs.io/
 repo_url: https://github.com/gaaraujo/openseespy-solvers
 repo_name: gaaraujo/openseespy-solvers
 
