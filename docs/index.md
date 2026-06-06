@@ -12,11 +12,32 @@ OpenSeesPy.
 
 ## Start Here
 
+In a new environment:
+
 ```bash
 python -m pip install openseespy-solvers
 ```
 
-If OpenSeesPy is not already installed:
+for a default installation.
+
+```bash
+python -m pip install "openseespy-solvers[umfpack]"
+```
+
+for the latest UMFPACK-backed CPU direct solver (`scipy.umfpack`). On Windows, see
+[UMFPACK install notes](installation.md#umfpack).
+
+```bash
+python -m pip install "openseespy-solvers[cuda12]"
+# or
+python -m pip install "openseespy-solvers[cuda13]"
+```
+
+if you have an NVIDIA GPU and want GPU-accelerated solvers (CuPy + nvMath). Match
+`cuda12` / `cuda13` to the CUDA generation from `nvidia-smi`. Details:
+[GPU install](installation.md#gpu).
+
+If you want to make sure OpenSeesPy is installed as well:
 
 ```bash
 python -m pip install "openseespy-solvers[opensees]"
