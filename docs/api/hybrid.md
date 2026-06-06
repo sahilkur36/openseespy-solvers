@@ -10,7 +10,7 @@ unnecessarily expensive.
 
 | Factory | Description |
 |---------|-------------|
-| [`hybrid`](#openseespy_solvers.hybrid) | Direct factorization reused as a GMRES preconditioner |
+| [`hybrid`](#openseespy_solvers.hybrid.hybrid) | Direct factorization reused as a GMRES preconditioner |
 
 ## Usage
 

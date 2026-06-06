@@ -1,6 +1,7 @@
 site_name: openseespy-solvers
 site_description: SciPy-style PythonSparse solvers for OpenSeesPy
-site_url: https://openseespy-solvers.readthedocs.io/
+# RTD sets READTHEDOCS_CANONICAL_URL (e.g. …/en/stable/) so internal links keep the version prefix.
+site_url: !ENV [READTHEDOCS_CANONICAL_URL, 'http://127.0.0.1:8000/']
 repo_url: https://github.com/gaaraujo/openseespy-solvers
 repo_name: gaaraujo/openseespy-solvers
 
@@ -23,7 +24,6 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
   features:
-    - navigation.tabs
     - navigation.sections
     - navigation.expand
     - content.code.copy
