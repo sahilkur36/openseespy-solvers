@@ -24,6 +24,9 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
   features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.path
     - navigation.sections
     - navigation.expand
     - content.code.copy
@@ -62,10 +65,11 @@ markdown_extensions:
   - tables
 
 nav:
-  - Home: index.md
-  - Installation: installation.md
-  - Recommended solvers: recommended-solvers.md
-  - Tutorial: getting-started.md
+  - Getting started:
+      - Home: index.md
+      - Installation: installation.md
+      - Recommended solvers: recommended-solvers.md
+      - Tutorial: getting-started.md
   - User guide:
       - PythonSparse interface: user-guide/pythonsparse-interface.md
       - Solver objects: user-guide/solver-objects.md
@@ -80,8 +84,9 @@ nav:
       - openseespy_solvers.nvmath: api/nvmath.md
       - openseespy_solvers.hybrid: api/hybrid.md
       - Exceptions: api/exceptions.md
-  - Examples: examples.md
-  - Release notes: changelog.md
+  - Project:
+      - Examples: examples.md
+      - Release notes: changelog.md
 
 extra:
   social:
