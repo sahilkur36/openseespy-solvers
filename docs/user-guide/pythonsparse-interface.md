@@ -64,6 +64,23 @@ analysis pipeline runs on **one process**. That includes state determination, el
 and nodal assembly, constraint handling, convergence tests, and the call into
 `PythonSparse` with the assembled stiffness (and mass, for eigen).
 
+![OpenSeesPy assembles on the CPU; PythonSparse receives buffers; GPU backends solve on device](../assets/pythonsparse-gpu-workflow.png)
+
+The diagram above is a typical **nonlinear static/transient** step with a GPU direct or
+iterative backend:
+
+1. **OpenSees (CPU, C++)** — Newton loop: element state determination, assemble residual
+   `r` and effective tangent `K_T*`, update displacements when converged.
+2. **Python solver (CPU, Python)** — `PythonSparse` callback reads `r` and `K_T*`
+   from OpenSees memoryviews, orchestrates the backend, writes `Δu` back.
+3. **GPU (optional)** — copy `r` and `K_T*` host→device, solve
+   `K_T* Δu = r`, copy `Δu` device→host. SciPy/UMFPACK paths stay on the CPU instead
+   of the third column.
+
+Eigen analysis follows the same split: OpenSees assembles **K** and **M** on the CPU; the
+solver object runs ARPACK, LOBPCG, or shift-invert on CPU and/or GPU depending on the
+factory you choose.
+
 This package does **not** support parallel or MPI OpenSeesPy builds where the model
 is partitioned across processes. `PythonSparse` callbacks always run in the same
 process that owns the model.

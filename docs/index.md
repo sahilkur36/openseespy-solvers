@@ -10,6 +10,17 @@ and NVIDIA nvMath as solver objects. OpenSeesPy assembles the model matrices; th
 object receives those arrays, runs the selected backend, and writes results back to
 OpenSeesPy.
 
+## How it works
+
+OpenSeesPy runs the analysis loop on the CPU (state determination, assembly, Newton
+iterations). When a linear solve is needed, it calls your **PythonSparse** solver with
+assembled buffers; GPU backends copy data to the device, solve, and copy the result back.
+
+![OpenSeesPy PythonSparse workflow with optional GPU solve](assets/pythonsparse-gpu-workflow.png)
+
+More detail on callbacks, matrix status, and what runs where:
+[PythonSparse interface](user-guide/pythonsparse-interface.md#parallelism).
+
 ## Start Here
 
 In a new environment:
