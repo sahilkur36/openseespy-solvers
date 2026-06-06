@@ -103,6 +103,6 @@ assembly and the `PythonSparse` callback still run in one process. See
 
 - [Tutorial](getting-started.md)
 - [Examples](examples.md)
-- [Reference: scipy](reference/scipy.md)
-- [Reference: cupy](reference/cupy.md)
-- [Reference: nvmath](reference/nvmath.md)
+- [API: scipy](api/scipy.md)
+- [API: cupy](api/cupy.md)
+- [API: nvmath](api/nvmath.md)

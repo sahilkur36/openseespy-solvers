@@ -69,11 +69,11 @@ alternatives.
 
 | Module | Provides |
 |--------|----------|
-| [`scipy`](reference/scipy.md) | CPU solvers: `spsolve`, `umfpack`, `cg`, `gmres`, `eigsh`, `lobpcg` |
+| [`scipy`](api/scipy.md) | CPU solvers: `spsolve`, `umfpack`, `cg`, `gmres`, `eigsh`, `lobpcg` |
 | [`scipy.precond`](api/precond.md) | CPU preconditioners: `jacobi`, `ilu`, `direct` |
-| [`cupy`](reference/cupy.md) | GPU solvers: `spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg` |
+| [`cupy`](api/cupy.md) | GPU solvers: `spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg` |
 | [`cupy.precond`](api/precond_cupy.md) | GPU preconditioners: `jacobi`, `ilu`, `direct` |
-| [`nvmath`](reference/nvmath.md) | GPU direct sparse solver: `direct_solver` |
+| [`nvmath`](api/nvmath.md) | GPU direct sparse solver: `direct_solver` |
 | [`hybrid`](api/hybrid.md) | Direct factorization reused as a GMRES preconditioner |
 
 Factory signatures match the underlying SciPy or CuPy functions where possible. The matrix
@@ -87,7 +87,7 @@ and right-hand side are supplied by OpenSeesPy at solve time.
 - [Examples](examples.md)
 - [Solver objects](user-guide/solver-objects.md)
 - [PythonSparse interface](user-guide/pythonsparse-interface.md)
-- [API reference](api/scipy.md)
+- [API reference](api/index.md)
 
 ## Support
 
