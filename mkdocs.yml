@@ -72,7 +72,6 @@ nav:
       - Tutorial: getting-started.md
   - User guide:
       - PythonSparse interface: user-guide/pythonsparse-interface.md
-      - Node numbering: user-guide/numberer.md
       - Solver objects: user-guide/solver-objects.md
       - to_openseespy: user-guide/to-openseespy.md
       - Preconditioners: user-guide/preconditioners.md

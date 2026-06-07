@@ -5,8 +5,7 @@ see the [OpenSeesPy documentation](https://openseespydoc.readthedocs.io/) and
 [examples](examples.md).
 
 For install steps (CPU vs GPU wheels), see [Installation](installation.md). For which
-solver to pick first, see [Recommended solvers](recommended-solvers.md). For OpenSees
-`numberer` choices (`Plain` vs `RCM`), see [Node numbering](user-guide/numberer.md).
+solver to pick first, see [Recommended solvers](recommended-solvers.md).
 
 ## Recommended choices (summary)
 
@@ -38,8 +37,7 @@ ops.analyze(1)
 ```
 
 The LU factorization is reused when OpenSees reports an unchanged matrix structure and
-sparsity pattern between solves. Use `ops.numberer("Plain")` with direct sparse solvers
-(the library applies its own reordering); see [Node numbering](user-guide/numberer.md).
+sparsity pattern between solves.
 
 For large systems on CPU, prefer [`umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack)
 after installing UMFPACK (see [installation — UMFPACK](installation.md#umfpack)).

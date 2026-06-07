@@ -29,8 +29,7 @@ NATIVE_STATIC_SOLVERS = ["BandGeneral", "SuperLU", "UmfPack"]
 # Benchmark scripts: skip a solver on finer meshes after it uses this fraction of --time-limit.
 BUDGET_SKIP_FRACTION = 0.85
 
-# OpenSees numberer: Plain for sparse direct (library reorders internally); RCM for banded
-# and iterative paths. See docs/user-guide/numberer.md.
+# OpenSees numberer: Plain for sparse direct (library reorders internally); RCM for banded/iterative.
 _NATIVE_NUMBERER_RCM = frozenset({"BandGeneral", "genBandArpack"})
 _DIRECT_PYTHONSPARSE_CLASSES = frozenset({"_SpSolve", "_Umfpack", "_DirectSolver"})
 

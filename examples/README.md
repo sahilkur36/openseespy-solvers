@@ -38,8 +38,6 @@ Optional backends (UMFPACK, nvmath, `cupy`): see the
 
 Each script builds a small 3-D brick bar, runs one analysis, and prints **Passed!** or
 **Failed!**. All use `solver.to_openseespy()` with `ops.system("PythonSparse", ...)`.
-Shared helpers pick **`Plain`** for direct sparse solvers and **`RCM`** for iterative ones
-(see [Node numbering](../docs/user-guide/numberer.md)).
 
 Eigen scripts and `brick_bar_eigen` use **two-tier verification**: compare PythonSparse to
 OpenSees **`genBandArpack`** first; if results disagree, fall back to **`fullGenLapack`**
