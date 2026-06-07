@@ -1,0 +1,51 @@
+mesh_factor,equations,solver,status,seconds
+1.5,540,PythonSparse (scipy.spsolve),0,0.025208699982613325
+1.5,540,PythonSparse (scipy.umfpack),0,0.07552920002490282
+1.5,540,PythonSparse (nvmath.direct_solver),0,0.4008070999989286
+1.5,540,BandGeneral,0,0.01900599990040064
+1.5,540,SuperLU,0,0.024616200011223555
+2.0,900,PythonSparse (scipy.spsolve),0,0.059396800003014505
+2.0,900,PythonSparse (scipy.umfpack),0,0.07399780000559986
+2.0,900,PythonSparse (nvmath.direct_solver),0,0.10086510004475713
+2.0,900,BandGeneral,0,0.0502070999937132
+2.0,900,SuperLU,0,0.04900789994280785
+2.5,1800,PythonSparse (scipy.spsolve),0,0.111329699982889
+2.5,1800,PythonSparse (scipy.umfpack),0,0.14340020006056875
+2.5,1800,PythonSparse (nvmath.direct_solver),0,0.20281919999979436
+2.5,1800,BandGeneral,0,0.10226960002910346
+2.5,1800,SuperLU,0,0.1446281000971794
+3.0,2520,PythonSparse (scipy.spsolve),0,0.15147679997608066
+3.0,2520,PythonSparse (scipy.umfpack),0,0.2072352000977844
+3.0,2520,PythonSparse (nvmath.direct_solver),0,0.1840841000666842
+3.0,2520,BandGeneral,0,0.13149800000246614
+3.0,2520,SuperLU,0,0.16152369999326766
+4.0,5400,PythonSparse (scipy.spsolve),0,0.368091500014998
+4.0,5400,PythonSparse (scipy.umfpack),0,0.5123700000112876
+4.0,5400,PythonSparse (nvmath.direct_solver),0,0.3813088999595493
+4.0,5400,BandGeneral,0,0.39593329990748316
+4.0,5400,SuperLU,0,0.4664350999519229
+5.0,9900,PythonSparse (scipy.spsolve),0,0.8328294999664649
+5.0,9900,PythonSparse (scipy.umfpack),0,1.2696508000371978
+5.0,9900,PythonSparse (nvmath.direct_solver),0,0.9075449000811204
+5.0,9900,BandGeneral,0,0.9096061999443918
+5.0,9900,SuperLU,0,0.9185323000419885
+6.0,16380,PythonSparse (scipy.spsolve),0,2.099968600086868
+6.0,16380,PythonSparse (scipy.umfpack),0,2.703655399964191
+6.0,16380,PythonSparse (nvmath.direct_solver),0,1.5347397000296041
+6.0,16380,BandGeneral,0,2.0273024999769405
+6.0,16380,SuperLU,0,1.8650070000439882
+8.0,36720,PythonSparse (scipy.spsolve),0,9.762588300043717
+8.0,36720,PythonSparse (scipy.umfpack),0,6.888229000032879
+8.0,36720,PythonSparse (nvmath.direct_solver),0,2.7394475999753922
+8.0,36720,BandGeneral,0,8.004212799947709
+8.0,36720,SuperLU,0,10.937961100018583
+10.0,69300,PythonSparse (scipy.spsolve),0,18.946374799939804
+10.0,69300,PythonSparse (scipy.umfpack),0,17.830668100039475
+10.0,69300,PythonSparse (nvmath.direct_solver),0,5.620134899974801
+10.0,69300,BandGeneral,0,27.244841099949554
+10.0,69300,SuperLU,0,30.037254399969243
+11.0,91080,PythonSparse (scipy.spsolve),0,27.670647600083612
+11.0,91080,PythonSparse (scipy.umfpack),0,23.016907199984416
+11.0,91080,PythonSparse (nvmath.direct_solver),0,7.559191600070335
+11.0,91080,BandGeneral,0,47.22398719994817
+11.0,91080,SuperLU,0,55.80555589997675

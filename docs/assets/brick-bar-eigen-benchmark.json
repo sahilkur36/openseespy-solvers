@@ -1,0 +1,75 @@
+{
+  "generated_at": "2026-06-07T22:17:55.403179+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 141 Stepping 1, GenuineIntel",
+  "python": "3.12.5",
+  "mesh_factors": [
+    1.0,
+    2.0,
+    3.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0,
+    11.0
+  ],
+  "mesh_table": [
+    {
+      "factor": 1.0,
+      "nx": 10,
+      "ny": 1,
+      "nz": 2,
+      "equations": 180
+    },
+    {
+      "factor": 2.0,
+      "nx": 20,
+      "ny": 2,
+      "nz": 4,
+      "equations": 900
+    },
+    {
+      "factor": 3.0,
+      "nx": 30,
+      "ny": 3,
+      "nz": 6,
+      "equations": 2520
+    },
+    {
+      "factor": 4.0,
+      "nx": 40,
+      "ny": 4,
+      "nz": 8,
+      "equations": 5400
+    },
+    {
+      "factor": 6.0,
+      "nx": 60,
+      "ny": 6,
+      "nz": 12,
+      "equations": 16380
+    },
+    {
+      "factor": 8.0,
+      "nx": 80,
+      "ny": 8,
+      "nz": 16,
+      "equations": 36720
+    },
+    {
+      "factor": 10.0,
+      "nx": 100,
+      "ny": 10,
+      "nz": 20,
+      "equations": 69300
+    },
+    {
+      "factor": 11.0,
+      "nx": 110,
+      "ny": 11,
+      "nz": 22,
+      "equations": 91080
+    }
+  ],
+  "num_modes": 5
+}

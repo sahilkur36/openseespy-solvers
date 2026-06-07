@@ -70,7 +70,6 @@ nav:
   - Getting started:
       - Home: index.md
       - Installation: installation.md
-      - Recommended solvers: recommended-solvers.md
       - Tutorial: getting-started.md
   - User guide:
       - PythonSparse interface: user-guide/pythonsparse-interface.md

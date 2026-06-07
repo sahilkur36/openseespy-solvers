@@ -2,8 +2,7 @@
 
 This page shows how to wire solvers from this package into OpenSeesPy. Model-building
 details are omitted; see the [OpenSeesPy documentation](https://openseespydoc.readthedocs.io/)
-and [examples](examples.md). For install steps, see [Installation](installation.md). For
-which solver to pick first, see [Recommended solvers](recommended-solvers.md).
+and [examples](examples.md). For install steps, see [Installation](installation.md).
 
 ## Linear analysis
 
@@ -68,9 +67,10 @@ solver = direct_solver()
 ops.system("PythonSparse", solver.to_openseespy())
 ```
 
-Iterative solvers (`cg`, `gmres`) and hybrid direct/iterative schemes are available when a
-full factorization is too expensive; see [Recommended solvers](recommended-solvers.md) and
-[Preconditioners](user-guide/preconditioners.md).
+When a full factorization is too expensive, try iterative solvers (`cg`, `gmres`) with a
+[preconditioner](user-guide/preconditioners.md), or [`hybrid`](api/hybrid.md) to reuse a
+direct factorization as a GMRES preconditioner. See the [API overview](api/index.md) for all
+factories.
 
 ## Generalized eigenvalue analysis
 

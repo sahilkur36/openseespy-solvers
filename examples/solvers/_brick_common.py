@@ -19,12 +19,17 @@ REFERENCE_EIGEN_SOLVER = TRUSTED_EIGEN_SOLVER
 
 # Mesh-size knobs for benchmark scripts (mesh_size = BAR_THICKNESS / factor).
 DEFAULT_STATIC_MESH_FACTORS = [1.5, 2.0, 2.5, 3.0]
-LARGE_STATIC_MESH_FACTORS = [4.0, 5.0, 6.0, 8.0]
+LARGE_STATIC_MESH_FACTORS = [4.0, 5.0, 6.0, 8.0, 10.0, 11.0]
 DEFAULT_EIGEN_MESH_FACTORS = [1.0, 2.0, 3.0, 4.0]
-LARGE_EIGEN_MESH_FACTORS = [4.0, 6.0, 8.0, 10.0]
+LARGE_EIGEN_MESH_FACTORS = [4.0, 6.0, 8.0, 10.0, 11.0]
+STATIC_MESH_FACTORS = [*DEFAULT_STATIC_MESH_FACTORS, *LARGE_STATIC_MESH_FACTORS]
+EIGEN_MESH_FACTORS = [
+    *DEFAULT_EIGEN_MESH_FACTORS,
+    *(f for f in LARGE_EIGEN_MESH_FACTORS if f not in DEFAULT_EIGEN_MESH_FACTORS),
+]
 
 # Native OpenSees solvers compared in ``brick_bar.py`` (static benchmark).
-NATIVE_STATIC_SOLVERS = ["BandGeneral", "SuperLU", "UmfPack"]
+NATIVE_STATIC_SOLVERS = ["BandGeneral", "SuperLU"]
 
 # Benchmark scripts: skip a solver on finer meshes after it uses this fraction of --time-limit.
 BUDGET_SKIP_FRACTION = 0.85
@@ -120,7 +125,7 @@ def eigen_skips_trusted_reference(label: str) -> bool:
 
 
 def pythonsparse_static_solvers() -> list[tuple[str, object]]:
-    """Recommended PythonSparse static solvers (see docs/recommended-solvers.md)."""
+    """Default PythonSparse static solvers (see docs/getting-started.md)."""
     from openseespy_solvers.scipy import spsolve as scipy_spsolve
 
     solvers: list[tuple[str, object]] = []
@@ -150,7 +155,7 @@ def pythonsparse_static_solvers() -> list[tuple[str, object]]:
 
 
 def pythonsparse_eigen_solvers() -> list[tuple[str, object]]:
-    """Recommended PythonSparse eigen solvers (see docs/recommended-solvers.md)."""
+    """Default PythonSparse eigen solvers (see docs/getting-started.md)."""
     from openseespy_solvers.scipy import eigsh
 
     solvers: list[tuple[str, object]] = []

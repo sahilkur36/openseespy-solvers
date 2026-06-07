@@ -71,10 +71,8 @@ factorization; only ``solve`` stays on GPU.
 ```python
 from openseespy_solvers.scipy import cg, precond
 
-solver = cg(
-    rtol=1e-8,
-    M=lambda A: precond.ilu(A, drop_tol=1e-4, fill_factor=10),
-)
+solver = cg(rtol=1e-8, M=precond.jacobi)
+# solver = cg(rtol=1e-8, M=precond.ilu)
 ```
 
 ## Example (cupy)
@@ -82,13 +80,42 @@ solver = cg(
 ```python
 from openseespy_solvers.cupy import cg, precond
 
-solver = cg(rtol=1e-8, M=precond.ilu)  # fill_factor=1, GPU ILU(0)-like
+solver = cg(rtol=1e-8, M=precond.jacobi)
+# solver = cg(rtol=1e-8, M=precond.ilu)  # fill_factor=1, GPU ILU(0)-like
 ```
 
-## Notes
+Pass the factory itself (`M=precond.jacobi`, `M=precond.ilu`, …) on either
+backend. OpenSees calls `M(A)` when the assembled matrix is available.
 
-Pass a `cupyx.scipy.sparse.linalg.LinearOperator` or a custom factory when you
-need a preconditioner not covered by `precond`.
+## Custom preconditioner options
+
+When a built-in factory accepts extra keyword arguments (for example
+``drop_tol`` on [`ilu`](../api/precond.md#openseespy_solvers.scipy.precond.ilu)),
+wrap it in a lambda or use ``functools.partial`` so `M` remains a single-argument
+callable:
+
+```python
+from openseespy_solvers.scipy import cg, precond
+
+solver = cg(
+    rtol=1e-8,
+    M=lambda A: precond.ilu(A, drop_tol=1e-4, fill_factor=10),
+)
+```
+
+The same pattern works on GPU when you need non-default `spilu` settings:
+
+```python
+from openseespy_solvers.cupy import cg, precond
+
+solver = cg(
+    rtol=1e-8,
+    M=lambda A: precond.ilu(A, fill_factor=2),
+)
+```
+
+You can also pass a fixed `LinearOperator`, a sparse matrix, or any other
+factory `M(A)` if you need a preconditioner not covered by `precond`.
 
 ## See Also
 

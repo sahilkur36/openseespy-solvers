@@ -1,5 +1,13 @@
 # Examples
 
+To refresh the example figures on the docs site (requires `matplotlib`—`pip install matplotlib`):
+
+```bash
+cd examples
+python plot_brick_bar_benchmark.py              # static + eigen
+python plot_brick_bar_benchmark.py --eigen-only # eigen only
+```
+
 ## Layout
 
 | Location | Purpose |
@@ -94,10 +102,10 @@ Change the mesh sweep in one line (bigger number = finer mesh):
 MESH_FACTORS = [1.5, 2.0, 2.5, 3.0]
 ```
 
-Benchmarks compare [recommended solvers](../docs/recommended-solvers.md) to native
+Benchmarks compare [default PythonSparse solvers](../docs/getting-started.md) to native
 OpenSees backends. **Static** (`brick_bar.py`): `scipy.spsolve`, optional
 `scipy.umfpack`, optional `nvmath.direct_solver` (GPU), vs `BandGeneral`,
-`SuperLU`, `UmfPack`. **Eigen** (`brick_bar_eigen.py`): `scipy.eigsh`, optional
+`SuperLU`. **Eigen** (`brick_bar_eigen.py`): `scipy.eigsh`, optional
 `cupy.eigsh`, vs `genBandArpack` (`fullGenLapack` tiebreaker on mismatch). Other
 factories remain in `solvers/` as smoke tests only.
 
@@ -107,7 +115,7 @@ String-based solver loop (no lambdas):
 from openseespy_solvers.scipy import spsolve
 
 solver = spsolve()
-NATIVE_SOLVERS = brick.NATIVE_STATIC_SOLVERS  # BandGeneral, SuperLU, UmfPack
+NATIVE_SOLVERS = brick.NATIVE_STATIC_SOLVERS  # BandGeneral, SuperLU
 
 for factor in MESH_FACTORS:
     nx, ny, nz = mesh_counts(factor)

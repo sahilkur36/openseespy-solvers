@@ -88,20 +88,38 @@ def far_corner_node():
     return None
 
 
-def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
+def run_benchmark(
+    mesh_factors,
+    *,
+    time_limit=DEFAULT_TIME_LIMIT,
+    table=None,
+    on_row=None,
+    skip_rows=None,
+):
     pythonsparse_solvers = brick.pythonsparse_eigen_solvers()
     results = []
     far_node = None
     mode_shape = None
     skip_remaining: set[str] = set()
+    skip_rows = skip_rows or set()
 
     def record(row):
         results.append(row)
         if table is not None:
             table.add_row(*row)
+        if on_row is not None:
+            on_row(row)
 
     for factor in mesh_factors:
         nx, ny, nz = mesh_counts(factor)
+        pending_py = [
+            (label, solver)
+            for label, solver in pythonsparse_solvers
+            if (factor, label) not in skip_rows
+        ]
+        reference_done = (factor, FAST_REFERENCE) in skip_rows
+        if not pending_py and reference_done:
+            continue
 
         if FAST_REFERENCE in skip_remaining:
             build_model(nx, ny, nz)
@@ -110,7 +128,19 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
             ref_ev = None
             ref_mode = None
             ref_mode_last = None
-            record((factor, equations, FAST_REFERENCE, -2, 0.0, float("nan")))
+            if not reference_done:
+                record((factor, equations, FAST_REFERENCE, -2, 0.0, float("nan")))
+        elif reference_done:
+            build_model(nx, ny, nz)
+            far_node = far_corner_node()
+            ref_ev = ops.eigen(FAST_REFERENCE, NUM_MODES)
+            equations = ops.systemSize()
+            ref_mode = ops.nodeEigenvector(far_node, 1) if far_node is not None and ref_ev else None
+            ref_mode_last = (
+                ops.nodeEigenvector(far_node, NUM_MODES)
+                if far_node is not None and ref_ev
+                else None
+            )
         else:
             build_model(nx, ny, nz)
             far_node = far_corner_node()
@@ -137,6 +167,8 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
             record((factor, equations, FAST_REFERENCE, ref_status, ref_seconds, ref_first))
 
         for label, solver in pythonsparse_solvers:
+            if (factor, label) in skip_rows:
+                continue
             if label in skip_remaining:
                 record((factor, equations, label, -2, 0.0, float("nan")))
                 continue
@@ -202,6 +234,11 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
                 print(
                     f"  Mesh {factor}: {label} mismatch vs {FAST_REFERENCE}; "
                     f"{TRUSTED_REFERENCE} skipped on finer meshes"
+                )
+            elif (factor, TRUSTED_REFERENCE) in skip_rows:
+                print(
+                    f"  Mesh {factor}: {label} mismatch vs {FAST_REFERENCE}; "
+                    f"{TRUSTED_REFERENCE} already in CSV (tiebreaker skipped)"
                 )
             else:
                 build_model(nx, ny, nz)

@@ -124,22 +124,36 @@ def apply_load():
         ops.load(node, 0.0, 0.0, -load)
 
 
-def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
+def run_benchmark(
+    mesh_factors,
+    *,
+    time_limit=DEFAULT_TIME_LIMIT,
+    table=None,
+    on_row=None,
+    skip_rows=None,
+):
     pythonsparse_solvers = brick.pythonsparse_static_solvers()
     results = []
     far_node = None
     skip_remaining: set[str] = set()
+    skip_rows = skip_rows or set()
+
+    def emit(row):
+        results.append(row)
+        if table is not None:
+            table.add_row(*row)
+        if on_row is not None:
+            on_row(row)
 
     for factor in mesh_factors:
         nx, ny, nz = mesh_counts(factor)
         for label, solver in pythonsparse_solvers:
+            if (factor, label) in skip_rows:
+                continue
             if label in skip_remaining:
                 build_model(nx, ny, nz)
                 equations = brick.equation_count_for_mesh()
-                row = (factor, equations, label, -2, 0.0)
-                results.append(row)
-                if table is not None:
-                    table.add_row(*row)
+                emit((factor, equations, label, -2, 0.0))
                 continue
             build_model(nx, ny, nz)
             far_node = far_corner_node()
@@ -159,18 +173,14 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
                     label, seconds, time_limit, factor=factor, skip_remaining=skip_remaining
                 )
             equations = ops.systemSize()
-            row = (factor, equations, label, status, seconds)
-            results.append(row)
-            if table is not None:
-                table.add_row(*row)
+            emit((factor, equations, label, status, seconds))
         for name in NATIVE_SOLVERS:
+            if (factor, name) in skip_rows:
+                continue
             if name in skip_remaining:
                 build_model(nx, ny, nz)
                 equations = brick.equation_count_for_mesh()
-                row = (factor, equations, name, -2, 0.0)
-                results.append(row)
-                if table is not None:
-                    table.add_row(*row)
+                emit((factor, equations, name, -2, 0.0))
                 continue
             build_model(nx, ny, nz)
             far_node = far_corner_node()
@@ -190,10 +200,7 @@ def run_benchmark(mesh_factors, *, time_limit=DEFAULT_TIME_LIMIT, table=None):
                     name, seconds, time_limit, factor=factor, skip_remaining=skip_remaining
                 )
             equations = ops.systemSize()
-            row = (factor, equations, name, status, seconds)
-            results.append(row)
-            if table is not None:
-                table.add_row(*row)
+            emit((factor, equations, name, status, seconds))
 
     return pythonsparse_solvers, results, far_node
 

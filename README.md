@@ -54,13 +54,6 @@ solver = spsolve()
 
 # after defining the OpenSeesPy model:
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("Plain")
-ops.constraints("Plain")
-ops.integrator("LoadControl", 1.0)
-ops.test("NormUnbalance", 1.0e-8, 25)
-ops.algorithm("Newton")
-ops.analysis("Static")
-ops.analyze(1)
 ```
 
 For eigen analysis:
@@ -68,23 +61,19 @@ For eigen analysis:
 ```python
 from openseespy_solvers.scipy import eigsh
 
-eigsolver = eigsh(tol=1e-8)
-eigenvalues = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
+eig_solver = eigsh()
+eigenvalues = ops.eigen("PythonSparse", 5, eig_solver.to_openseespy())
 ```
 
-## Recommended Solvers
-
-These are good first choices for typical OpenSeesPy analyses:
+## Default Solvers
 
 | Analysis | CPU | NVIDIA GPU |
 |----------|-----|-------------|
 | Static or transient linear solve | `scipy.spsolve`; `scipy.umfpack` for larger CPU systems | `nvmath.direct_solver` |
 | Generalized eigen solve | `scipy.eigsh` | `cupy.eigsh` |
 
-Iterative solvers (`cg`, `gmres`, `lobpcg`) and preconditioners are also available when a
-direct factorization is too expensive or a model benefits from a custom strategy.
-
-More detail: [Recommended solvers](https://openseespy-solvers.readthedocs.io/en/latest/recommended-solvers/).
+Tutorial and API docs cover wiring, alternatives, and optional backends:
+[openseespy-solvers.readthedocs.io](https://openseespy-solvers.readthedocs.io/).
 
 ## Modules
 

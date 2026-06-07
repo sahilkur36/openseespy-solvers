@@ -10,4 +10,7 @@ dist/
 .venv/
 venv/
 site/
+.tmp-mkdocs-*/
 *.csv
+!docs/assets/brick-bar-static-benchmark.csv
+!docs/assets/brick-bar-eigen-benchmark.csv

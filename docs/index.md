@@ -73,8 +73,8 @@ For a full model example, continue with the [tutorial](getting-started.md).
 | Static or transient linear solve | `scipy.spsolve`; `scipy.umfpack` for larger CPU systems | `nvmath.direct_solver` |
 | Generalized eigen solve | `scipy.eigsh` | `cupy.eigsh` |
 
-See [Recommended solvers](recommended-solvers.md) for the reasoning, install notes, and
-alternatives.
+For iterative solvers, preconditioners, and `hybrid`, see the [API overview](api/index.md) and
+[Tutorial](getting-started.md).
 
 ## Modules
 
@@ -94,7 +94,6 @@ and right-hand side are supplied by OpenSeesPy at solve time.
 
 - [Installation](installation.md)
 - [Tutorial](getting-started.md)
-- [Recommended solvers](recommended-solvers.md)
 - [Examples](examples.md)
 - [Solver objects](user-guide/solver-objects.md)
 - [PythonSparse interface](user-guide/pythonsparse-interface.md)
