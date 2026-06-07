@@ -29,24 +29,6 @@ NATIVE_STATIC_SOLVERS = ["BandGeneral", "SuperLU", "UmfPack"]
 # Benchmark scripts: skip a solver on finer meshes after it uses this fraction of --time-limit.
 BUDGET_SKIP_FRACTION = 0.85
 
-# OpenSees numberer: Plain for sparse direct (library reorders internally); RCM for banded/iterative.
-_NATIVE_NUMBERER_RCM = frozenset({"BandGeneral", "genBandArpack"})
-_DIRECT_PYTHONSPARSE_CLASSES = frozenset({"_SpSolve", "_Umfpack", "_DirectSolver"})
-
-
-def numberer_for_native_system(name: str) -> str:
-    """Return ``Plain`` or ``RCM`` for a native ``ops.system(name)`` solver."""
-    if name in _NATIVE_NUMBERER_RCM:
-        return "RCM"
-    return "Plain"
-
-
-def numberer_for_pythonsparse_solver(solver) -> str:
-    """Return ``Plain`` or ``RCM`` for a PythonSparse solver object."""
-    if type(solver).__name__ in _DIRECT_PYTHONSPARSE_CLASSES:
-        return "Plain"
-    return "RCM"
-
 
 def equation_count_for_mesh() -> int:
     """Return ``ops.systemSize()`` after ``build_model`` (requires a linear system)."""
@@ -346,7 +328,7 @@ def apply_load(ops):
 
 def run_static(ops, solver, steps=2):
     ops.system("PythonSparse", solver.to_openseespy())
-    ops.numberer(numberer_for_pythonsparse_solver(solver))
+    ops.numberer("RCM")
     ops.constraints("Plain")
     ops.integrator("LoadControl", 1.0 / steps)
     ops.test("NormUnbalance", 1.0e-7, 50)

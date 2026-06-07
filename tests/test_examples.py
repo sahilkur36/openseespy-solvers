@@ -39,10 +39,8 @@ def _run_example_script(path: Path) -> str:
 
 
 def _run_static(ops, solver, *, steps: int) -> None:
-    import _brick_common as brick
-
     ops.system("PythonSparse", solver.to_openseespy())
-    ops.numberer(brick.numberer_for_pythonsparse_solver(solver))
+    ops.numberer("RCM")
     ops.constraints("Plain")
     ops.integrator("LoadControl", 1.0 / steps)
     ops.test("NormUnbalance", 1.0e-7, 50)

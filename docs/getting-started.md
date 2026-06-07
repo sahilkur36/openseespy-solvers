@@ -31,7 +31,8 @@ ops.system("PythonSparse", solver.to_openseespy())
 ops.numberer("Plain")
 ops.constraints("Plain")
 ops.integrator("LoadControl", 1.0)
-ops.algorithm("Linear")
+ops.test("NormUnbalance", 1.0e-8, 25)
+ops.algorithm("Newton")
 ops.analysis("Static")
 ops.analyze(1)
 ```
@@ -54,10 +55,11 @@ from openseespy_solvers.nvmath import direct_solver
 
 solver = direct_solver()
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("Plain")
+ops.numberer("RCM")
 ops.constraints("Plain")
 ops.integrator("LoadControl", 1.0)
-ops.algorithm("Linear")
+ops.test("NormUnbalance", 1.0e-8, 25)
+ops.algorithm("Newton")
 ops.analysis("Static")
 ops.analyze(1)
 ```
@@ -74,7 +76,6 @@ from openseespy_solvers.scipy import precond
 
 solver = cg(rtol=1e-8, maxiter=500, M=precond.jacobi)
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("RCM")
 ```
 
 The `M` argument accepts a preconditioner object or a callable `M(A)` that receives the
@@ -90,7 +91,6 @@ Recommended CPU path for `K x = λ M x` with the full mass matrix OpenSees assem
 from openseespy_solvers.scipy import eigsh
 
 eigsolver = eigsh(tol=1e-8)
-ops.numberer("RCM")
 lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
 ```
 
@@ -109,7 +109,6 @@ Recommended GPU path when you have CUDA (default `mass_mode="general"`: full `M`
 from openseespy_solvers.cupy import eigsh
 
 eigsolver = eigsh(tol=1e-8)
-ops.numberer("RCM")
 lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
 ```
 
@@ -122,7 +121,6 @@ from openseespy_solvers.cupy import lobpcg, precond
 from openseespy_solvers.nvmath import direct_solver
 
 eigsolver = lobpcg(M=precond.direct(direct_solver()), tol=1e-8)
-ops.numberer("RCM")
 lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
 ```
 
@@ -135,7 +133,6 @@ from openseespy_solvers.cupy import cg
 
 solver = cg(rtol=1e-8)
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("RCM")
 ```
 
 Requires `cupy`. After a solve, `solver.A` and `solver.x` are `cupy` arrays on device.
