@@ -1,26 +1,48 @@
 # Tutorial
 
-This section shows how to wire solvers into OpenSeesPy. Model-building details are omitted;
-see the [OpenSeesPy documentation](https://openseespydoc.readthedocs.io/) and
-[examples](examples.md).
+This page shows how to wire solvers from this package into OpenSeesPy. Model-building
+details are omitted; see the [OpenSeesPy documentation](https://openseespydoc.readthedocs.io/)
+and [examples](examples.md). For install steps, see [Installation](installation.md). For
+which solver to pick first, see [Recommended solvers](recommended-solvers.md).
 
-For install steps (CPU vs GPU wheels), see [Installation](installation.md). For which
-solver to pick first, see [Recommended solvers](recommended-solvers.md).
+## Linear analysis
 
-## Recommended choices (summary)
+The finite element method discretizes a continuous structural model into nodes and
+elements. After assembly, the governing equations can be written, without loss of
+generality, as
 
-| Analysis | With NVIDIA GPU | CPU only |
-|----------|-----------------|----------|
-| Linear `Ax = b` (static, transient, …) | `nvmath.direct_solver` | `scipy.spsolve` or `scipy.umfpack` |
-| Eigen `K x = λ M x` | `cupy.eigsh` | `scipy.eigsh` |
+$$
+\mathbf{M} \ddot{\mathbf{u}} + \mathbf{C} \dot{\mathbf{u}} + \mathbf{p}_r(\mathbf{u}) = \mathbf{p}_f(t),
+$$
 
-These are often faster than built-in OpenSees solvers for many models because they use
-mature library implementations (SuperLU, UMFPACK, ARPACK, nvmath.sparse/cuDSS, etc.) with
-factorization reuse when the matrix is unchanged.
+where $\mathbf{M}$ is the mass matrix, $\mathbf{C}$ is the damping matrix, $\mathbf{u}$ is
+the vector of nodal displacements (and rotations), $\mathbf{p}_r(\mathbf{u})$ collects
+resisting forces (which may be nonlinear in $\mathbf{u}$), and $\mathbf{p}_f(t)$ is the
+applied load vector. For a **static** analysis the inertial term
+$\mathbf{M} \ddot{\mathbf{u}}$ and the damping term $\mathbf{C} \dot{\mathbf{u}}$ are absent.
 
----
+OpenSees advances the solution in time with an **incremental integrator**. At
+each step the nonlinear equilibrium equations are linearized, typically in a Newton
+iteration, resulting in the linear system
+$$
+\mathbf{A} \mathbf{x} = \mathbf{b},
+$$
 
-## Static analysis — CPU direct solver
+where $\mathbf{A}$ is a matrix, and $\mathbf{x}$ and $\mathbf{b}$ are vectors. What
+they represent depends on the integrator and algorithm.
+
+OpenSees assembles $\mathbf{A}$ and $\mathbf{b}$ from the model and passes them to a
+**linear solver** selected with the [`system`](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system.html) command.
+
+A linear `solver` object from this library can be used in OpenSeesPy with the following syntax:
+
+```python
+ops.system("PythonSparse", solver.to_openseespy())
+```
+
+### CPU direct solver
+
+A good default on CPU is [`scipy.spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve):
 
 ```python
 import openseespy.opensees as ops
@@ -28,26 +50,15 @@ from openseespy_solvers.scipy import spsolve
 
 solver = spsolve()
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("Plain")
-ops.constraints("Plain")
-ops.integrator("LoadControl", 1.0)
-ops.test("NormUnbalance", 1.0e-8, 25)
-ops.algorithm("Newton")
-ops.analysis("Static")
-ops.analyze(1)
 ```
 
-The LU factorization is reused when OpenSees reports an unchanged matrix structure and
-sparsity pattern between solves.
+For larger sparse systems on CPU, [`scipy.umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack)
+is often faster once UMFPACK is installed ([installation — UMFPACK](installation.md#umfpack)).
 
-For large systems on CPU, prefer [`umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack)
-after installing UMFPACK (see [installation — UMFPACK](installation.md#umfpack)).
+### GPU direct solver
 
----
-
-## Static analysis — GPU (nvmath.sparse)
-
-Requires `cupy` and nvmath wheels matching your driver ([GPU install](installation.md#gpu)).
+If you have an NVIDIA GPU and the matching optional wheels ([GPU install](installation.md#gpu)),
+use [`nvmath.direct_solver`](api/nvmath.md#openseespy_solvers.nvmath.direct_solver):
 
 ```python
 import openseespy.opensees as ops
@@ -55,96 +66,54 @@ from openseespy_solvers.nvmath import direct_solver
 
 solver = direct_solver()
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("Plain")
-ops.constraints("Plain")
-ops.integrator("LoadControl", 1.0)
-ops.test("NormUnbalance", 1.0e-8, 25)
-ops.algorithm("Newton")
-ops.analysis("Static")
-ops.analyze(1)
 ```
 
----
+Iterative solvers (`cg`, `gmres`) and hybrid direct/iterative schemes are available when a
+full factorization is too expensive; see [Recommended solvers](recommended-solvers.md) and
+[Preconditioners](user-guide/preconditioners.md).
 
-## Static analysis with CG and a Jacobi preconditioner
+## Generalized eigenvalue analysis
 
-Use when a direct factorization is too expensive:
+Modal analysis solves the **generalized eigenvalue problem**:
+
+$$
+\left( \mathbf{K} - \lambda \mathbf{M} \right) \mathbf{\Phi} = \mathbf{0}.
+$$
+
+Here $\lambda$ is an eigenvalue, $\mathbf{\Phi}$ is the corresponding eigenvector, $\mathbf{K}$
+is the stiffness matrix, and $\mathbf{M}$ is the mass matrix. The eigenvalue is the square
+of the natural angular frequency, $\omega = \sqrt{\lambda}$ (rad/s); $\mathbf{\Phi}$ gives
+the mode shape.
+
+An eigen `solver` object from this library can be used in OpenSeesPy with the following syntax:
 
 ```python
-from openseespy_solvers.scipy import cg
-from openseespy_solvers.scipy import precond
-
-solver = cg(rtol=1e-8, maxiter=500, M=precond.jacobi)
-ops.system("PythonSparse", solver.to_openseespy())
+lam = ops.eigen("PythonSparse", num_modes, eig_solver.to_openseespy())
 ```
 
-The `M` argument accepts a preconditioner object or a callable `M(A)` that receives the
-assembled matrix; see [Preconditioners](user-guide/preconditioners.md).
+### CPU eigen solver (`scipy.eigsh`)
 
----
-
-## Modal analysis — CPU (`scipy.eigsh`)
-
-Recommended CPU path for `K x = λ M x` with the full mass matrix OpenSees assembles:
+A good default on CPU is [`scipy.eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh):
 
 ```python
+import openseespy.opensees as ops
 from openseespy_solvers.scipy import eigsh
 
-eigsolver = eigsh(tol=1e-8)
-lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
+eig_solver = eigsh()
+num_modes = 5
+lam = ops.eigen("PythonSparse", num_modes, eig_solver.to_openseespy())
 ```
 
-Eigenvalues and eigenvectors are written to OpenSees output buffers in place.
-`eigsolver.K` and `eigsolver.M` hold the assembled stiffness and mass matrices from the
-last call.
+### GPU eigen solver (`cupy.eigsh`)
 
----
-
-## Modal analysis — GPU (`cupy.eigsh`)
-
-Recommended GPU path when you have CUDA (default `mass_mode="general"`: full `M`,
-`scipy.sparse.linalg.eigsh` / ARPACK on CPU, inner `(K - σ M)⁻¹` solves on GPU):
+A good default on GPU is [`cupy.eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh):
 
 ```python
+import openseespy.opensees as ops
 from openseespy_solvers.cupy import eigsh
 
-eigsolver = eigsh(tol=1e-8)
-lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
+eig_solver = eigsh()
+num_modes = 5
+lam = ops.eigen("PythonSparse", num_modes, eig_solver.to_openseespy())
 ```
 
-For row-sum **lumped** mass (faster, different physics), use `mass_mode="lumped"`.
-
-**LOBPCG** is an alternative iterative eigen solver:
-
-```python
-from openseespy_solvers.cupy import lobpcg, precond
-from openseespy_solvers.nvmath import direct_solver
-
-eigsolver = lobpcg(M=precond.direct(direct_solver()), tol=1e-8)
-lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
-```
-
----
-
-## GPU iterative static (`cupy.cg`)
-
-```python
-from openseespy_solvers.cupy import cg
-
-solver = cg(rtol=1e-8)
-ops.system("PythonSparse", solver.to_openseespy())
-```
-
-Requires `cupy`. After a solve, `solver.A` and `solver.x` are `cupy` arrays on device.
-
----
-
-## See Also
-
-- [Recommended solvers](recommended-solvers.md)
-- [`scipy.spsolve` API](api/scipy.md#openseespy_solvers.scipy.spsolve)
-- [`scipy.umfpack` API](api/scipy.md#openseespy_solvers.scipy.umfpack)
-- [`scipy.eigsh` API](api/scipy.md#openseespy_solvers.scipy.eigsh)
-- [`nvmath.direct_solver` API](api/nvmath.md#openseespy_solvers.nvmath.direct_solver)
-- [`cupy.eigsh` API](api/cupy.md#openseespy_solvers.cupy.eigsh)
-- [PythonSparse interface](user-guide/pythonsparse-interface.md)
