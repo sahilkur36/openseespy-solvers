@@ -87,6 +87,7 @@ nav:
       - Exceptions: api/exceptions.md
   - Project:
       - Examples: examples.md
+      - Adding a solver: adding-a-solver.md
       - Release notes: changelog.md
 
 extra_javascript:

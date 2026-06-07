@@ -15,7 +15,7 @@ from openseespy_solvers.exceptions import (
 )
 from openseespy_solvers.hybrid import hybrid
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 __all__ = [
     "BackendNotAvailableError",

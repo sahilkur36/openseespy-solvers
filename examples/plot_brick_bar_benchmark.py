@@ -9,7 +9,7 @@ import math
 import platform
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -64,7 +64,7 @@ def mesh_table(mesh_factors: list[float]) -> list[dict[str, object]]:
 
 def host_metadata() -> dict[str, str]:
     return {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "platform": platform.platform(),
         "processor": platform.processor() or "unknown",
         "python": platform.python_version(),

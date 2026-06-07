@@ -33,8 +33,13 @@ BENCHMARK_SCRIPTS = [EXAMPLES / "brick_bar.py", EXAMPLES / "brick_bar_eigen.py"]
 
 def _run_example_script(path: Path) -> str:
     out = io.StringIO()
-    with redirect_stdout(out):
-        runpy.run_path(str(path), run_name="__main__")
+    old_argv = sys.argv
+    sys.argv = [str(path)]
+    try:
+        with redirect_stdout(out):
+            runpy.run_path(str(path), run_name="__main__")
+    finally:
+        sys.argv = old_argv
     return out.getvalue()
 
 

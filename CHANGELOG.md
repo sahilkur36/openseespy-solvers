@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-06-08
+
+### Added
+
+- Brick-bar benchmark plot script (`examples/plot_brick_bar_benchmark.py`) with live
+  progress, incremental CSV writes, and `--append` resume.
+- Published static and eigen benchmark assets under `docs/assets/`.
+- Contributor guide: [Adding a solver](adding-a-solver.md).
+- Tutorial FEM theory section and MathJax support in the docs site.
+
+### Changed
+
+- Rewrote the [Examples](examples.md) page with mesh tables, analysis snippets,
+  and timing plots (mesh sweeps through factor 11, ~91k equations).
+- Normalized backend naming in solver docstrings and PyPI description.
+- Docs navigation: merged API reference, workflow diagram, removed
+  `recommended-solvers.md`; refreshed preconditioner guidance.
+- Static benchmark: dropped native OpenSees `UmfPack` from comparisons.
+- Examples: `RCM` numberer for direct solvers; benchmark scripts skip completed
+  mesh/solver pairs when appending results.
+
+### Fixed
+
+- Example smoke tests: isolate `sys.argv` so pytest flags are not passed to
+  `brick_bar.py` / `brick_bar_eigen.py` argparse.
+
 ## [0.1.1] - 2026-06-05
 
 ### Added
