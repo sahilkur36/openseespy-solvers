@@ -67,26 +67,26 @@ markdown_extensions:
   - tables
 
 nav:
-  - Getting started:
+  - Get Started:
       - Home: index.md
       - Installation: installation.md
       - Tutorial: getting-started.md
-  - User guide:
+      - Examples: examples.md
+  - User Guide:
       - PythonSparse interface: user-guide/pythonsparse-interface.md
       - Solver objects: user-guide/solver-objects.md
       - to_openseespy: user-guide/to-openseespy.md
       - Preconditioners: user-guide/preconditioners.md
-  - API reference:
+  - API Reference:
       - Overview: api/index.md
-      - openseespy_solvers.scipy: api/scipy.md
-      - openseespy_solvers.scipy.precond: api/precond.md
-      - openseespy_solvers.cupy: api/cupy.md
-      - openseespy_solvers.cupy.precond: api/precond_cupy.md
-      - openseespy_solvers.nvmath: api/nvmath.md
-      - openseespy_solvers.hybrid: api/hybrid.md
+      - scipy: api/scipy.md
+      - scipy.precond: api/precond.md
+      - cupy: api/cupy.md
+      - cupy.precond: api/precond_cupy.md
+      - nvmath: api/nvmath.md
+      - hybrid: api/hybrid.md
       - Exceptions: api/exceptions.md
-  - Project:
-      - Examples: examples.md
+  - Development:
       - Adding a solver: adding-a-solver.md
       - Release notes: changelog.md
 
