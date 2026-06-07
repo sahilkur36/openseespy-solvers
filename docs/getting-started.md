@@ -5,7 +5,8 @@ see the [OpenSeesPy documentation](https://openseespydoc.readthedocs.io/) and
 [examples](examples.md).
 
 For install steps (CPU vs GPU wheels), see [Installation](installation.md). For which
-solver to pick first, see [Recommended solvers](recommended-solvers.md).
+solver to pick first, see [Recommended solvers](recommended-solvers.md). For OpenSees
+`numberer` choices (`Plain` vs `RCM`), see [Node numbering](user-guide/numberer.md).
 
 ## Recommended choices (summary)
 
@@ -28,7 +29,7 @@ from openseespy_solvers.scipy import spsolve
 
 solver = spsolve()
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("RCM")
+ops.numberer("Plain")
 ops.constraints("Plain")
 ops.integrator("LoadControl", 1.0)
 ops.algorithm("Linear")
@@ -37,7 +38,8 @@ ops.analyze(1)
 ```
 
 The LU factorization is reused when OpenSees reports an unchanged matrix structure and
-sparsity pattern between solves.
+sparsity pattern between solves. Use `ops.numberer("Plain")` with direct sparse solvers
+(the library applies its own reordering); see [Node numbering](user-guide/numberer.md).
 
 For large systems on CPU, prefer [`umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack)
 after installing UMFPACK (see [installation — UMFPACK](installation.md#umfpack)).
@@ -54,7 +56,7 @@ from openseespy_solvers.nvmath import direct_solver
 
 solver = direct_solver()
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("RCM")
+ops.numberer("Plain")
 ops.constraints("Plain")
 ops.integrator("LoadControl", 1.0)
 ops.algorithm("Linear")
@@ -74,6 +76,7 @@ from openseespy_solvers.scipy import precond
 
 solver = cg(rtol=1e-8, maxiter=500, M=precond.jacobi)
 ops.system("PythonSparse", solver.to_openseespy())
+ops.numberer("RCM")
 ```
 
 The `M` argument accepts a preconditioner object or a callable `M(A)` that receives the
@@ -89,6 +92,7 @@ Recommended CPU path for `K x = λ M x` with the full mass matrix OpenSees assem
 from openseespy_solvers.scipy import eigsh
 
 eigsolver = eigsh(tol=1e-8)
+ops.numberer("RCM")
 lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
 ```
 
@@ -107,6 +111,7 @@ Recommended GPU path when you have CUDA (default `mass_mode="general"`: full `M`
 from openseespy_solvers.cupy import eigsh
 
 eigsolver = eigsh(tol=1e-8)
+ops.numberer("RCM")
 lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
 ```
 
@@ -119,6 +124,7 @@ from openseespy_solvers.cupy import lobpcg, precond
 from openseespy_solvers.nvmath import direct_solver
 
 eigsolver = lobpcg(M=precond.direct(direct_solver()), tol=1e-8)
+ops.numberer("RCM")
 lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
 ```
 
@@ -131,6 +137,7 @@ from openseespy_solvers.cupy import cg
 
 solver = cg(rtol=1e-8)
 ops.system("PythonSparse", solver.to_openseespy())
+ops.numberer("RCM")
 ```
 
 Requires `cupy`. After a solve, `solver.A` and `solver.x` are `cupy` arrays on device.

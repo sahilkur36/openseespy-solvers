@@ -54,7 +54,7 @@ solver = spsolve()
 
 # after defining the OpenSeesPy model:
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("RCM")
+ops.numberer("Plain")   # direct sparse: library reorders internally; see docs
 ops.constraints("Plain")
 ops.integrator("LoadControl", 1.0)
 ops.algorithm("Linear")

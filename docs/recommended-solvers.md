@@ -40,6 +40,17 @@ For Newton or transient analyses where the tangent changes slowly, consider
 [`hybrid`](api/hybrid.md). It reuses a direct factorization as a GMRES preconditioner until
 the system size changes or GMRES fails to converge.
 
+## Node numbering
+
+Use **`ops.numberer("Plain")`** with **sparse direct** PythonSparse backends
+(`spsolve`, `umfpack`, `nvmath.direct_solver`, `cupy.spsolve`) and native **`SuperLU`**
+/ **`UmfPack`**. Those libraries apply their own fill-reducing ordering during
+factorization.
+
+Use **`ops.numberer("RCM")`** with **banded** native solvers (`BandGeneral`,
+`genBandArpack`) and **iterative** PythonSparse backends (`cg`, `gmres`, `hybrid`,
+`eigsh`, `lobpcg`). See [Node numbering](user-guide/numberer.md).
+
 ## Eigenproblems
 
 Use these for generalized modal problems `K x = lambda M x` through

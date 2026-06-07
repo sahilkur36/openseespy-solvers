@@ -97,6 +97,7 @@ and right-hand side are supplied by OpenSeesPy at solve time.
 - [Recommended solvers](recommended-solvers.md)
 - [Examples](examples.md)
 - [Solver objects](user-guide/solver-objects.md)
+- [Node numbering](user-guide/numberer.md)
 - [PythonSparse interface](user-guide/pythonsparse-interface.md)
 - [API reference](api/index.md)
 

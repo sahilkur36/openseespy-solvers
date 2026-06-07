@@ -83,9 +83,10 @@ for factor in MESH_FACTORS:
         apply_load()
         if name == "PythonSparse":
             ops.system("PythonSparse", solver.to_openseespy())
+            ops.numberer("Plain")
         else:
             ops.system(name)
-        ops.numberer("RCM")
+            ops.numberer("RCM" if name == "BandGeneral" else "Plain")
         ops.constraints("Plain")
         ops.integrator("LoadControl", 1.0 / NUM_STEPS)
         ops.test("NormUnbalance", 1.0e-7, 50)
