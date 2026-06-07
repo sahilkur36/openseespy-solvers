@@ -55,7 +55,7 @@ from openseespy_solvers.nvmath import direct_solver
 
 solver = direct_solver()
 ops.system("PythonSparse", solver.to_openseespy())
-ops.numberer("RCM")
+ops.numberer("Plain")
 ops.constraints("Plain")
 ops.integrator("LoadControl", 1.0)
 ops.test("NormUnbalance", 1.0e-8, 25)
