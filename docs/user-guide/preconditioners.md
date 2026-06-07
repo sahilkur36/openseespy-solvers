@@ -31,7 +31,7 @@ sparse matrix or `LinearOperator`
 callable
 : A factory `M(A)` returning a sparse matrix or `LinearOperator`.
 
-## Built-in factories (SciPy)
+## Built-in factories (scipy)
 
 [`openseespy_solvers.scipy.precond`](../api/precond.md) provides:
 
@@ -47,7 +47,7 @@ callable
   [`lobpcg`](../api/scipy.md#openseespy_solvers.scipy.lobpcg) ``M=``.
   Pass a direct solver, e.g. ``M=precond.direct(spsolve())``.
 
-## Built-in factories (CuPy)
+## Built-in factories (cupy)
 
 [`openseespy_solvers.cupy.precond`](../api/precond_cupy.md) provides the same
 pattern on GPU:
@@ -58,7 +58,7 @@ pattern on GPU:
 [`ilu`](../api/precond_cupy.md#openseespy_solvers.cupy.precond.ilu)
 : Incomplete LU via [`cupyx.scipy.sparse.linalg.spilu`](https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.sparse.linalg.spilu.html).
 Defaults to ``fill_factor=1`` so factorization runs on the GPU with **no
-fill-in** (ILU(0)-like). Other ``fill_factor`` values use SciPy on CPU for the
+fill-in** (ILU(0)-like). Other ``fill_factor`` values use `scipy.sparse.linalg` on CPU for the
 factorization; only ``solve`` stays on GPU.
 
 [`direct`](../api/precond_cupy.md#openseespy_solvers.cupy.precond.direct)
@@ -66,7 +66,7 @@ factorization; only ``solve`` stays on GPU.
   [`lobpcg`](../api/cupy.md#openseespy_solvers.cupy.lobpcg) ``M=``.
   Pass a direct solver, e.g. ``M=precond.direct(direct_solver())``.
 
-## Example (SciPy)
+## Example (scipy)
 
 ```python
 from openseespy_solvers.scipy import cg, precond
@@ -77,7 +77,7 @@ solver = cg(
 )
 ```
 
-## Example (CuPy)
+## Example (cupy)
 
 ```python
 from openseespy_solvers.cupy import cg, precond
@@ -96,4 +96,4 @@ need a preconditioner not covered by `precond`.
 
 [`scipy.gmres`](../api/scipy.md#openseespy_solvers.scipy.gmres)
 
-[SciPy tutorial: Preconditioned conjugate gradient](https://docs.scipy.org/doc/scipy/tutorial/sparse.html)
+[scipy tutorial: Preconditioned conjugate gradient](https://docs.scipy.org/doc/scipy/tutorial/sparse.html)

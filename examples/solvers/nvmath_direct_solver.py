@@ -1,4 +1,4 @@
-"""Brick bar static analysis — nvMath ``direct_solver`` (GPU).
+"""Brick bar static analysis — nvmath.sparse ``direct_solver`` (GPU).
 
 Install: ``python -m pip install "openseespy-solvers[cuda13]"``
 (see docs/installation.md; use ``[cuda12]`` for CUDA 12.x).
@@ -17,7 +17,7 @@ if _HERE not in sys.path:
 try:
     from openseespy_solvers.nvmath import direct_solver
 except ImportError as exc:
-    print("nvMath backend not available:", exc)
+    print("nvmath backend not available:", exc)
     print('Install: python -m pip install "openseespy-solvers[cuda13]"  # or [cuda12]')
     raise SystemExit(1) from exc
 

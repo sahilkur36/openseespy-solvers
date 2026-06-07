@@ -1,4 +1,4 @@
-"""Brick bar static analysis — SciPy ``spsolve`` (PythonSparse direct)."""
+"""Brick bar static analysis — scipy ``spsolve`` (PythonSparse direct)."""
 
 import os
 import sys

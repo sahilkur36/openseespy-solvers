@@ -1,4 +1,4 @@
-"""Brick bar eigen analysis — SciPy ``lobpcg`` (experimental).
+"""Brick bar eigen analysis — scipy ``lobpcg`` (experimental).
 
 Not included in the automated solver smoke suite: LOBPCG is unreliable on tiny
 meshes. Run manually from ``examples/``:

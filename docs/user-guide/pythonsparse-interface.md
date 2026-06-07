@@ -74,7 +74,7 @@ iterative backend:
 2. **Python solver (CPU, Python)** — `PythonSparse` callback reads `r` and `K_T*`
    from OpenSees memoryviews, orchestrates the backend, writes `Δu` back.
 3. **GPU (optional)** — copy `r` and `K_T*` host→device, solve
-   `K_T* Δu = r`, copy `Δu` device→host. SciPy/UMFPACK paths stay on the CPU instead
+   `K_T* Δu = r`, copy `Δu` device→host. scipy/UMFPACK paths stay on the CPU instead
    of the third column.
 
 Eigen analysis follows the same split: OpenSees assembles **K** and **M** on the CPU; the
@@ -90,8 +90,8 @@ process that owns the model.
 | Layer | Behavior |
 |-------|----------|
 | OpenSees model pipeline | Serial (single CPU process) |
-| SciPy backends (`spsolve`, `cg`, `eigsh`, …) | CPU linear algebra; may use multithreaded BLAS/LAPACK inside SciPy/UMFPACK |
-| CuPy / nvMath backends | **GPU** factorization, iterative solve, or eigen iteration; matrix assembly still happens on the CPU in OpenSees, with host↔device transfers inside the solver |
+| scipy backends (`spsolve`, `cg`, `eigsh`, …) | CPU linear algebra; may use multithreaded BLAS/LAPACK inside scipy/UMFPACK |
+| cupy / nvmath backends | **GPU** factorization, iterative solve, or eigen iteration; matrix assembly still happens on the CPU in OpenSees, with host↔device transfers inside the solver |
 
 So a GPU setup speeds up the **sparse solve step**, not domain decomposition or
 multi-rank OpenSees analysis.

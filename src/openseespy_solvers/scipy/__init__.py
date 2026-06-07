@@ -1,8 +1,8 @@
-"""Sparse linear algebra solvers for OpenSeesPy (SciPy backend).
+"""Sparse linear algebra solvers for OpenSeesPy (`scipy.sparse.linalg` backend).
 
 This module provides solver objects that wrap :mod:`scipy.sparse.linalg` for
 OpenSeesPy's ``PythonSparse`` linear and eigen commands. Factory signatures
-match SciPy except that ``A`` and ``b`` (or ``K`` and ``M``) are supplied by
+match `scipy.sparse.linalg` except that ``A`` and ``b`` (or ``K`` and ``M``) are supplied by
 OpenSees at solve time.
 
 Each factory returns a solver object. Register it with OpenSees using
@@ -444,7 +444,7 @@ def umfpack(
     Parameters
     ----------
     """ + _OPENSEES_LINEAR + _LINEAR_RETURNS + _LINEAR_NOTES + """
-    The OpenSees CSR buffers are assembled into a SciPy matrix and converted to
+    The OpenSees CSR buffers are assembled into a `scipy.sparse` matrix and converted to
     CSC for UMFPACK, so non-symmetric systems are solved correctly.
 
     Raises
@@ -489,7 +489,7 @@ def cg(
     Parameters
     ----------
     x0 : ndarray, optional
-        Starting guess for the solution. Forwarded to SciPy when not ``None``.
+        Starting guess for the solution. Forwarded to `scipy.sparse.linalg` when not ``None``.
     rtol, atol : float, optional
         Relative and absolute tolerances for convergence. For convergence,
         ``norm(b - A @ x) <= max(rtol*norm(b), atol)`` must hold. Defaults are

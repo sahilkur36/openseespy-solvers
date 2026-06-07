@@ -1,4 +1,4 @@
-"""CuPy backend hooks shared by all CuPy-namespace solvers."""
+"""cupy backend hooks shared by all cupy-namespace solvers."""
 
 from __future__ import annotations
 
@@ -15,16 +15,16 @@ def _import_cupy() -> tuple[Any, Any, Any]:
         import cupy as cp
         import cupyx.scipy.sparse as csp
         import cupyx.scipy.sparse.linalg as cspla
-    except ImportError as exc:  # pragma: no cover - exercised only without CuPy
+    except ImportError as exc:  # pragma: no cover - exercised only without cupy
         raise BackendNotAvailableError(
-            "The 'cupy' backend requires CuPy. Install a CUDA-matched wheel, "
+            "The 'cupy' backend requires cupy. Install a CUDA-matched wheel, "
             "for example: python -m pip install \"openseespy-solvers[cuda13]\""
         ) from exc
     return cp, csp, cspla
 
 
 class CupyMixin:
-    """Implements the backend hooks using CuPy / cupyx (GPU)."""
+    """Implements backend hooks using cupy / cupyx (GPU)."""
 
     backend = "cupy"
     _on_device = True
@@ -53,7 +53,7 @@ class CupyMixin:
             return csp.csr_matrix((data, ind, ptr), shape=shape)
         if fmt == "CSC":
             return csp.csc_matrix((data, ind, ptr), shape=shape)
-        raise UnsupportedStorageSchemeError(f"CuPy backend does not support scheme {fmt!r}")
+        raise UnsupportedStorageSchemeError(f"cupy backend does not support scheme {fmt!r}")
 
     def _update_matrix(self, matrix: Any, values: np.ndarray) -> Any:
         matrix.data[:] = self._cp.asarray(values, dtype=self._cupy_dtype)
@@ -84,7 +84,7 @@ class CupyMixin:
         M: Any | None,
         callback: Any | None,
     ) -> dict[str, Any]:
-        """Map SciPy-style rtol/atol onto the installed CuPy iterative API."""
+        """Map scipy-style rtol/atol onto the installed cupy iterative API."""
         params = inspect.signature(func).parameters
         kwargs: dict[str, Any] = {"maxiter": maxiter, "M": M}
         if callback is not None:

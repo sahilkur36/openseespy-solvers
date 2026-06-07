@@ -1,4 +1,4 @@
-"""Brick bar static analysis — CuPy ``spsolve`` (GPU direct).
+"""Brick bar static analysis — cupy ``spsolve`` (GPU direct).
 
 Install: ``python -m pip install "openseespy-solvers[cuda13]"`` (or ``[cuda12]``)
 """
@@ -16,7 +16,7 @@ if _HERE not in sys.path:
 try:
     from openseespy_solvers.cupy import spsolve
 except Exception as exc:
-    print("CuPy backend not available:", exc)
+    print("cupy backend not available:", exc)
     print('Install: python -m pip install "openseespy-solvers[cuda13]"  # or [cuda12]')
     raise SystemExit(1) from exc
 

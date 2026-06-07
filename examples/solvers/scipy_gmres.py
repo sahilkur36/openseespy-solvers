@@ -1,4 +1,4 @@
-"""Brick bar static analysis — SciPy ``gmres`` (iterative)."""
+"""Brick bar static analysis — scipy ``gmres`` (iterative)."""
 
 import os
 import sys

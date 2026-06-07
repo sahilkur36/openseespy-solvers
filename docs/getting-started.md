@@ -15,7 +15,7 @@ solver to pick first, see [Recommended solvers](recommended-solvers.md).
 | Eigen `K x = λ M x` | `cupy.eigsh` | `scipy.eigsh` |
 
 These are often faster than built-in OpenSees solvers for many models because they use
-mature library implementations (SuperLU, UMFPACK, ARPACK, nvMath/cuDSS, etc.) with
+mature library implementations (SuperLU, UMFPACK, ARPACK, nvmath.sparse/cuDSS, etc.) with
 factorization reuse when the matrix is unchanged.
 
 ---
@@ -44,9 +44,9 @@ after installing UMFPACK (see [installation — UMFPACK](installation.md#umfpack
 
 ---
 
-## Static analysis — GPU (nvMath)
+## Static analysis — GPU (nvmath.sparse)
 
-Requires CuPy and nvMath wheels matching your driver ([GPU install](installation.md#gpu)).
+Requires `cupy` and nvmath wheels matching your driver ([GPU install](installation.md#gpu)).
 
 ```python
 import openseespy.opensees as ops
@@ -100,8 +100,8 @@ last call.
 
 ## Modal analysis — GPU (`cupy.eigsh`)
 
-Recommended GPU path when you have CUDA (default `mass_mode="general"`: full `M`, SciPy
-ARPACK on CPU, inner `(K - σ M)⁻¹` solves on GPU):
+Recommended GPU path when you have CUDA (default `mass_mode="general"`: full `M`,
+`scipy.sparse.linalg.eigsh` / ARPACK on CPU, inner `(K - σ M)⁻¹` solves on GPU):
 
 ```python
 from openseespy_solvers.cupy import eigsh
@@ -124,7 +124,7 @@ lam = ops.eigen("PythonSparse", 5, eigsolver.to_openseespy())
 
 ---
 
-## GPU iterative static (CuPy CG)
+## GPU iterative static (`cupy.cg`)
 
 ```python
 from openseespy_solvers.cupy import cg
@@ -133,7 +133,7 @@ solver = cg(rtol=1e-8)
 ops.system("PythonSparse", solver.to_openseespy())
 ```
 
-Requires CuPy. After a solve, `solver.A` and `solver.x` are CuPy arrays on device.
+Requires `cupy`. After a solve, `solver.A` and `solver.x` are `cupy` arrays on device.
 
 ---
 

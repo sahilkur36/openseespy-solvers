@@ -1,4 +1,4 @@
-"""Brick bar eigen analysis — SciPy ``eigsh`` (PythonSparse eigen)."""
+"""Brick bar eigen analysis — scipy ``eigsh`` (PythonSparse eigen)."""
 
 import os
 import sys

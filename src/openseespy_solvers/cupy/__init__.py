@@ -1,11 +1,11 @@
-"""Sparse linear algebra solvers for OpenSeesPy (CuPy backend).
+"""Sparse linear algebra solvers for OpenSeesPy (`cupyx.scipy.sparse.linalg` backend).
 
 This module provides solver objects that wrap :mod:`cupyx.scipy.sparse.linalg`
-for OpenSeesPy's ``PythonSparse`` commands. Factory signatures match CuPy's
-SciPy-compatible API except that ``A`` and ``b`` (or ``K`` and ``M``) are
+for OpenSeesPy's ``PythonSparse`` commands. Factory signatures match the
+`cupyx.scipy.sparse.linalg` API except that ``A`` and ``b`` (or ``K`` and ``M``) are
 supplied by OpenSees at solve time.
 
-Importing this module requires CuPy. Install a CUDA-matched extra, for example
+Importing this module requires `cupy`. Install a CUDA-matched extra, for example
 ``python -m pip install "openseespy-solvers[cuda13]"`` or use ``[cuda12]``.
 
 Notes
@@ -60,7 +60,7 @@ from openseespy_solvers._sparse import (
 from openseespy_solvers.cupy._base import CupyMixin, _import_cupy
 from openseespy_solvers.exceptions import SolverConvergenceError
 
-# Fail fast at import time if CuPy is unavailable.
+# Fail fast at import time if cupy is unavailable.
 _import_cupy()
 
 __all__ = ["cg", "gmres", "spsolve", "eigsh", "lobpcg"]
@@ -487,7 +487,7 @@ class _Eigsh(CupyMixin, EigenSolver):
         )
 
     def _solve_eigen_standard(self, K, M, *, num_modes):  # noqa: ANN001
-        """Plain SciPy ARPACK (OpenSees path when find_smallest=False and no sigma)."""
+        """Plain scipy ARPACK path when find_smallest=False and no sigma."""
         kwargs = eigsh_arpack_kwargs(
             num_modes=num_modes,
             which=OPENSEES_EIGSH_WHICH,
@@ -733,7 +733,7 @@ def eigsh(
     ``find_smallest=True``; no shift when ``find_smallest=False`` unless you set
     ``sigma``. ARPACK always uses ``which='LM'``.
 
-    - ``mass_mode='general'`` (default): SciPy ARPACK; GPU inner solves only when
+    - ``mass_mode='general'`` (default): `scipy.sparse.linalg.eigsh`; GPU inner solves only when
       shift-invert is active.
     - ``mass_mode='diagonal'`` / ``'lumped'``: GPU shift-invert (smallest modes).
 
@@ -748,7 +748,7 @@ def eigsh(
     linear_solver : LinearSolver, optional
         Inner solver for shift-invert (``general`` and diagonal/lumped paths).
     mode : {'normal', 'buckling', 'cayley'}, optional
-        SciPy ARPACK mode (``mass_mode='general'`` only). Default ``'normal'``.
+        `scipy.sparse.linalg.eigsh` mode (``mass_mode='general'`` only). Default ``'normal'``.
     v0 : cupy.ndarray, optional
         Starting vector for ARPACK.
     ncv : int, optional
@@ -766,10 +766,10 @@ def eigsh(
 
     Notes
     -----
-    CuPy does not expose generalized :func:`~cupyx.scipy.sparse.linalg.eigsh`, so
-    ``diagonal`` / ``lumped`` run CuPy Lanczos on
+    `cupyx.scipy.sparse.linalg.eigsh` does not expose generalized eigen solves, so
+    ``diagonal`` / ``lumped`` run cupy Lanczos on
     ``OP = (K - sigma diag(m))^{-1} diag(m)`` while ``general``
-    uses SciPy ARPACK with the same shift-invert idea and a full mass matrix.
+    uses `scipy.sparse.linalg.eigsh` with the same shift-invert idea and a full mass matrix.
     """
     return _Eigsh(
         sigma=sigma,

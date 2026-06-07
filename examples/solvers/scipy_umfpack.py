@@ -1,4 +1,4 @@
-"""Brick bar static analysis — SciPy ``umfpack`` (optional scikit-umfpack).
+"""Brick bar static analysis — scipy ``umfpack`` (optional scikit-umfpack).
 
 Install: ``python -m pip install "openseespy-solvers[umfpack]"``
 """

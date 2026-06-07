@@ -1,6 +1,6 @@
 # openseespy_solvers.cupy.precond
 
-CUDA preconditioner factories for iterative CuPy solvers.
+CUDA preconditioner factories for iterative `cupyx.scipy.sparse.linalg` solvers.
 
 Pass these factories through the `M=` keyword of `cg`, `gmres`, or `lobpcg`. When `M` is
 callable, the solver calls it as `M(A)` after OpenSeesPy supplies the assembled matrix.

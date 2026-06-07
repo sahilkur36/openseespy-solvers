@@ -1,4 +1,4 @@
-"""Brick bar eigen analysis — CuPy ``eigsh`` shift-invert (PythonSparse eigen)."""
+"""Brick bar eigen analysis — cupy ``eigsh`` shift-invert (PythonSparse eigen)."""
 
 import os
 import sys

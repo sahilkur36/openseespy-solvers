@@ -1,4 +1,4 @@
-"""Preconditioner factories for the CuPy backend.
+"""Preconditioner factories for the cupy backend.
 
 These callables are intended for the ``M`` argument of :func:`cg`,
 :func:`gmres`, and :func:`lobpcg`. Each factory accepts the assembled sparse
@@ -81,10 +81,10 @@ def jacobi(A: Any) -> Any:
 def ilu(A: Any, **opts: Any) -> Any:
     """Return an incomplete LU preconditioner as a ``LinearOperator`` on GPU.
 
-    By default ``fill_factor=1``, which triggers CuPy's GPU ILU path with no
+    By default ``fill_factor=1``, which triggers cupy's GPU ILU path with no
     fill-in and no pivoting. See
     :func:`cupyx.scipy.sparse.linalg.spilu` — only ``fill_factor=1`` runs the
-    factorization on GPU; other settings delegate to SciPy on CPU.
+    factorization on GPU; other settings delegate to `scipy.sparse.linalg` on CPU.
 
     Parameters
     ----------

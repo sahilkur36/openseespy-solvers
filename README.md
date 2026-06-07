@@ -1,10 +1,10 @@
 # openseespy-solvers
 
-SciPy-style sparse linear and eigen solvers for OpenSeesPy
+`scipy`-style sparse linear and eigen solvers for OpenSeesPy
 [`PythonSparse`](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system/PythonSparse.html).
 
-`openseespy-solvers` wraps familiar numerical backends such as SciPy, CuPy, and
-NVIDIA nvMath as solver objects that OpenSeesPy can call directly. OpenSeesPy
+`openseespy-solvers` wraps familiar numerical backends such as `scipy.sparse.linalg`,
+`cupyx.scipy.sparse.linalg`, and NVIDIA `nvmath.sparse` as solver objects that OpenSeesPy can call directly. OpenSeesPy
 assembles the stiffness, mass, and right-hand-side arrays; the solver object performs
 the sparse solve and writes the result back to OpenSeesPy.
 
@@ -16,7 +16,7 @@ Documentation: [openseespy-solvers.readthedocs.io](https://openseespy-solvers.re
 python -m pip install openseespy-solvers
 ```
 
-The base install provides NumPy/SciPy CPU solvers. It requires Python 3.12 or newer.
+The base install provides NumPy and `scipy.sparse.linalg` CPU solvers. It requires Python 3.12 or newer.
 
 OpenSeesPy is optional so the package can be used and tested without forcing an OpenSees
 install. If OpenSeesPy is not already in your environment, install the extra:
@@ -96,7 +96,7 @@ More detail: [Recommended solvers](https://openseespy-solvers.readthedocs.io/en/
 | `openseespy_solvers.nvmath` | GPU direct sparse solver: `direct_solver` |
 | `openseespy_solvers.hybrid` | Direct factorization reused as a GMRES preconditioner |
 
-Factory signatures follow the corresponding SciPy/CuPy functions where possible. The
+Factory signatures follow the corresponding `scipy`/`cupy` functions where possible. The
 matrix and right-hand side are supplied by OpenSeesPy at solve time.
 
 ## Examples and Development

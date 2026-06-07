@@ -1,4 +1,4 @@
-"""SciPy-style PythonSparse solvers for OpenSeesPy."""
+"""scipy-style PythonSparse solvers for OpenSeesPy."""
 
 from __future__ import annotations
 

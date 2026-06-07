@@ -1,4 +1,4 @@
-"""Brick bar static analysis — SciPy ``cg`` (iterative, no preconditioner)."""
+"""Brick bar static analysis — scipy ``cg`` (iterative, no preconditioner)."""
 
 import os
 import sys

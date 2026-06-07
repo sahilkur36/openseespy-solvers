@@ -98,7 +98,7 @@ def pythonsparse_label(solver) -> str:
 
 
 def gpu_available() -> bool:
-    """True when CuPy sees at least one CUDA device."""
+    """True when cupy sees at least one CUDA device."""
     try:
         import cupy as cp
 

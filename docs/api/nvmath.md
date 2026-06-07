@@ -1,6 +1,6 @@
 # openseespy_solvers.nvmath
 
-NVIDIA nvMath sparse direct solver factory.
+NVIDIA `nvmath.sparse` direct solver factory.
 
 This module provides a CUDA direct solver for OpenSeesPy `PythonSparse` linear systems.
 It wraps `nvmath.sparse.advanced.DirectSolver` and returns a solver object that can be
@@ -8,7 +8,7 @@ registered with `ops.system("PythonSparse", ...)`.
 
 ## Solving Linear Problems
 
-| Factory | nvMath analogue | Description |
+| Factory | nvmath analogue | Description |
 |---------|-----------------|-------------|
 | [`direct_solver`](#openseespy_solvers.nvmath.direct_solver) | `nvmath.sparse.advanced.DirectSolver` | Sparse direct solver on CUDA |
 
@@ -32,7 +32,7 @@ ops.system("PythonSparse", solver.to_openseespy())
 ## Notes
 
 `direct_solver()` runs on the GPU by default. OpenSeesPy supplies CPU buffers; the solver
-copies them to the device, factors the sparse matrix with nvMath/cuDSS, and writes the
+copies them to the device, factors the sparse matrix with `nvmath.sparse`/cuDSS, and writes the
 solution back through the OpenSeesPy callback.
 
 Optional `execution=` and `plan_algorithm=` arguments are forwarded to

@@ -1,4 +1,4 @@
-"""SciPy backend hooks shared by all SciPy-namespace solvers."""
+"""scipy backend hooks shared by all scipy-namespace solvers."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from openseespy_solvers.exceptions import UnsupportedStorageSchemeError
 def _import_umfpack() -> Any:
     """Import :mod:`scikits.umfpack` lazily.
 
-    ``scikit-umfpack`` is an optional dependency, so importing the SciPy
+    ``scikit-umfpack`` is an optional dependency, so importing the scipy
     namespace must never require it. The import is deferred until a UMFPACK
     solver is actually instantiated.
 
@@ -39,7 +39,7 @@ def _import_umfpack() -> Any:
 
 
 class ScipyMixin:
-    """Implements the backend hooks using SciPy / NumPy (CPU)."""
+    """Implements backend hooks using scipy / NumPy (CPU)."""
 
     backend = "scipy"
     _on_device = False
@@ -56,7 +56,7 @@ class ScipyMixin:
             return sp.csr_matrix((values.copy(), indices.copy(), indptr.copy()), shape=shape)
         if fmt == "CSC":
             return sp.csc_matrix((values.copy(), indices.copy(), indptr.copy()), shape=shape)
-        raise UnsupportedStorageSchemeError(f"SciPy backend does not support scheme {fmt!r}")
+        raise UnsupportedStorageSchemeError(f"scipy backend does not support scheme {fmt!r}")
 
     def _update_matrix(self, matrix: sp.spmatrix, values: np.ndarray) -> sp.spmatrix:
         matrix.data[:] = np.asarray(values, dtype=self._compute_dtype)

@@ -9,7 +9,7 @@ backends you need.
 |-----------|-------------|
 | Python | 3.12 or newer |
 | NumPy | 1.26 or newer |
-| SciPy | 1.12 or newer |
+| scipy | 1.12 or newer |
 | OpenSeesPy | Needed to run OpenSees analyses and examples; use a serial build |
 
 `openseespy-solvers` does not install OpenSeesPy by default. This keeps the base package
@@ -87,9 +87,9 @@ For CUDA 12.x:
 python -m pip install "openseespy-solvers[cuda12]"
 ```
 
-These extras install both CuPy and nvMath for the selected CUDA generation. Keep CuPy and
-nvMath on the same CUDA generation. Avoid installing the generic `cupy` package unless you
-intentionally want to build CuPy from source.
+These extras install both `cupy` and nvmath for the selected CUDA generation. Keep `cupy` and
+nvmath on the same CUDA generation. Avoid installing the generic `cupy` package unless you
+intentionally want to build `cupy` from source.
 
 ## Development Install
 
@@ -148,15 +148,15 @@ conda install -c conda-forge scikit-umfpack
 
 The PyPI package may need source-build tools that are inconvenient on Windows.
 
-### CuPy Cannot Find CUDA Libraries
+### cupy Cannot Find CUDA Libraries
 
-Install the CuPy wheel with bundled runtime libraries:
+Install the `cupy` wheel with bundled runtime libraries:
 
 ```bash
 python -m pip install "cupy-cuda13x[ctk]"   # or cupy-cuda12x[ctk]
 ```
 
-Also confirm that `nvidia-smi` works and that CuPy and nvMath use the same CUDA generation.
+Also confirm that `nvidia-smi` works and that `cupy` and nvmath use the same CUDA generation.
 
 ## Build Documentation Locally
 

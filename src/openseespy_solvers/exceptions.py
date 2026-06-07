@@ -29,7 +29,7 @@ class UnsupportedComputeDtypeError(OpenSeesSolverError, ValueError):
 class BackendNotAvailableError(OpenSeesSolverError, ImportError):
     """Optional backend library is not installed.
 
-    For example, importing :mod:`openseespy_solvers.cupy` without CuPy raises
+    For example, importing :mod:`openseespy_solvers.cupy` without `cupy` raises
     this exception. Install the CUDA 13 extra, for example
     ``python -m pip install "openseespy-solvers[cuda13]"``.
     """

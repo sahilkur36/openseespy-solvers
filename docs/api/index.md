@@ -10,7 +10,7 @@ The public modules are:
 | [`openseespy_solvers.scipy.precond`](precond.md) | CPU preconditioner factories |
 | [`openseespy_solvers.cupy`](cupy.md) | CUDA linear and eigen solver factories |
 | [`openseespy_solvers.cupy.precond`](precond_cupy.md) | CUDA preconditioner factories |
-| [`openseespy_solvers.nvmath`](nvmath.md) | NVIDIA nvMath direct sparse solver factory |
+| [`openseespy_solvers.nvmath`](nvmath.md) | NVIDIA `nvmath.sparse` direct solver factory |
 | [`openseespy_solvers.hybrid`](hybrid.md) | Hybrid direct-factorization/GMRES solver factory |
 | [`openseespy_solvers.exceptions`](exceptions.md) | Public exception types |
 
@@ -40,35 +40,35 @@ passing `solver.to_openseespy()` to `ops.system("PythonSparse", ...)` or
 
 | Factory | Backend | Purpose |
 |---------|---------|---------|
-| [`scipy.spsolve`](scipy.md#openseespy_solvers.scipy.spsolve) | SciPy / SuperLU | CPU sparse direct solve |
+| [`scipy.spsolve`](scipy.md#openseespy_solvers.scipy.spsolve) | `scipy.sparse.linalg` / SuperLU | CPU sparse direct solve |
 | [`scipy.umfpack`](scipy.md#openseespy_solvers.scipy.umfpack) | scikit-umfpack | CPU sparse direct solve using UMFPACK |
-| [`scipy.cg`](scipy.md#openseespy_solvers.scipy.cg) | SciPy | CPU Conjugate Gradient |
-| [`scipy.gmres`](scipy.md#openseespy_solvers.scipy.gmres) | SciPy | CPU GMRES |
-| [`cupy.spsolve`](cupy.md#openseespy_solvers.cupy.spsolve) | CuPy | CUDA sparse direct solve |
-| [`cupy.cg`](cupy.md#openseespy_solvers.cupy.cg) | CuPy | CUDA Conjugate Gradient |
-| [`cupy.gmres`](cupy.md#openseespy_solvers.cupy.gmres) | CuPy | CUDA GMRES |
-| [`nvmath.direct_solver`](nvmath.md#openseespy_solvers.nvmath.direct_solver) | NVIDIA nvMath | CUDA sparse direct solve |
-| [`hybrid`](hybrid.md#openseespy_solvers.hybrid.hybrid) | SciPy-compatible direct solver + GMRES | Reuse a direct factorization as a GMRES preconditioner |
+| [`scipy.cg`](scipy.md#openseespy_solvers.scipy.cg) | `scipy.sparse.linalg` | CPU Conjugate Gradient |
+| [`scipy.gmres`](scipy.md#openseespy_solvers.scipy.gmres) | `scipy.sparse.linalg` | CPU GMRES |
+| [`cupy.spsolve`](cupy.md#openseespy_solvers.cupy.spsolve) | `cupyx.scipy.sparse.linalg` | CUDA sparse direct solve |
+| [`cupy.cg`](cupy.md#openseespy_solvers.cupy.cg) | `cupyx.scipy.sparse.linalg` | CUDA Conjugate Gradient |
+| [`cupy.gmres`](cupy.md#openseespy_solvers.cupy.gmres) | `cupyx.scipy.sparse.linalg` | CUDA GMRES |
+| [`nvmath.direct_solver`](nvmath.md#openseespy_solvers.nvmath.direct_solver) | NVIDIA `nvmath.sparse` | CUDA sparse direct solve |
+| [`hybrid`](hybrid.md#openseespy_solvers.hybrid.hybrid) | `scipy`-compatible direct solver + GMRES | Reuse a direct factorization as a GMRES preconditioner |
 
 ## Eigen Solvers
 
 | Factory | Backend | Purpose |
 |---------|---------|---------|
-| [`scipy.eigsh`](scipy.md#openseespy_solvers.scipy.eigsh) | SciPy / ARPACK | CPU generalized symmetric eigen solve |
-| [`scipy.lobpcg`](scipy.md#openseespy_solvers.scipy.lobpcg) | SciPy | CPU LOBPCG eigen solve |
-| [`cupy.eigsh`](cupy.md#openseespy_solvers.cupy.eigsh) | CuPy + SciPy ARPACK | CUDA-assisted generalized symmetric eigen solve |
-| [`cupy.lobpcg`](cupy.md#openseespy_solvers.cupy.lobpcg) | CuPy | CUDA LOBPCG eigen solve |
+| [`scipy.eigsh`](scipy.md#openseespy_solvers.scipy.eigsh) | `scipy.sparse.linalg` / ARPACK | CPU generalized symmetric eigen solve |
+| [`scipy.lobpcg`](scipy.md#openseespy_solvers.scipy.lobpcg) | `scipy.sparse.linalg` | CPU LOBPCG eigen solve |
+| [`cupy.eigsh`](cupy.md#openseespy_solvers.cupy.eigsh) | `cupyx.scipy.sparse.linalg` + `scipy.sparse.linalg` | CUDA-assisted generalized symmetric eigen solve |
+| [`cupy.lobpcg`](cupy.md#openseespy_solvers.cupy.lobpcg) | `cupyx.scipy.sparse.linalg` | CUDA LOBPCG eigen solve |
 
 ## Preconditioners
 
 | Factory | Backend | Purpose |
 |---------|---------|---------|
-| [`scipy.precond.jacobi`](precond.md#openseespy_solvers.scipy.precond.jacobi) | SciPy | Diagonal/Jacobi preconditioner |
-| [`scipy.precond.ilu`](precond.md#openseespy_solvers.scipy.precond.ilu) | SciPy | Incomplete LU preconditioner |
-| [`scipy.precond.direct`](precond.md#openseespy_solvers.scipy.precond.direct) | SciPy | Direct-solver preconditioner |
-| [`cupy.precond.jacobi`](precond_cupy.md#openseespy_solvers.cupy.precond.jacobi) | CuPy | Diagonal/Jacobi preconditioner |
-| [`cupy.precond.ilu`](precond_cupy.md#openseespy_solvers.cupy.precond.ilu) | CuPy | Incomplete LU preconditioner |
-| [`cupy.precond.direct`](precond_cupy.md#openseespy_solvers.cupy.precond.direct) | CuPy | Direct-solver preconditioner |
+| [`scipy.precond.jacobi`](precond.md#openseespy_solvers.scipy.precond.jacobi) | `scipy.sparse` | Diagonal/Jacobi preconditioner |
+| [`scipy.precond.ilu`](precond.md#openseespy_solvers.scipy.precond.ilu) | `scipy.sparse.linalg` | Incomplete LU preconditioner |
+| [`scipy.precond.direct`](precond.md#openseespy_solvers.scipy.precond.direct) | `scipy.sparse.linalg` | Direct-solver preconditioner |
+| [`cupy.precond.jacobi`](precond_cupy.md#openseespy_solvers.cupy.precond.jacobi) | `cupyx.scipy.sparse` | Diagonal/Jacobi preconditioner |
+| [`cupy.precond.ilu`](precond_cupy.md#openseespy_solvers.cupy.precond.ilu) | `cupyx.scipy.sparse.linalg` | Incomplete LU preconditioner |
+| [`cupy.precond.direct`](precond_cupy.md#openseespy_solvers.cupy.precond.direct) | `cupyx.scipy.sparse.linalg` | Direct-solver preconditioner |
 
 ## OpenSeesPy Difference
 

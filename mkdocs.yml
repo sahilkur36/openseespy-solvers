@@ -1,5 +1,5 @@
 site_name: openseespy-solvers
-site_description: SciPy-style PythonSparse solvers for OpenSeesPy
+site_description: scipy-style PythonSparse solvers for OpenSeesPy
 # RTD sets READTHEDOCS_CANONICAL_URL (e.g. …/en/stable/) so internal links keep the version prefix.
 site_url: !ENV [READTHEDOCS_CANONICAL_URL, 'http://127.0.0.1:8000/']
 repo_url: https://github.com/gaaraujo/openseespy-solvers

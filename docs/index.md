@@ -1,12 +1,12 @@
 # openseespy-solvers
 
-`openseespy-solvers` provides SciPy-style sparse linear and eigen solvers for
+`openseespy-solvers` provides `scipy`-style sparse linear and eigen solvers for
 [OpenSeesPy](https://openseespydoc.readthedocs.io/) `PythonSparse` commands.
 
 The package wraps numerical libraries such as
 [`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html),
 [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse.html),
-and NVIDIA nvMath as solver objects. OpenSeesPy assembles the model matrices; the solver
+and NVIDIA `nvmath.sparse` as solver objects. OpenSeesPy assembles the model matrices; the solver
 object receives those arrays, runs the selected backend, and writes results back to
 OpenSeesPy.
 
@@ -44,7 +44,7 @@ python -m pip install "openseespy-solvers[cuda12]"
 python -m pip install "openseespy-solvers[cuda13]"
 ```
 
-if you have an NVIDIA GPU and want GPU-accelerated solvers (CuPy + nvMath). Match
+if you have an NVIDIA GPU and want GPU-accelerated solvers (`cupy` + nvmath). Match
 `cuda12` / `cuda13` to the CUDA generation from `nvidia-smi`. Details:
 [GPU install](installation.md#gpu).
 
@@ -87,7 +87,7 @@ alternatives.
 | [`nvmath`](api/nvmath.md) | GPU direct sparse solver: `direct_solver` |
 | [`hybrid`](api/hybrid.md) | Direct factorization reused as a GMRES preconditioner |
 
-Factory signatures match the underlying SciPy or CuPy functions where possible. The matrix
+Factory signatures match the underlying `scipy` or `cupy` functions where possible. The matrix
 and right-hand side are supplied by OpenSeesPy at solve time.
 
 ## Helpful Pages

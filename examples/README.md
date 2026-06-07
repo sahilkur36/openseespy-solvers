@@ -31,7 +31,7 @@ python solvers/scipy_spsolve.py
 python solvers/scipy_eigsh.py
 ```
 
-Optional backends (UMFPACK, nvMath, CuPy): see the
+Optional backends (UMFPACK, nvmath, `cupy`): see the
 [installation guide](../docs/installation.md).
 
 ## Solver catalog (`solvers/`)
@@ -47,7 +47,7 @@ against the matching backend's `eigsh` (not native OpenSees eigen solvers). They
 manual-only and are not part of the default pytest smoke tests.
 Use the default mesh sweep for CI; add `--large-test` only when you want heavier runs.
 
-### SciPy (`openseespy_solvers.scipy`)
+### scipy (`openseespy_solvers.scipy`)
 
 | Script | Factory |
 |--------|---------|
@@ -64,7 +64,7 @@ Use the default mesh sweep for CI; add `--large-test` only when you want heavier
 Preconditioner factories live in `openseespy_solvers.scipy.precond`: **`jacobi`**, **`ilu`**,
 **`direct`** (used via `M=` on `cg` / `gmres` / `lobpcg`, as in the scripts above).
 
-### CuPy (`openseespy_solvers.cupy`)
+### cupy (`openseespy_solvers.cupy`)
 
 | Script | Factory |
 |--------|---------|
@@ -80,7 +80,7 @@ Preconditioner factories live in `openseespy_solvers.scipy.precond`: **`jacobi`*
 [`eigsh`](solvers/cupy_eigsh.py) uses shift-invert (`diagonal` / `lumped` on GPU;
 `general` with full mass).
 
-### nvMath (`openseespy_solvers.nvmath`) — GPU
+### nvmath.sparse (`openseespy_solvers.nvmath`) — GPU
 
 | Script | Factory |
 |--------|---------|

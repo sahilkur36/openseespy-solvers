@@ -1,4 +1,4 @@
-"""nvMath backend hooks shared by all nvmath-namespace solvers."""
+"""nvmath.sparse backend hooks shared by all nvmath-namespace solvers."""
 
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ def _resolve_sp_module(
                 import cupy  # noqa: F401
             except ImportError as exc:  # pragma: no cover
                 raise ImportError(
-                    "CuPy sparse matrices require CuPy. "
+                    "cupy sparse matrices require cupy. "
                     "Install with: python -m pip install "
                     '"openseespy-solvers[cuda13]"'
                 ) from exc
@@ -73,7 +73,7 @@ def _resolve_sp_module(
             import cupyx.scipy.sparse as csp
         except ImportError as exc:  # pragma: no cover
             raise ImportError(
-                "device='gpu' requires CuPy. "
+                "device='gpu' requires cupy. "
                 "Install with: python -m pip install "
                 '"openseespy-solvers[cuda13]"'
             ) from exc
@@ -89,7 +89,7 @@ def _resolve_sp_module(
 def _find_multithreading_lib() -> str | None:
     """Locate the cuDSS multithreading layer library, if installed.
 
-    nvMath uses this for multi-threaded CPU work during plan/factorize (especially
+    nvmath.sparse uses this for multi-threaded CPU work during plan/factorize (especially
     with hybrid execution). See ``CUDSS_THREADING_LIB`` and NVIDIA's cuDSS docs.
     """
     env = os.environ.get("CUDSS_THREADING_LIB")
@@ -156,7 +156,7 @@ def _find_multithreading_lib() -> str | None:
 
 
 class NvMathMixin:
-    """Implements backend hooks for nvMath direct solvers (CPU or GPU sparse)."""
+    """Implements backend hooks for nvmath.sparse direct solvers (CPU or GPU sparse)."""
 
     backend = "nvmath"
 
@@ -202,7 +202,7 @@ class NvMathMixin:
                 matrix = spm.csc_matrix((data, ind, ptr), shape=shape).tocsr()
             else:
                 raise UnsupportedStorageSchemeError(
-                    f"nvMath backend does not support scheme {fmt!r}"
+                    f"nvmath backend does not support scheme {fmt!r}"
                 )
             return matrix
 
@@ -216,7 +216,7 @@ class NvMathMixin:
             ).tocsr()
         else:
             raise UnsupportedStorageSchemeError(
-                f"nvMath backend does not support scheme {fmt!r}"
+                f"nvmath backend does not support scheme {fmt!r}"
             )
         return matrix
 

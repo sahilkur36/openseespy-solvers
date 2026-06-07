@@ -1,7 +1,7 @@
 """Parsing of OpenSees PythonSparse buffers into NumPy arrays.
 
 These helpers are backend-agnostic: they only turn the raw memoryviews OpenSees
-passes into NumPy views. Building the actual sparse matrix (SciPy, CuPy, ...) is
+passes into NumPy views. Building the actual sparse matrix (scipy, cupy, ...) is
 the job of each namespace's solver, via its ``_build_matrix`` hook.
 """
 
@@ -89,7 +89,7 @@ def eigsh_arpack_kwargs(
     maxiter: int | None,
     mode: str | None = None,
 ) -> dict[str, Any]:
-    """Keyword arguments forwarded to SciPy/CuPy ``eigsh`` (ARPACK), except ``A``/``M``."""
+    """Keyword arguments forwarded to scipy/cupy ``eigsh`` (ARPACK), except ``A``/``M``."""
     kwargs: dict[str, Any] = {"k": num_modes, "which": which}
     if mode is not None:
         kwargs["mode"] = mode

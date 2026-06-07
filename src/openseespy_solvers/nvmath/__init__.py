@@ -1,8 +1,8 @@
-"""Sparse direct solvers for OpenSeesPy (NVIDIA nvMath backend, GPU).
+"""Sparse direct solvers for OpenSeesPy (NVIDIA nvmath.sparse backend, GPU).
 
 This module wraps :class:`nvmath.sparse.advanced.DirectSolver` for OpenSeesPy's
 ``PythonSparse`` linear system command on the GPU (``cupyx.scipy.sparse`` matrices).
-Requires CuPy and a CUDA-capable GPU; use SciPy solvers on CPU instead.
+Requires cupy and a CUDA-capable GPU; use scipy solvers on CPU instead.
 
 Importing this module does **not** require ``nvmath-python``; the dependency is
 loaded when ``direct_solver()`` is called. Install a CUDA-matched extra, for example
@@ -169,7 +169,7 @@ def direct_solver(
     debug: bool = False,
     dtype: Any = np.float64,
 ) -> _DirectSolver:
-    r"""Configure an nvMath sparse direct solver for OpenSees ``PythonSparse``.
+    r"""Configure an nvmath.sparse direct solver for OpenSees ``PythonSparse``.
 
     Uses :class:`nvmath.sparse.advanced.DirectSolver` with separate plan,
     factorize, and solve phases. The factorization is reused while OpenSees
@@ -187,7 +187,7 @@ def direct_solver(
         environments without a GPU; CPU linear solves should normally use
         :func:`openseespy_solvers.scipy.spsolve` or :func:`~openseespy_solvers.scipy.umfpack`.
     execution : ExecutionCUDA or ExecutionHybrid, optional
-        nvMath execution policy forwarded to :class:`~nvmath.sparse.advanced.DirectSolver`.
+        nvmath execution policy forwarded to :class:`~nvmath.sparse.advanced.DirectSolver`.
     plan_algorithm : DirectSolverAlgType, optional
         Planning algorithm assigned to ``solver.plan_config.algorithm`` before
         the first :meth:`~nvmath.sparse.advanced.DirectSolver.plan` call.
@@ -205,7 +205,7 @@ def direct_solver(
 
     Notes
     -----
-    Install CuPy and ``nvmath-python`` wheels matching your CUDA driver; see
+    Install cupy and ``nvmath-python`` wheels matching your CUDA driver; see
     :doc:`installation`.
 
     See Also

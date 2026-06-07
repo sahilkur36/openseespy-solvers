@@ -1,13 +1,13 @@
 """Shared settings for ``scipy_lobpcg.py`` and ``cupy_lobpcg.py``.
 
-SciPy and CuPy LOBPCG examples use identical solver kwargs; each script compares
+scipy and cupy LOBPCG examples use identical solver kwargs; each script compares
 against its backend's ``eigsh`` reference on the same mesh.
 """
 
 NUM_MODES = 2
 MESH = (8, 2, 4)
 
-# Same LOBPCG kwargs for SciPy and CuPy (``M=precond.jacobi`` is added in each script).
+# Same LOBPCG kwargs for scipy and cupy (``M=precond.jacobi`` is added in each script).
 LOBPCG_KWARGS = {
     "tol": 1e-3,
     "maxiter": 300,

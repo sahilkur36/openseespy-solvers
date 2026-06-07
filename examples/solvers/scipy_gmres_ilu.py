@@ -1,4 +1,4 @@
-"""Brick bar static analysis — SciPy ``gmres`` with ``precond.ilu``."""
+"""Brick bar static analysis — scipy ``gmres`` with ``precond.ilu``."""
 
 import os
 import sys

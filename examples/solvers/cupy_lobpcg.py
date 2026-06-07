@@ -1,4 +1,4 @@
-"""Brick bar eigen analysis — CuPy ``lobpcg`` (experimental, GPU eigen).
+"""Brick bar eigen analysis — cupy ``lobpcg`` (experimental, GPU eigen).
 
 Not included in the automated solver smoke suite: LOBPCG is unreliable on tiny
 meshes. Run manually from ``examples/``:
@@ -24,7 +24,7 @@ if _HERE not in sys.path:
 try:
     from openseespy_solvers.cupy import eigsh, lobpcg, precond
 except Exception as exc:
-    print("CuPy backend not available:", exc)
+    print("cupy backend not available:", exc)
     print('Install: python -m pip install "openseespy-solvers[cuda13]"  # or [cuda12]')
     raise SystemExit(1) from exc
 

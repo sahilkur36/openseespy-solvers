@@ -11,7 +11,7 @@ Use these for static, transient, or other analyses that solve `Ax = b` through
 
 | Situation | Start with | Notes |
 |-----------|------------|-------|
-| CPU | [`scipy.spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve) | Good default; uses SciPy's sparse direct solver |
+| CPU | [`scipy.spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve) | Good default; uses `scipy.sparse.linalg` |
 | CPU, larger systems | [`scipy.umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack) | Optional UMFPACK backend; often worth trying for larger sparse systems |
 | NVIDIA GPU | [`nvmath.direct_solver`](api/nvmath.md#openseespy_solvers.nvmath.direct_solver) | Recommended GPU direct solver |
 
@@ -47,8 +47,8 @@ Use these for generalized modal problems `K x = lambda M x` through
 
 | Situation | Start with | Notes |
 |-----------|------------|-------|
-| CPU | [`scipy.eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh) | ARPACK through SciPy |
-| NVIDIA GPU | [`cupy.eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh) | Uses GPU work in the shift-invert path |
+| CPU | [`scipy.eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh) | ARPACK through `scipy.sparse.linalg` |
+| NVIDIA GPU | [`cupy.eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh) | Uses `cupyx.scipy.sparse.linalg` work in the shift-invert path |
 
 CPU example:
 

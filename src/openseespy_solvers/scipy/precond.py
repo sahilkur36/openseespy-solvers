@@ -1,4 +1,4 @@
-"""Preconditioner factories for the SciPy backend.
+"""Preconditioner factories for the scipy backend.
 
 These callables are intended for the ``M`` argument of :func:`cg`,
 :func:`gmres`, and :func:`lobpcg`. Each factory accepts the assembled sparse

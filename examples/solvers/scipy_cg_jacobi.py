@@ -1,4 +1,4 @@
-"""Brick bar static analysis — SciPy ``cg`` with ``precond.jacobi``."""
+"""Brick bar static analysis — scipy ``cg`` with ``precond.jacobi``."""
 
 import os
 import sys
