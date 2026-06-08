@@ -7,7 +7,7 @@ Backend factories return solver objects that implement the OpenSees
 ## Common methods
 
 `to_openseespy(scheme=None, writable=None)`
-: Return the OpenSees configuration dict. See [to_openseespy](to-openseespy.md).
+: Return the OpenSees configuration dict. See [to_openseespy()](index.md#to_openseespy).
 
 `solve(**kwargs)`
 : Called by OpenSees; not normally invoked from application code.
@@ -70,8 +70,8 @@ solver = cg(rtol=1e-6, dtype="float32")
 
 On GPU, ``openseespy_solvers.cupy`` factories accept the same ``dtype`` keyword.
 
-## See Also
+## See also
 
-[PythonSparse interface](pythonsparse-interface.md)
-
-[Tutorial](../getting-started.md)
+- [User guide overview](index.md)
+- [PythonSparse interface](../development/pythonsparse-interface.md)
+- [Tutorial](../getting-started.md)

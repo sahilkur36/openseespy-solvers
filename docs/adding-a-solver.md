@@ -1,7 +1,7 @@
 # Adding a solver
 
 This page is a short checklist for adding a new solver to the package. For how
-OpenSees calls solvers at runtime, see the [PythonSparse interface](user-guide/pythonsparse-interface.md).
+OpenSees calls solvers at runtime, see the [PythonSparse interface](development/pythonsparse-interface.md).
 
 ## Before you start
 
@@ -118,4 +118,4 @@ usually enough.
 - CPU backend mixin: `src/openseespy_solvers/scipy/_base.py`
 - GPU backend mixin: `src/openseespy_solvers/cupy/_base.py`
 - Synthetic test kwargs: `tests/conftest.py`
-- OpenSees buffer contract: [PythonSparse interface](user-guide/pythonsparse-interface.md)
+- OpenSees buffer contract: [PythonSparse interface](development/pythonsparse-interface.md)

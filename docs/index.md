@@ -19,7 +19,7 @@ assembled buffers; GPU backends copy data to the device, solve, and copy the res
 ![OpenSeesPy PythonSparse workflow with optional GPU solve](assets/pythonsparse-gpu-workflow.png)
 
 More detail on callbacks, matrix status, and what runs where:
-[PythonSparse interface](user-guide/pythonsparse-interface.md#parallelism).
+[PythonSparse interface](development/pythonsparse-interface.md#parallelism).
 
 ## Start Here
 
@@ -95,8 +95,8 @@ and right-hand side are supplied by OpenSeesPy at solve time.
 - [Installation](installation.md)
 - [Tutorial](getting-started.md)
 - [Examples](examples.md)
+- [User guide](user-guide/index.md)
 - [Solver objects](user-guide/solver-objects.md)
-- [PythonSparse interface](user-guide/pythonsparse-interface.md)
 - [API reference](api/index.md)
 
 ## Support

@@ -82,4 +82,4 @@ ops.system("PythonSparse", solver.to_openseespy())
 ```
 
 See [Solver objects](../user-guide/solver-objects.md) and
-[PythonSparse interface](../user-guide/pythonsparse-interface.md) for lifecycle details.
+[PythonSparse interface](../development/pythonsparse-interface.md) for lifecycle details.

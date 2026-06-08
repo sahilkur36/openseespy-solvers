@@ -136,7 +136,7 @@ python brick_bar_eigen.py
 
 These solvers target serial OpenSeesPy. GPU backends accelerate the sparse solve, but the
 OpenSees model assembly still happens in one process. Parallel or MPI OpenSeesPy builds are
-not supported by this package. See [PythonSparse and parallelism](user-guide/pythonsparse-interface.md#parallelism).
+not supported by this package. See [PythonSparse and parallelism](development/pythonsparse-interface.md#parallelism).
 
 ### UMFPACK Fails to Install on Windows
 

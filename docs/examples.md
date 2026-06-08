@@ -1,8 +1,7 @@
 # Examples
 
-The examples below use the same 3-D solid mesh: a rectangular bar inspired by the meshing
-tutorial on
-[OpenSees Digital](https://openseesdigital.com/2021/12/19/three-dimensional-meshing/).
+The following example benchmarks the performance of some of the solvers available in this library versus the ones built into OpenSees. The benchmarks are performed on a 3-D solid mesh of a cantilever beam, similar to the one used on this
+[OpenSees Digital post](https://openseesdigital.com/2021/12/19/three-dimensional-meshing/).
 The bar is 10 in long, 1 in thick, and 2 in tall (kip–in–sec units). One end is fixed in
 all directions.
 
@@ -59,23 +58,6 @@ platforms.
 
 ## Linear static analysis
 
-### Mesh refinement
-
-The analysis is benchmarked for the following mesh factors:
-
-| Mesh factor $f$ | $(n_x, n_y, n_z)$ | Equations |
-|-----------------|-------------------|-----------|
-| 1.5 | (15, 2, 3) | 540 |
-| 2.0 | (20, 2, 4) | 900 |
-| 2.5 | (25, 3, 5) | 1,800 |
-| 3.0 | (30, 3, 6) | 2,520 |
-| 4.0 | (40, 4, 8) | 5,400 |
-| 5.0 | (50, 5, 10) | 9,900 |
-| 6.0 | (60, 6, 12) | 16,380 |
-| 8.0 | (80, 8, 16) | 36,720 |
-| 10.0 | (100, 10, 20) | 69,300 |
-| 11.0 | (110, 11, 22) | 91,080 |
-
 ### Analysis setup
 
 A static analysis is run for an increasing load over **10** `LoadControl` steps
@@ -116,21 +98,6 @@ Reported times are **wall-clock seconds for the full** `ops.analyze(NUM_STEPS)` 
 The same bar mesh is used to solve the generalized eigenproblem
 $(\mathbf{K} - \lambda \mathbf{M})\mathbf{\Phi} = \mathbf{0}$ for the five lowest-frequency modes.
 
-### Mesh refinement
-
-The analysis is benchmarked for the following mesh factors:
-
-| Mesh factor $f$ | $(n_x, n_y, n_z)$ | Equations |
-|-----------------|-------------------|-----------|
-| 1.0 | (10, 1, 2) | 180 |
-| 2.0 | (20, 2, 4) | 900 |
-| 3.0 | (30, 3, 6) | 2,520 |
-| 4.0 | (40, 4, 8) | 5,400 |
-| 6.0 | (60, 6, 12) | 16,380 |
-| 8.0 | (80, 8, 16) | 36,720 |
-| 10.0 | (100, 10, 20) | 69,300 |
-| 11.0 | (110, 11, 22) | 91,080 |
-
 ### Analysis setup
 
 ```python
@@ -156,4 +123,4 @@ Reported times are **wall-clock seconds for the full** `ops.eigen(...)` call.
 
 - [Tutorial](getting-started.md)
 - [Installation](installation.md)
-- [PythonSparse interface](user-guide/pythonsparse-interface.md)
+- [User guide](user-guide/index.md)

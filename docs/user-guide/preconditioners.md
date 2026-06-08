@@ -117,9 +117,10 @@ solver = cg(
 You can also pass a fixed `LinearOperator`, a sparse matrix, or any other
 factory `M(A)` if you need a preconditioner not covered by `precond`.
 
-## See Also
+## See also
 
-[`scipy.cg`](../api/scipy.md#openseespy_solvers.scipy.cg)
+- [User guide overview](index.md)
+- [`scipy.cg`](../api/scipy.md#openseespy_solvers.scipy.cg)
 
 [`scipy.gmres`](../api/scipy.md#openseespy_solvers.scipy.gmres)
 

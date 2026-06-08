@@ -96,8 +96,9 @@ process that owns the model.
 So a GPU setup speeds up the **sparse solve step**, not domain decomposition or
 multi-rank OpenSees analysis.
 
-## See Also
+## See also
 
-[solver objects](solver-objects.md), [to_openseespy()](to-openseespy.md)
-
-[OpenSees PythonSparse documentation](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system/PythonSparse.html)
+- [User guide](../user-guide/index.md) — `ops.system` / `ops.eigen` usage for end users
+- [Solver objects](../user-guide/solver-objects.md)
+- [Adding a solver](../adding-a-solver.md)
+- [OpenSees PythonSparse documentation](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/system/PythonSparse.html)

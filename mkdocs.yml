@@ -73,9 +73,8 @@ nav:
       - Tutorial: getting-started.md
       - Examples: examples.md
   - User Guide:
-      - PythonSparse interface: user-guide/pythonsparse-interface.md
+      - Overview: user-guide/index.md
       - Solver objects: user-guide/solver-objects.md
-      - to_openseespy: user-guide/to-openseespy.md
       - Preconditioners: user-guide/preconditioners.md
   - API Reference:
       - Overview: api/index.md
@@ -87,6 +86,7 @@ nav:
       - hybrid: api/hybrid.md
       - Exceptions: api/exceptions.md
   - Development:
+      - PythonSparse interface: development/pythonsparse-interface.md
       - Adding a solver: adding-a-solver.md
       - Release notes: changelog.md
 
