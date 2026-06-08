@@ -1,7 +1,9 @@
 # Adding a solver
 
-This page is a short checklist for adding a new solver to the package. For how
-OpenSees calls solvers at runtime, see the [PythonSparse interface](development/pythonsparse-interface.md).
+This page is a short checklist for adding a new solver to the package. Submit
+changes as a [pull request on GitHub](https://github.com/gaaraujo/openseespy-solvers/pulls).
+For how OpenSees calls solvers at runtime, see the
+[PythonSparse interface](development/pythonsparse-interface.md).
 
 ## Before you start
 
@@ -48,9 +50,9 @@ Refresh on `'COEFFICIENTS_CHANGED'`; rebuild on `'STRUCTURE_CHANGED'`. See `_SpS
 for a minimal example.
 
 For **iterative** solvers with a preconditioner, users pass `M=precond.jacobi` (or
-similar). Preconditioner factories live in `scipy/precond.py` or `cupy/precond.py`.
+similar). Built-in preconditioners live in `scipy/precond.py` or `cupy/precond.py`.
 
-### 2. Add a public factory
+### 2. Add a public solver constructor
 
 Add a function that returns your class and append its name to `__all__`:
 
@@ -61,7 +63,7 @@ def my_solver(*, scheme=None, writable="none", debug=False, dtype=np.float64) ->
 ```
 
 Use the docstring fragments in `_docstrings.py` (`_OPENSEES_LINEAR`, `_LINEAR_RETURNS`,
-etc.) so factory docs stay consistent.
+etc.) so constructor docs stay consistent.
 
 Match the underlying library’s keyword names where you can. Do **not** expose `A`, `b`,
 `K`, or `M` — OpenSees supplies those at solve time.
@@ -74,7 +76,7 @@ If the solver needs an extra package:
 2. Lazy-import inside a `_import_*()` helper (see `scipy/_base.py` for umfpack).
 3. Raise a clear `ImportError` with an install hint when the package is missing.
 
-The module should import without the extra installed; only calling the factory should
+The module should import without the extra installed; only calling the constructor should
 require it.
 
 ### 4. Tests
@@ -100,12 +102,12 @@ can smoke-test it.
   default).
 - Note the change in `CHANGELOG.md`.
 
-API pages under `docs/api/` are generated from docstrings; a good factory docstring is
+API pages under `docs/api/` are generated from docstrings; a good constructor docstring is
 usually enough.
 
 ## Done checklist
 
-- [ ] Factory in `__all__`
+- [ ] Constructor in `__all__`
 - [ ] `self._params` set in `__init__`
 - [ ] Direct solver respects `matrix_status`
 - [ ] Unit test with synthetic OpenSees kwargs

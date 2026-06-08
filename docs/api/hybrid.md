@@ -1,14 +1,14 @@
 # openseespy_solvers.hybrid
 
-Hybrid linear solver factory.
+Hybrid linear solver constructor.
 
-`hybrid` reuses a direct factorization as a GMRES preconditioner. It is useful for
+[`hybrid()`](#openseespy_solvers.hybrid.hybrid) reuses a direct factorization (from a solver such as [`spsolve()`](scipy.md#openseespy_solvers.scipy.spsolve)) as a GMRES preconditioner. It is useful for
 analyses where the tangent changes slowly and a full refactorization at every step is
 unnecessarily expensive.
 
 ## Solving Linear Problems
 
-| Factory | Description |
+| Constructor | Description |
 |---------|-------------|
 | [`hybrid`](#openseespy_solvers.hybrid.hybrid) | Direct factorization reused as a GMRES preconditioner |
 

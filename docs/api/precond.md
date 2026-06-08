@@ -1,13 +1,13 @@
 # openseespy_solvers.scipy.precond
 
-CPU preconditioner factories for iterative `scipy.sparse.linalg` solvers.
+CPU built-in preconditioners for iterative `scipy.sparse.linalg` solvers.
 
-Pass these factories through the `M=` keyword of `cg`, `gmres`, or `lobpcg`. When `M` is
+Pass these callables through the `M=` keyword of `cg`, `gmres`, or `lobpcg`. When `M` is
 callable, the solver calls it as `M(A)` after OpenSeesPy supplies the assembled matrix.
 
 ## Preconditioners
 
-| Factory | Description |
+| Preconditioner | Description |
 |---------|-------------|
 | [`jacobi`](#openseespy_solvers.scipy.precond.jacobi) | Diagonal/Jacobi preconditioner |
 | [`ilu`](#openseespy_solvers.scipy.precond.ilu) | Incomplete LU preconditioner |

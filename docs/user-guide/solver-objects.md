@@ -1,13 +1,14 @@
 # Solver objects
 
-Backend factories return solver objects that implement the OpenSees
+Solver constructors (for example [`spsolve()`](../api/scipy.md#openseespy_solvers.scipy.spsolve), [`cg()`](../api/scipy.md#openseespy_solvers.scipy.cg)) return objects that implement the OpenSees
 `PythonSparse` protocol. Application code configures the solver, passes
 `solver.to_openseespy()` to OpenSeesPy, and inspects cached data after analysis.
 
 ## Common methods
 
-`to_openseespy(scheme=None, writable=None)`
-: Return the OpenSees configuration dict. See [to_openseespy()](index.md#to_openseespy).
+`to_openseespy()`
+: Return a dict for OpenSeesPy; pass it unchanged. See
+  [to_openseespy()](index.md#to_openseespy).
 
 `solve(**kwargs)`
 : Called by OpenSees; not normally invoked from application code.
@@ -17,15 +18,19 @@ Backend factories return solver objects that implement the OpenSees
 
 ## Linear solver attributes
 
+All cached attributes are `None` until the first `solve` (or `formAp` for `A`).
+
 `A`
-: Cached sparse system matrix (`scipy.sparse.spmatrix` or
-  `cupyx.scipy.sparse.spmatrix`).
+: `scipy.sparse.spmatrix` or `cupyx.scipy.sparse.spmatrix` — cached system
+  matrix from the last solve or `formAp` call.
 
 `b`
-: Right-hand side from the last solve.
+: `numpy.ndarray` (CPU backends) or `cupy.ndarray` (GPU) — 1-D right-hand
+  side in the solver's compute `dtype` from the last solve.
 
 `x`
-: Solution from the last solve.
+: `numpy.ndarray` (CPU) or `cupy.ndarray` (GPU) — 1-D solution from the last
+  solve. On CPU backends this is the OpenSees `x` buffer (`float64`).
 
 `stats`
 : Runtime statistics (`num_solves`, `last_solve_time`, `last_info`,
@@ -34,7 +39,8 @@ Backend factories return solver objects that implement the OpenSees
 ## Eigen solver attributes
 
 `K`, `M`
-: Cached stiffness and mass matrices from the last solve.
+: `scipy.sparse.spmatrix` or `cupyx.scipy.sparse.spmatrix` — cached stiffness
+  and mass matrices from the last eigen solve, or `None` before the first solve.
 
 `stats`
 : Runtime statistics (`num_solves`, `last_solve_time`, `last_num_modes`,
@@ -46,29 +52,11 @@ Backend factories return solver objects that implement the OpenSees
 but reset internal cache and statistics. OpenSees uses this when cloning a
 system of equations.
 
-## Notes
+## Compute precision (`dtype`) *(experimental)*
 
-Set `debug=True` at construction to propagate exceptions from `solve` and
-`formAp` instead of returning a negative status code (linear solvers only).
-
-## Compute precision (`dtype`)
-
-Every factory accepts ``dtype`` (default ``numpy.float64``). Supported values are
+Every solver constructor accepts ``dtype`` (default ``numpy.float64``). Supported values are
 ``float32`` and ``float64``. The internal sparse solve, matrix cache (``A``,
 ``K``, ``M``), and right-hand sides use that precision.
-
-OpenSees ``PythonSparse`` buffers are always double precision: matrix entries,
-``b``, ``x``, eigenvalues, and eigenvectors are read and written as
-``float64``. The solver casts at the boundary so you can trade accuracy for
-speed or memory without changing the OpenSees side.
-
-```python
-from openseespy_solvers.scipy import cg
-
-solver = cg(rtol=1e-6, dtype="float32")
-```
-
-On GPU, ``openseespy_solvers.cupy`` factories accept the same ``dtype`` keyword.
 
 ## See also
 

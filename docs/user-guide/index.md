@@ -5,11 +5,12 @@ OpenSeesPy can delegate linear and eigen solves to a **Python solver** through t
 OpenSees assembles the sparse matrices and right-hand side, then calls methods on
 your solver object (`solve`, and for linear solvers `formAp`).
 
-**openseespy-solvers** wraps `scipy`, `cupy`, and `nvmath` as ready-made solver
-objects so you do not have to implement that callback protocol yourself. In
+**openseespy-solvers** wraps [`scipy`](../api/scipy.md), [`cupy`](../api/cupy.md), and
+[`nvmath`](../api/nvmath.md) as ready-made solver objects so you do not have to implement
+that callback protocol yourself. In
 application code you typically:
 
-1. Pick a factory (`spsolve`, `eigsh`, `direct_solver`, …).
+1. Call a solver constructor ([`spsolve`](../api/scipy.md#openseespy_solvers.scipy.spsolve), [`eigsh`](../api/scipy.md#openseespy_solvers.scipy.eigsh), [`direct_solver`](../api/nvmath.md#openseespy_solvers.nvmath.direct_solver), …).
 2. Pass `solver.to_openseespy()` to OpenSeesPy.
 
 ```python
@@ -34,40 +35,14 @@ solver configuration, preconditioners, and what you can inspect after a solve.
 
 ## to_openseespy()
 
-`solver.to_openseespy()` returns the configuration dict OpenSeesPy expects:
-
-```python
-solver = cg(rtol=1e-8)
-cfg = solver.to_openseespy()
-ops.system("PythonSparse", cfg)
-```
-
-```python
-lam = ops.eigen("PythonSparse", num_modes, eig_solver.to_openseespy())
-```
-
-**Return value**
-
-| Key | Meaning |
-|-----|---------|
-| `solver` | The solver instance (OpenSees retains a reference and calls its methods). |
-| `scheme` | Sparse storage scheme (`'CSR'` by default). |
-| `writable` | Writable buffer policy (included when set at construction). |
-
-**Parameters** (optional overrides at call time)
-
-`scheme`
-: Override the storage scheme.
-
-`writable`
-: Override the writable buffer list (for example `'values'` or `['values', 'rhs']`).
-  Default at construction is `'none'`.
+`solver.to_openseespy()` returns a dict. Pass it to OpenSeesPy unchanged in
+`ops.system("PythonSparse", …)` and `ops.eigen("PythonSparse", …)`. Configure
+the solver when you create it ([`spsolve()`](../api/scipy.md#openseespy_solvers.scipy.spsolve), [`cg(rtol=1e-8)`](../api/scipy.md#openseespy_solvers.scipy.cg), …), not by editing
+that dict.
 
 Use `copy.copy(solver)` to obtain a fresh instance with the same configuration
 but empty internal state. OpenSees may clone solvers when copying a system of
 equations.
-
-Factory-level API details: [`BaseOpenSeesSolver.to_openseespy`](../api/scipy.md).
 
 ## See also
 

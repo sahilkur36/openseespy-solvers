@@ -4,34 +4,41 @@ Iterative solvers accept an optional preconditioner through the `M` keyword,
 consistent with [`scipy.sparse.linalg.cg`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.cg.html)
 and [`cupyx.scipy.sparse.linalg.cg`](https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.sparse.linalg.cg.html).
 
-## Callable factories
+OpenSees assembles the system matrix `A` during `solve`, not when you construct
+the solver. Pass a callable `M(A)`; OpenSees invokes it when the matrix
+structure or coefficients change, and reuses the cached result when
+`matrix_status='UNCHANGED'`. Use a built-in preconditioner from
+[`openseespy_solvers.scipy.precond`](../api/precond.md) or
+[`openseespy_solvers.cupy.precond`](../api/precond_cupy.md), or supply your own callable `M(A)`.
 
-The system matrix `A` is not available when the solver object is constructed.
-To build a preconditioner from `A`, pass a callable:
+## Built-in preconditioners
+
+Pass the built-in callable to `M=` on an iterative solver such as [`cg()`](../api/scipy.md#openseespy_solvers.scipy.cg) (do not call it yourself):
 
 ```python
-from openseespy_solvers.scipy import cg
-from openseespy_solvers.scipy import precond
+from openseespy_solvers.scipy import cg, precond
 
-solver = cg(M=precond.jacobi)
+solver = cg(rtol=1e-8, M=precond.jacobi)
 ```
 
-The factory is invoked as `M(A)` during `solve` when the matrix structure or
-coefficients change. When `matrix_status='UNCHANGED'`, the cached
-preconditioner is reused.
+```python
+from openseespy_solvers.cupy import cg, precond
 
-## Accepted forms of `M`
+solver = cg(rtol=1e-8, M=precond.jacobi)
+```
 
-`None`
-: No preconditioning.
+When a built-in accepts extra keyword arguments (for example ``drop_tol`` on
+[`ilu`](../api/precond.md#openseespy_solvers.scipy.precond.ilu)), wrap it in a
+lambda so `M` stays a single-argument callable:
 
-sparse matrix or `LinearOperator`
-: A fixed preconditioner that does not depend on the current `A`.
+```python
+solver = cg(
+    rtol=1e-8,
+    M=lambda A: precond.ilu(A, drop_tol=1e-4, fill_factor=10),
+)
+```
 
-callable
-: A factory `M(A)` returning a sparse matrix or `LinearOperator`.
-
-## Built-in factories (scipy)
+### scipy
 
 [`openseespy_solvers.scipy.precond`](../api/precond.md) provides:
 
@@ -45,12 +52,12 @@ callable
 [`direct`](../api/precond.md#openseespy_solvers.scipy.precond.direct)
 : Full sparse factorization as a `LinearOperator`, primarily for
   [`lobpcg`](../api/scipy.md#openseespy_solvers.scipy.lobpcg) ``M=``.
-  Pass a direct solver, e.g. ``M=precond.direct(spsolve())``.
+  Pass a direct solver such as [`spsolve()`](../api/scipy.md#openseespy_solvers.scipy.spsolve), e.g. ``M=precond.direct(spsolve())``.
 
-## Built-in factories (cupy)
+### cupy
 
 [`openseespy_solvers.cupy.precond`](../api/precond_cupy.md) provides the same
-pattern on GPU:
+names on GPU:
 
 [`jacobi`](../api/precond_cupy.md#openseespy_solvers.cupy.precond.jacobi)
 : Diagonal preconditioner as a device ``LinearOperator`` (element-wise apply).
@@ -64,64 +71,39 @@ factorization; only ``solve`` stays on GPU.
 [`direct`](../api/precond_cupy.md#openseespy_solvers.cupy.precond.direct)
 : Full sparse factorization as a ``LinearOperator``, primarily for
   [`lobpcg`](../api/cupy.md#openseespy_solvers.cupy.lobpcg) ``M=``.
-  Pass a direct solver, e.g. ``M=precond.direct(direct_solver())``.
+  Pass a direct solver such as [`direct_solver()`](../api/nvmath.md#openseespy_solvers.nvmath.direct_solver), e.g. ``M=precond.direct(direct_solver())``.
 
-## Example (scipy)
+## Your own preconditioner
 
-```python
-from openseespy_solvers.scipy import cg, precond
-
-solver = cg(rtol=1e-8, M=precond.jacobi)
-# solver = cg(rtol=1e-8, M=precond.ilu)
-```
-
-## Example (cupy)
+Define a function `M(A)` that returns a `LinearOperator` or sparse matrix in the
+same backend as the solver:
 
 ```python
-from openseespy_solvers.cupy import cg, precond
+import numpy as np
+import scipy.sparse as sp
+from openseespy_solvers.scipy import cg
 
-solver = cg(rtol=1e-8, M=precond.jacobi)
-# solver = cg(rtol=1e-8, M=precond.ilu)  # fill_factor=1, GPU ILU(0)-like
+def my_precond(A):
+    d = A.diagonal()
+    inv = np.ones_like(d)
+    inv[d != 0] = 1.0 / d[d != 0]
+    return sp.diags(inv)
+
+solver = cg(rtol=1e-8, M=my_precond)
 ```
 
-Pass the factory itself (`M=precond.jacobi`, `M=precond.ilu`, …) on either
-backend. OpenSees calls `M(A)` when the assembled matrix is available.
+Other accepted values for `M`:
 
-## Custom preconditioner options
+`None`
+: No preconditioning.
 
-When a built-in factory accepts extra keyword arguments (for example
-``drop_tol`` on [`ilu`](../api/precond.md#openseespy_solvers.scipy.precond.ilu)),
-wrap it in a lambda or use ``functools.partial`` so `M` remains a single-argument
-callable:
-
-```python
-from openseespy_solvers.scipy import cg, precond
-
-solver = cg(
-    rtol=1e-8,
-    M=lambda A: precond.ilu(A, drop_tol=1e-4, fill_factor=10),
-)
-```
-
-The same pattern works on GPU when you need non-default `spilu` settings:
-
-```python
-from openseespy_solvers.cupy import cg, precond
-
-solver = cg(
-    rtol=1e-8,
-    M=lambda A: precond.ilu(A, fill_factor=2),
-)
-```
-
-You can also pass a fixed `LinearOperator`, a sparse matrix, or any other
-factory `M(A)` if you need a preconditioner not covered by `precond`.
+`LinearOperator` or sparse matrix
+: A fixed, pre-built `M`. **Not recommended:** the equation count is unknown
+  until OpenSees builds the analysis model.
 
 ## See also
 
 - [User guide overview](index.md)
 - [`scipy.cg`](../api/scipy.md#openseespy_solvers.scipy.cg)
-
-[`scipy.gmres`](../api/scipy.md#openseespy_solvers.scipy.gmres)
-
-[scipy tutorial: Preconditioned conjugate gradient](https://docs.scipy.org/doc/scipy/tutorial/sparse.html)
+- [`scipy.gmres`](../api/scipy.md#openseespy_solvers.scipy.gmres)
+- [scipy tutorial: Preconditioned conjugate gradient](https://docs.scipy.org/doc/scipy/tutorial/sparse.html)

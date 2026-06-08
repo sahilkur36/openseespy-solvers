@@ -86,6 +86,7 @@ nav:
       - hybrid: api/hybrid.md
       - Exceptions: api/exceptions.md
   - Development:
+      - Overview: development/index.md
       - PythonSparse interface: development/pythonsparse-interface.md
       - Adding a solver: adding-a-solver.md
       - Release notes: changelog.md

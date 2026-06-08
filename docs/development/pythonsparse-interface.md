@@ -79,7 +79,7 @@ iterative backend:
 
 Eigen analysis follows the same split: OpenSees assembles **K** and **M** on the CPU; the
 solver object runs ARPACK, LOBPCG, or shift-invert on CPU and/or GPU depending on the
-factory you choose.
+solver constructor you choose.
 
 This package does **not** support parallel or MPI OpenSeesPy builds where the model
 is partitioned across processes. `PythonSparse` callbacks always run in the same
@@ -90,7 +90,7 @@ process that owns the model.
 | Layer | Behavior |
 |-------|----------|
 | OpenSees model pipeline | Serial (single CPU process) |
-| scipy backends (`spsolve`, `cg`, `eigsh`, …) | CPU linear algebra; may use multithreaded BLAS/LAPACK inside scipy/UMFPACK |
+| scipy backends ([`spsolve`](../api/scipy.md#openseespy_solvers.scipy.spsolve), [`cg`](../api/scipy.md#openseespy_solvers.scipy.cg), [`eigsh`](../api/scipy.md#openseespy_solvers.scipy.eigsh), …) | CPU linear algebra; may use multithreaded BLAS/LAPACK inside scipy/UMFPACK |
 | cupy / nvmath backends | **GPU** factorization, iterative solve, or eigen iteration; matrix assembly still happens on the CPU in OpenSees, with host↔device transfers inside the solver |
 
 So a GPU setup speeds up the **sparse solve step**, not domain decomposition or

@@ -1,9 +1,9 @@
 # openseespy_solvers.scipy
 
-CPU sparse linear and eigen solver factories.
+CPU sparse linear and eigen solver constructors.
 
 This module follows the naming and keyword conventions of
-`scipy.sparse.linalg` where possible. The main difference is that factories return
+[`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html) where possible. The main difference is that constructors return
 OpenSeesPy-compatible solver objects; OpenSeesPy supplies `A`, `b`, `K`, and `M` at solve
 time.
 
@@ -11,21 +11,21 @@ time.
 
 Direct methods:
 
-| Factory | `scipy` analogue | Description |
+| Constructor | `scipy` analogue | Description |
 |---------|----------------|-------------|
 | [`spsolve`](#openseespy_solvers.scipy.spsolve) | `scipy.sparse.linalg.spsolve` / `splu` | Sparse direct solver using SuperLU |
 | [`umfpack`](#openseespy_solvers.scipy.umfpack) | `scikits.umfpack` | Sparse direct solver using UMFPACK |
 
 Iterative methods:
 
-| Factory | `scipy` analogue | Description |
+| Constructor | `scipy` analogue | Description |
 |---------|----------------|-------------|
 | [`cg`](#openseespy_solvers.scipy.cg) | `scipy.sparse.linalg.cg` | Conjugate Gradient |
 | [`gmres`](#openseespy_solvers.scipy.gmres) | `scipy.sparse.linalg.gmres` | Generalized Minimal Residual |
 
 ## Eigenvalue Problems
 
-| Factory | `scipy` analogue | Description |
+| Constructor | `scipy` analogue | Description |
 |---------|----------------|-------------|
 | [`eigsh`](#openseespy_solvers.scipy.eigsh) | `scipy.sparse.linalg.eigsh` | ARPACK-based generalized symmetric eigen solve |
 | [`lobpcg`](#openseespy_solvers.scipy.lobpcg) | `scipy.sparse.linalg.lobpcg` | Locally Optimal Block Preconditioned Conjugate Gradient |
@@ -50,7 +50,7 @@ lam = ops.eigen("PythonSparse", num_modes, solver.to_openseespy())
 
 ## Notes
 
-`spsolve` and `umfpack` are both sparse direct solvers. `spsolve` uses `scipy.sparse.linalg`'s
+[`spsolve`](#openseespy_solvers.scipy.spsolve) and [`umfpack`](#openseespy_solvers.scipy.umfpack) are both sparse direct solvers. [`spsolve`](#openseespy_solvers.scipy.spsolve) uses [`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html)'s
 SuperLU path and is available with the base install. `umfpack` requires the optional
 `scikit-umfpack` package:
 

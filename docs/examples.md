@@ -65,7 +65,7 @@ A static analysis is run for an increasing load over **10** `LoadControl` steps
 everything else held fixed, differences in wall time are dominated by the linear equation solver.
 
 The native OpenSees solvers `BandGeneral` and `SuperLU` are compared with
-`scipy.spsolve`, `scipy.umfpack`, and `nvmath.direct_solver` from this library.
+[`spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve), [`umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack), and [`direct_solver`](api/nvmath.md#openseespy_solvers.nvmath.direct_solver) from this library.
 
 ```python
 from openseespy_solvers.scipy import spsolve

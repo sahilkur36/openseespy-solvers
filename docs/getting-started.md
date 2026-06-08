@@ -70,7 +70,7 @@ ops.system("PythonSparse", solver.to_openseespy())
 When a full factorization is too expensive, try iterative solvers (`cg`, `gmres`) with a
 [preconditioner](user-guide/preconditioners.md), or [`hybrid`](api/hybrid.md) to reuse a
 direct factorization as a GMRES preconditioner. See the [API overview](api/index.md) for all
-factories.
+solver constructors.
 
 ## Generalized eigenvalue analysis
 

@@ -70,24 +70,24 @@ For a full model example, continue with the [tutorial](getting-started.md).
 
 | Analysis | CPU | NVIDIA GPU |
 |----------|-----|-------------|
-| Static or transient linear solve | `scipy.spsolve`; `scipy.umfpack` for larger CPU systems | `nvmath.direct_solver` |
-| Generalized eigen solve | `scipy.eigsh` | `cupy.eigsh` |
+| Static or transient linear solve | [`spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve); [`umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack) for larger CPU systems | [`direct_solver`](api/nvmath.md#openseespy_solvers.nvmath.direct_solver) |
+| Generalized eigen solve | [`eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh) | [`eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh) |
 
-For iterative solvers, preconditioners, and `hybrid`, see the [API overview](api/index.md) and
+For iterative solvers, preconditioners, and [`hybrid()`](api/hybrid.md#openseespy_solvers.hybrid.hybrid), see the [API overview](api/index.md) and
 [Tutorial](getting-started.md).
 
 ## Modules
 
 | Module | Provides |
 |--------|----------|
-| [`scipy`](api/scipy.md) | CPU solvers: `spsolve`, `umfpack`, `cg`, `gmres`, `eigsh`, `lobpcg` |
-| [`scipy.precond`](api/precond.md) | CPU preconditioners: `jacobi`, `ilu`, `direct` |
-| [`cupy`](api/cupy.md) | GPU solvers: `spsolve`, `cg`, `gmres`, `eigsh`, `lobpcg` |
-| [`cupy.precond`](api/precond_cupy.md) | GPU preconditioners: `jacobi`, `ilu`, `direct` |
-| [`nvmath`](api/nvmath.md) | GPU direct sparse solver: `direct_solver` |
-| [`hybrid`](api/hybrid.md) | Direct factorization reused as a GMRES preconditioner |
+| [`scipy`](api/scipy.md) | CPU solvers: [`spsolve`](api/scipy.md#openseespy_solvers.scipy.spsolve), [`umfpack`](api/scipy.md#openseespy_solvers.scipy.umfpack), [`cg`](api/scipy.md#openseespy_solvers.scipy.cg), [`gmres`](api/scipy.md#openseespy_solvers.scipy.gmres), [`eigsh`](api/scipy.md#openseespy_solvers.scipy.eigsh), [`lobpcg`](api/scipy.md#openseespy_solvers.scipy.lobpcg) |
+| [`scipy.precond`](api/precond.md) | CPU preconditioners: [`jacobi`](api/precond.md#openseespy_solvers.scipy.precond.jacobi), [`ilu`](api/precond.md#openseespy_solvers.scipy.precond.ilu), [`direct`](api/precond.md#openseespy_solvers.scipy.precond.direct) |
+| [`cupy`](api/cupy.md) | GPU solvers: [`spsolve`](api/cupy.md#openseespy_solvers.cupy.spsolve), [`cg`](api/cupy.md#openseespy_solvers.cupy.cg), [`gmres`](api/cupy.md#openseespy_solvers.cupy.gmres), [`eigsh`](api/cupy.md#openseespy_solvers.cupy.eigsh), [`lobpcg`](api/cupy.md#openseespy_solvers.cupy.lobpcg) |
+| [`cupy.precond`](api/precond_cupy.md) | GPU preconditioners: [`jacobi`](api/precond_cupy.md#openseespy_solvers.cupy.precond.jacobi), [`ilu`](api/precond_cupy.md#openseespy_solvers.cupy.precond.ilu), [`direct`](api/precond_cupy.md#openseespy_solvers.cupy.precond.direct) |
+| [`nvmath`](api/nvmath.md) | GPU direct sparse solver: [`direct_solver`](api/nvmath.md#openseespy_solvers.nvmath.direct_solver) |
+| [`hybrid`](api/hybrid.md) | [`hybrid()`](api/hybrid.md#openseespy_solvers.hybrid.hybrid): direct factorization reused as a GMRES preconditioner |
 
-Factory signatures match the underlying `scipy` or `cupy` functions where possible. The matrix
+Constructor signatures match the underlying `scipy` or `cupy` functions where possible. The matrix
 and right-hand side are supplied by OpenSeesPy at solve time.
 
 ## Helpful Pages

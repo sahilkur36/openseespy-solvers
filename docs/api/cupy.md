@@ -1,8 +1,9 @@
 # openseespy_solvers.cupy
 
-CUDA sparse linear and eigen solver factories implemented with `cupyx.scipy.sparse.linalg`.
+CUDA sparse linear and eigen solver constructors implemented with
+[`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse_linalg.html).
 
-This module follows `cupyx.scipy.sparse.linalg` naming where possible. Factories return
+This module follows [`cupyx.scipy.sparse.linalg`](https://docs.cupy.dev/en/stable/reference/scipy_sparse_linalg.html) naming where possible. Constructors return
 OpenSeesPy-compatible solver objects; OpenSeesPy supplies `A`, `b`, `K`, and `M` at solve
 time. Importing this module requires `cupy`.
 
@@ -10,20 +11,20 @@ time. Importing this module requires `cupy`.
 
 Direct methods:
 
-| Factory | `cupy` analogue | Description |
+| Constructor | `cupy` analogue | Description |
 |---------|---------------|-------------|
 | [`spsolve`](#openseespy_solvers.cupy.spsolve) | `cupyx.scipy.sparse.linalg.splu` | Sparse direct solver on CUDA |
 
 Iterative methods:
 
-| Factory | `cupy` analogue | Description |
+| Constructor | `cupy` analogue | Description |
 |---------|---------------|-------------|
 | [`cg`](#openseespy_solvers.cupy.cg) | `cupyx.scipy.sparse.linalg.cg` | Conjugate Gradient on CUDA |
 | [`gmres`](#openseespy_solvers.cupy.gmres) | `cupyx.scipy.sparse.linalg.gmres` | GMRES on CUDA |
 
 ## Eigenvalue Problems
 
-| Factory | `cupy`/`scipy` analogue | Description |
+| Constructor | `cupy`/`scipy` analogue | Description |
 |---------|---------------------|-------------|
 | [`eigsh`](#openseespy_solvers.cupy.eigsh) | `cupyx.scipy.sparse.linalg.eigsh` / `scipy.sparse.linalg.eigsh` | CUDA-assisted generalized symmetric eigen solve |
 | [`lobpcg`](#openseespy_solvers.cupy.lobpcg) | `cupyx.scipy.sparse.linalg.lobpcg` | LOBPCG on CUDA |
@@ -50,12 +51,12 @@ lam = ops.eigen("PythonSparse", num_modes, solver.to_openseespy())
 OpenSeesPy assembles matrices on the CPU. `cupy` solvers copy matrix data to the GPU before
 solving, so GPU speedups depend on problem size, sparsity, and transfer overhead.
 
-`eigsh` solves `K x = lambda M x` with shift-invert support:
+[`eigsh`](#openseespy_solvers.cupy.eigsh) solves `K x = lambda M x` with shift-invert support:
 
 - `mass_mode="general"` uses `scipy.sparse.linalg.eigsh` with GPU inner solves when shift-invert is active.
 - `mass_mode="diagonal"` and `mass_mode="lumped"` use GPU shift-invert with diagonal mass.
 
-Raw `cupyx.scipy.sparse.linalg.eigsh` does not accept a mass matrix; use `lobpcg` when you
+Raw [`cupyx.scipy.sparse.linalg.eigsh`](https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.sparse.linalg.eigsh.html) does not accept a mass matrix; use [`lobpcg`](#openseespy_solvers.cupy.lobpcg) when you
 need a different iterative eigen strategy.
 
 ## Function Reference
