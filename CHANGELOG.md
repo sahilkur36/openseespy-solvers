@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-06-08
+
+### Changed
+
+- User guide: focus on `ops.system` / `ops.eigen`; simplified `to_openseespy()`,
+  preconditioners (built-in vs custom), and solver-object pages.
+- API overview: scipy/cupy/nvmath compatibility examples; cross-links to module
+  and constructor reference pages.
+- Docs terminology: **solver constructor** instead of factory; Development overview
+  with GitHub repository, issues, and pull-request links.
+- RTD navigation: Get Started, User Guide, API Reference, and Development tabs.
+
 ## [0.1.2] - 2026-06-08
 
 ### Added
